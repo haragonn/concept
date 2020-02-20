@@ -4,6 +4,9 @@
 ==============================================================================*/
 #include "concept/Framework.h"
 #include "WinMain.h"
+#include "BreadBoardLoad.h"
+#include "BreadBoard2.h"
+#include "BreadBoard3.h"
 
 #include <string>
 
@@ -231,7 +234,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 	// マウスカーソルの表示設定
 	fm.SetMouseCursorVisibleFlag(true, false);
 
-	fm.Run(new DemoLoad);	// 実行
+	fm.Run(new BreadBoardLoad);	// 実行
 
 	fm.UnInit();	// 終了処理
 

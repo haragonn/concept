@@ -5,8 +5,7 @@
 #ifndef INCLUDE_WINMAIN_H
 #define INCLUDE_WINMAIN_H
 
-#include "concept/idea/h/idea.h"
-#include "concept/eidos/h/eidos.h"
+#include "concept/concept.h"
 
 namespace{
 	const int SCREEN_WIDTH = 1280;

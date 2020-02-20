@@ -250,9 +250,9 @@ void WrapCamera::UpdatePosition()
 
 	// カメラポジションの更新
 	eye_ = focus_;
-	eye_.x += distance_ * sin(rot_.x) * cos(rot_.y);
-	eye_.y += distance_ * sin(rot_.y);
-	eye_.z += distance_ * -cos(rot_.x) * cos(rot_.y);
+	eye_.x += distance_ * sinf(rot_.x) * cosf(rot_.y);
+	eye_.y += distance_ * sinf(rot_.y);
+	eye_.z += distance_ * -cosf(rot_.x) * cosf(rot_.y);
 
 	UpdateViewMatrix();
 }

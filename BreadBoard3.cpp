@@ -1,0 +1,113 @@
+
+#include "concept/eidos/h/Mesh/FbxModel.h"
+#include "BreadBoard3.h"
+
+class BreadBoard3::Impl{
+public:
+	Controller ctr_;
+
+	Font fnt_;
+
+	WrapCamera wcmr_;
+
+	PmdModel pmSakuya_;
+	FbxModel fm_;
+
+	int time_;
+};
+
+BreadBoard3::BreadBoard3() :
+	pImpl_(new BreadBoard3::Impl)
+{
+	Assert(pImpl_);
+}
+
+BreadBoard3::~BreadBoard3()
+{
+	SafeDelete(pImpl_);
+}
+
+void BreadBoard3::Init()
+{
+	BreadBoard3::Impl& im = *pImpl_;
+
+	im.ctr_.Init(1, true);
+
+	im.fnt_.Init(30);
+
+	im.wcmr_.Init(DegreeToRadian(65.5f), S_W / S_H, 0.0001f, 100000.0f, 2.0f);
+
+	im.fm_.LoadFbxMeshFromFile("model/PronamaChan_SD.fbx");
+
+	im.fm_.Init(0.0f, -1.0f, 0.0f);
+
+	im.wcmr_.AddObject(im.fm_);
+
+	im.time_ = 0;
+}
+void BreadBoard3::UnInit()
+{
+}
+
+Scene * BreadBoard3::Update()
+{
+	BreadBoard3::Impl& im = *pImpl_;
+
+	++im.time_;
+
+	im.ctr_.Update();
+
+	if(!im.wcmr_.IsWrap()){
+		float cameraSpeed = 0.02f;
+		Vector2D cm(im.ctr_.GetRAxis().x, im.ctr_.GetRAxis().y * 0.8f);
+		cm *= cameraSpeed;
+		im.wcmr_.MoveRotate(cm.x, cm.y);
+	}
+
+	if(im.ctr_.GetButton(PadButton::R) == 1){
+		im.wcmr_.SetWrapTarget(0.0f, 0.0f);
+	}
+
+	im.wcmr_.UpdateWrap(0.02f);
+
+	return this;
+}
+
+void BreadBoard3::Draw()
+{
+	BreadBoard3::Impl& im = *pImpl_;
+
+	im.wcmr_.DrawObject();
+
+	// åoâﬂéûä‘
+	int hour = im.time_ / 60 / 60 / 60 % 60;
+	int min = im.time_ / 60 / 60 % 60;
+	int sec = im.time_ / 60 % 60;
+	int ssec = im.time_ % 100;
+
+	im.fnt_.DrawFormatText(0.0f, 0.0f, "%02d:%02d:%02d:%02d", hour, min, sec, ssec);
+
+	// ì¸óÕ
+	im.fnt_.DrawFormatText(0.0f, 30.0f *  1, "Å™:%04d", im.ctr_.GetUp());
+	im.fnt_.DrawFormatText(0.0f, 30.0f *  2, "Å´:%04d", im.ctr_.GetDown());
+	im.fnt_.DrawFormatText(0.0f, 30.0f *  3, "Å©:%04d", im.ctr_.GetLeft());
+	im.fnt_.DrawFormatText(0.0f, 30.0f *  4, "Å®:%04d", im.ctr_.GetRight());
+	im.fnt_.DrawFormatText(0.0f, 30.0f *  5, "A :%04d", im.ctr_.GetButton(PadButton::A));
+	im.fnt_.DrawFormatText(0.0f, 30.0f *  6, "B :%04d", im.ctr_.GetButton(PadButton::B));
+	im.fnt_.DrawFormatText(0.0f, 30.0f *  7, "X :%04d", im.ctr_.GetButton(PadButton::X));
+	im.fnt_.DrawFormatText(0.0f, 30.0f *  8, "Y :%04d", im.ctr_.GetButton(PadButton::Y));
+	im.fnt_.DrawFormatText(0.0f, 30.0f *  9, "L :%04d", im.ctr_.GetButton(PadButton::L));
+	im.fnt_.DrawFormatText(0.0f, 30.0f * 10, "R :%04d", im.ctr_.GetButton(PadButton::R));
+	im.fnt_.DrawFormatText(0.0f, 30.0f * 11, "ST:%04d", im.ctr_.GetButton(PadButton::START));
+	im.fnt_.DrawFormatText(0.0f, 30.0f * 12, "BA:%04d", im.ctr_.GetButton(PadButton::BACK));
+	im.fnt_.DrawFormatText(0.0f, 30.0f * 13, "LS:%04d", im.ctr_.GetButton(PadButton::LS));
+	im.fnt_.DrawFormatText(0.0f, 30.0f * 14, "RS:%04d", im.ctr_.GetButton(PadButton::RS));
+	im.fnt_.DrawFormatText(0.0f, 30.0f * 15, "AX:%0.3f", im.ctr_.GetArrow().x);
+	im.fnt_.DrawFormatText(0.0f, 30.0f * 16, "AY:%0.3f", im.ctr_.GetArrow().y);
+	im.fnt_.DrawFormatText(0.0f, 30.0f * 17, "LX:%0.3f", im.ctr_.GetLAxis().x);
+	im.fnt_.DrawFormatText(0.0f, 30.0f * 18, "LY:%0.3f", im.ctr_.GetLAxis().y);
+	im.fnt_.DrawFormatText(0.0f, 30.0f * 19, "RX:%0.3f", im.ctr_.GetRAxis().x);
+	im.fnt_.DrawFormatText(0.0f, 30.0f * 20, "RY:%0.3f", im.ctr_.GetRAxis().y);
+	im.fnt_.DrawFormatText(0.0f, 30.0f * 21, "LT:%0.3f", im.ctr_.GetLTrigger());
+	im.fnt_.DrawFormatText(0.0f, 30.0f * 22, "RT:%0.3f", im.ctr_.GetRTrigger());
+}
