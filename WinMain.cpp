@@ -115,7 +115,8 @@ public:
 
 		if(scale_ > 1.0f){
 			scale_ *= 0.85f;
-		} else{
+		}
+		else{
 			scale_ = 1.0f;
 			if(anime_ < 31){
 				++anime_;
@@ -144,7 +145,7 @@ public:
 		if(cnt_ <= 30){
 			sprIcon_.SetColor(1.0f, 1.0f, 1.0f, cnt_ / 30.0f);
 		}
-		sprIcon_.DrawDividedTexture(texIcon_, anime_ < 20 ? 0 : (anime_ - 20) / 3, 0);
+		sprIcon_.DrawDividedTexture(texIcon_, anime_ < 20?0:(anime_ - 20) / 3, 0);
 
 		if(cnt_ >= 40 && cnt_ <= 90){
 			sprFont_.SetColor(1.0f, 1.0f, 1.0f, (cnt_ - 40.0f) / 50.0f);
@@ -235,6 +236,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 	fm.SetMouseCursorVisibleFlag(true, false);
 
 	fm.Run(new BreadBoardLoad);	// 実行
+	//fm.Run(new BreadBoard2);	// 実行
+	//fm.Run(new BreadBoard3);	// 実行
 
 	fm.UnInit();	// 終了処理
 

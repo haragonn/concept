@@ -50,7 +50,6 @@ void SpriteInstancing::UnInit()
 //------------------------------------------------------------------------------
 void SpriteInstancing::SetSize(float width, float height)
 {
-	// 引数の反映
 	halfWidth_ = width * 0.5f;
 	halfHeight_ = height * 0.5f;
 
@@ -60,6 +59,7 @@ void SpriteInstancing::SetSize(float width, float height)
 		halfWidth_ *= -1.0f;
 		bReversedX_ = true;
 	}
+
 	bReversedY_ = false;
 	if(halfHeight_ < 0.0f){
 		halfHeight_ *= -1.0f;
@@ -74,7 +74,6 @@ void SpriteInstancing::SetSize(float width, float height)
 //------------------------------------------------------------------------------
 void SpriteInstancing::SetRotate(float rad)
 {
-	// 引数の反映
 	rad_ = rad;
 }
 
@@ -85,7 +84,6 @@ void SpriteInstancing::SetRotate(float rad)
 //------------------------------------------------------------------------------
 void SpriteInstancing::MoveRotate(float rad)
 {
-	// 回転量をプラスする
 	rad_ += rad;
 }
 
@@ -107,7 +105,7 @@ void SpriteInstancing::SetColor(float r, float g, float b, float a)
 	color_.a = max(0.0f, min(1.0f, a));
 }
 
-void SpriteInstancing::AddSprite(Sprite & sprite)
+void SpriteInstancing::AddSprite(Sprite& sprite)
 {
 	// 画面外なら終了
 	GraphicManager& gm = GraphicManager::Instance();
@@ -117,7 +115,9 @@ void SpriteInstancing::AddSprite(Sprite & sprite)
 	if(sprite.pos_.x + longVicinity * ROOT2 < 0.0f
 		|| sprite.pos_.x - longVicinity * ROOT2 > gm.GetWidth()
 		|| sprite.pos_.y + longVicinity * ROOT2 < 0.0f
-		|| sprite.pos_.y - longVicinity * ROOT2 > gm.GetHeight()){ return; }
+		|| sprite.pos_.y - longVicinity * ROOT2 > gm.GetHeight()){
+		return;
+	}
 
 	Sprite* pSpr = &sprite;
 	auto it = find(vecSpritePtr_.begin(), vecSpritePtr_.end(), pSpr);
@@ -133,7 +133,7 @@ void SpriteInstancing::AddSprite(Sprite & sprite)
 	}
 }
 
-void SpriteInstancing::RemoveSprite(Sprite & sprite)
+void SpriteInstancing::RemoveSprite(Sprite& sprite)
 {
 	Sprite* pSpr = &sprite;
 	auto it = find(vecSpritePtr_.begin(), vecSpritePtr_.end(), pSpr);
@@ -175,7 +175,9 @@ void SpriteInstancing::DrawRect(int blend)
 		|| !sm.GetPixelShederDefaultPtr()
 		|| !sm.GetRectVertexBufferPtr()
 		|| !sim.GetVertexShederPtr()
-		|| vecSpritePtr_.size() == 0){ return; }
+		|| vecSpritePtr_.size() == 0){
+		return;
+	}
 
 	// 頂点情報
 	VertexData2D vd[SpriteManager::RECT_VERTEX_NUM];
@@ -200,6 +202,7 @@ void SpriteInstancing::DrawRect(int blend)
 	// バッファ書き込み
 	D3D11_MAPPED_SUBRESOURCE msr;
 	ID3D11Buffer* pVBuf = sm.GetRectVertexBufferPtr();
+
 	gm.GetContextPtr()->Map(pVBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
 	memcpy(msr.pData, vd, sizeof(VertexData2D) * SpriteManager::RECT_VERTEX_NUM);
 	gm.GetContextPtr()->Unmap(pVBuf, 0);
@@ -207,6 +210,7 @@ void SpriteInstancing::DrawRect(int blend)
 	// 頂点バッファのセット
 	UINT stride = sizeof(VertexData2D);
 	UINT offset = 0;
+
 	gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVBuf, &stride, &offset);
 
 	// 入力レイアウトのセット
@@ -216,7 +220,7 @@ void SpriteInstancing::DrawRect(int blend)
 	gm.GetContextPtr()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
 	D3D11_MAPPED_SUBRESOURCE MappedResource;
-	gm.GetContextPtr()->Map(sim.GetInstanceDataBufferPtr(), 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource );
+	gm.GetContextPtr()->Map(sim.GetInstanceDataBufferPtr(), 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
 
 	PerInstanceData* pInstanceData = (PerInstanceData*)MappedResource.pData;
 
@@ -236,9 +240,9 @@ void SpriteInstancing::DrawRect(int blend)
 	// ブレンディングのセット
 	if(!blend){
 		gm.SetBlendState(BLEND_ALIGNMENT);
-	}else if(blend > 0){
+	} else if(blend > 0){
 		gm.SetBlendState(BLEND_ADD);
-	}else{
+	} else{
 		gm.SetBlendState(BLEND_SUBTRACT);
 	}
 
@@ -258,6 +262,7 @@ void SpriteInstancing::DrawRect(int blend)
 	viewPort.Height = (FLOAT)gm.GetHeight();
 	viewPort.MinDepth = 0.0f;
 	viewPort.MaxDepth = 1.0f;
+
 	gm.GetContextPtr()->RSSetViewports(1, &viewPort);
 
 	//ポリゴン描画
@@ -269,7 +274,7 @@ void SpriteInstancing::DrawRect(int blend)
 // 引数　：テクスチャ(const Texture& tex),合成方法(int blend)
 // 戻り値：なし
 //------------------------------------------------------------------------------
-void SpriteInstancing::DrawTexture(const Texture & tex, int blend)
+void SpriteInstancing::DrawTexture(const Texture& tex, int blend)
 {
 	// 準備ができていなければ終了
 	GraphicManager& gm = GraphicManager::Instance();
@@ -281,7 +286,9 @@ void SpriteInstancing::DrawTexture(const Texture & tex, int blend)
 		|| !sm.GetPixelShederTexturePtr()
 		|| !sm.GetRectVertexBufferPtr()
 		|| !sim.GetVertexShederPtr()
-		|| vecSpritePtr_.size() == 0){ return; }
+		|| vecSpritePtr_.size() == 0){
+		return;
+	}
 
 	// 頂点情報
 	VertexData2D vd[SpriteManager::RECT_VERTEX_NUM];
@@ -294,6 +301,7 @@ void SpriteInstancing::DrawTexture(const Texture & tex, int blend)
 	float x, y, axisX, axisY;
 	float tSin = sinf(rad_);
 	float tCos = cosf(rad_);
+
 	for(int i = SpriteManager::RECT_VERTEX_NUM - 1; i >= 0; --i){
 		x = (i % 2) ? halfWidth_ : -halfWidth_;
 		y = (i > 1) ? halfHeight_ : -halfHeight_;
@@ -308,6 +316,7 @@ void SpriteInstancing::DrawTexture(const Texture & tex, int blend)
 	// バッファ書き込み
 	D3D11_MAPPED_SUBRESOURCE msr;
 	ID3D11Buffer* pVBuf = sm.GetRectVertexBufferPtr();
+
 	gm.GetContextPtr()->Map(pVBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
 	memcpy(msr.pData, vd, sizeof(VertexData2D) * SpriteManager::RECT_VERTEX_NUM);
 	gm.GetContextPtr()->Unmap(pVBuf, 0);
@@ -315,10 +324,12 @@ void SpriteInstancing::DrawTexture(const Texture & tex, int blend)
 	// 頂点バッファのセット
 	UINT stride = sizeof(VertexData2D);
 	UINT offset = 0;
+
 	gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVBuf, &stride, &offset);
 
 	// テクスチャ書き込み
 	ID3D11ShaderResourceView* pTexView = tex.GetTextureViewPtr();
+
 	if(pTexView){
 		gm.GetContextPtr()->PSSetShaderResources(0, 1, &pTexView);
 	}
@@ -330,7 +341,7 @@ void SpriteInstancing::DrawTexture(const Texture & tex, int blend)
 	gm.GetContextPtr()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
 	D3D11_MAPPED_SUBRESOURCE MappedResource;
-	gm.GetContextPtr()->Map(sim.GetInstanceDataBufferPtr(), 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource );
+	gm.GetContextPtr()->Map(sim.GetInstanceDataBufferPtr(), 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
 
 	PerInstanceData* pInstanceData = (PerInstanceData*)MappedResource.pData;
 
@@ -350,9 +361,9 @@ void SpriteInstancing::DrawTexture(const Texture & tex, int blend)
 	// ブレンディングのセット
 	if(!blend){
 		gm.SetBlendState(BLEND_ALIGNMENT);
-	}else if(blend > 0){
+	} else if(blend > 0){
 		gm.SetBlendState(BLEND_ADD);
-	}else{
+	} else{
 		gm.SetBlendState(BLEND_SUBTRACT);
 	}
 
@@ -363,7 +374,7 @@ void SpriteInstancing::DrawTexture(const Texture & tex, int blend)
 	gm.GetContextPtr()->GSSetShader(NULL, NULL, 0);
 	if(pTexView){
 		gm.GetContextPtr()->PSSetShader(sm.GetPixelShederTexturePtr(), NULL, 0);
-	}else{
+	} else{
 		gm.GetContextPtr()->PSSetShader(sm.GetPixelShederDefaultPtr(), NULL, 0);
 	}
 	gm.GetContextPtr()->CSSetShader(NULL, NULL, 0);
@@ -376,6 +387,7 @@ void SpriteInstancing::DrawTexture(const Texture & tex, int blend)
 	viewPort.Height = (FLOAT)gm.GetHeight();
 	viewPort.MinDepth = 0.0f;
 	viewPort.MaxDepth = 1.0f;
+
 	gm.GetContextPtr()->RSSetViewports(1, &viewPort);
 
 	//ポリゴン描画
@@ -388,7 +400,7 @@ void SpriteInstancing::DrawTexture(const Texture & tex, int blend)
 // 　　　　V座標(int vNum),合成方法(int blend)
 // 戻り値：なし
 //------------------------------------------------------------------------------
-void SpriteInstancing::DrawDividedTexture(const Texture & tex, int uNum, int vNum, int blend)
+void SpriteInstancing::DrawDividedTexture(const Texture& tex, int uNum, int vNum, int blend)
 {
 
 	// 準備ができていなければ終了
@@ -401,7 +413,9 @@ void SpriteInstancing::DrawDividedTexture(const Texture & tex, int uNum, int vNu
 		|| !sm.GetPixelShederTexturePtr()
 		|| !sm.GetRectVertexBufferPtr()
 		|| !sim.GetVertexShederPtr()
-		|| vecSpritePtr_.size() == 0){ return; }
+		|| vecSpritePtr_.size() == 0){
+		return;
+	}
 
 	// 頂点情報
 	VertexData2D vd[SpriteManager::RECT_VERTEX_NUM];
@@ -418,6 +432,7 @@ void SpriteInstancing::DrawDividedTexture(const Texture & tex, int uNum, int vNu
 	float u2 = tex.GetDivU() * (uNum + 1);
 	float v1 = tex.GetDivV() * vNum;
 	float v2 = tex.GetDivV() * (vNum + 1);
+
 	for(int i = SpriteManager::RECT_VERTEX_NUM - 1; i >= 0; --i){
 		x = (i % 2) ? halfWidth_ : -halfWidth_;
 		y = (i > 1) ? halfHeight_ : -halfHeight_;
@@ -432,6 +447,7 @@ void SpriteInstancing::DrawDividedTexture(const Texture & tex, int uNum, int vNu
 	// バッファ書き込み
 	D3D11_MAPPED_SUBRESOURCE msr;
 	ID3D11Buffer* pVBuf = sm.GetRectVertexBufferPtr();
+
 	gm.GetContextPtr()->Map(pVBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
 	memcpy(msr.pData, vd, sizeof(VertexData2D) * SpriteManager::RECT_VERTEX_NUM);
 	gm.GetContextPtr()->Unmap(pVBuf, 0);
@@ -439,10 +455,12 @@ void SpriteInstancing::DrawDividedTexture(const Texture & tex, int uNum, int vNu
 	// 頂点バッファのセット
 	UINT stride = sizeof(VertexData2D);
 	UINT offset = 0;
+
 	gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVBuf, &stride, &offset);
 
 	// テクスチャ書き込み
 	ID3D11ShaderResourceView* pTexView = tex.GetTextureViewPtr();
+
 	if(pTexView){
 		gm.GetContextPtr()->PSSetShaderResources(0, 1, &pTexView);
 	}
@@ -454,7 +472,7 @@ void SpriteInstancing::DrawDividedTexture(const Texture & tex, int uNum, int vNu
 	gm.GetContextPtr()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
 	D3D11_MAPPED_SUBRESOURCE MappedResource;
-	gm.GetContextPtr()->Map(sim.GetInstanceDataBufferPtr(), 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource );
+	gm.GetContextPtr()->Map(sim.GetInstanceDataBufferPtr(), 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
 
 	PerInstanceData* pInstanceData = (PerInstanceData*)MappedResource.pData;
 
@@ -474,9 +492,9 @@ void SpriteInstancing::DrawDividedTexture(const Texture & tex, int uNum, int vNu
 	// ブレンディングのセット
 	if(!blend){
 		gm.SetBlendState(BLEND_ALIGNMENT);
-	}else if(blend > 0){
+	} else if(blend > 0){
 		gm.SetBlendState(BLEND_ADD);
-	}else{
+	} else{
 		gm.SetBlendState(BLEND_SUBTRACT);
 	}
 
@@ -487,7 +505,7 @@ void SpriteInstancing::DrawDividedTexture(const Texture & tex, int uNum, int vNu
 	gm.GetContextPtr()->GSSetShader(NULL, NULL, 0);
 	if(pTexView){
 		gm.GetContextPtr()->PSSetShader(sm.GetPixelShederTexturePtr(), NULL, 0);
-	}else{
+	} else{
 		gm.GetContextPtr()->PSSetShader(sm.GetPixelShederDefaultPtr(), NULL, 0);
 	}
 	gm.GetContextPtr()->CSSetShader(NULL, NULL, 0);
@@ -500,6 +518,7 @@ void SpriteInstancing::DrawDividedTexture(const Texture & tex, int uNum, int vNu
 	viewPort.Height = (FLOAT)gm.GetHeight();
 	viewPort.MinDepth = 0.0f;
 	viewPort.MaxDepth = 1.0f;
+
 	gm.GetContextPtr()->RSSetViewports(1, &viewPort);
 
 	//ポリゴン描画
@@ -513,7 +532,7 @@ void SpriteInstancing::DrawDividedTexture(const Texture & tex, int uNum, int vNu
 // 　　　　合成方法(int blend)
 // 戻り値：なし
 //------------------------------------------------------------------------------
-void SpriteInstancing::DrawDelimitedTexture(const Texture & tex, float u, float v, float width, float height, int blend)
+void SpriteInstancing::DrawDelimitedTexture(const Texture& tex, float u, float v, float width, float height, int blend)
 {
 
 	// 準備ができていなければ終了
@@ -525,7 +544,9 @@ void SpriteInstancing::DrawDelimitedTexture(const Texture & tex, float u, float 
 		|| !sm.GetPixelShederDefaultPtr()
 		|| !sm.GetPixelShederTexturePtr()
 		|| !sm.GetRectVertexBufferPtr()
-		|| !sim.GetVertexShederPtr()){ return; }
+		|| !sim.GetVertexShederPtr()){
+		return;
+	}
 
 	// 頂点情報
 	VertexData2D vd[SpriteManager::RECT_VERTEX_NUM];
@@ -556,6 +577,7 @@ void SpriteInstancing::DrawDelimitedTexture(const Texture & tex, float u, float 
 	// バッファ書き込み
 	D3D11_MAPPED_SUBRESOURCE msr;
 	ID3D11Buffer* pVBuf = sm.GetRectVertexBufferPtr();
+
 	gm.GetContextPtr()->Map(pVBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
 	memcpy(msr.pData, vd, sizeof(VertexData2D) * SpriteManager::RECT_VERTEX_NUM);
 	gm.GetContextPtr()->Unmap(pVBuf, 0);
@@ -563,10 +585,12 @@ void SpriteInstancing::DrawDelimitedTexture(const Texture & tex, float u, float 
 	// 頂点バッファのセット
 	UINT stride = sizeof(VertexData2D);
 	UINT offset = 0;
+
 	gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVBuf, &stride, &offset);
 
 	// テクスチャ書き込み
 	ID3D11ShaderResourceView* pTexView = tex.GetTextureViewPtr();
+
 	if(pTexView){
 		gm.GetContextPtr()->PSSetShaderResources(0, 1, &pTexView);
 	}
@@ -578,7 +602,7 @@ void SpriteInstancing::DrawDelimitedTexture(const Texture & tex, float u, float 
 	gm.GetContextPtr()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
 	D3D11_MAPPED_SUBRESOURCE MappedResource;
-	gm.GetContextPtr()->Map(sim.GetInstanceDataBufferPtr(), 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource );
+	gm.GetContextPtr()->Map(sim.GetInstanceDataBufferPtr(), 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
 
 	PerInstanceData* pInstanceData = (PerInstanceData*)MappedResource.pData;
 
@@ -598,9 +622,9 @@ void SpriteInstancing::DrawDelimitedTexture(const Texture & tex, float u, float 
 	// ブレンディングのセット
 	if(!blend){
 		gm.SetBlendState(BLEND_ALIGNMENT);
-	}else if(blend > 0){
+	} else if(blend > 0){
 		gm.SetBlendState(BLEND_ADD);
-	}else{
+	} else{
 		gm.SetBlendState(BLEND_SUBTRACT);
 	}
 
@@ -611,7 +635,7 @@ void SpriteInstancing::DrawDelimitedTexture(const Texture & tex, float u, float 
 	gm.GetContextPtr()->GSSetShader(NULL, NULL, 0);
 	if(pTexView){
 		gm.GetContextPtr()->PSSetShader(sm.GetPixelShederTexturePtr(), NULL, 0);
-	}else{
+	} else{
 		gm.GetContextPtr()->PSSetShader(sm.GetPixelShederDefaultPtr(), NULL, 0);
 	}
 	gm.GetContextPtr()->CSSetShader(NULL, NULL, 0);
@@ -624,6 +648,7 @@ void SpriteInstancing::DrawDelimitedTexture(const Texture & tex, float u, float 
 	viewPort.Height = (FLOAT)gm.GetHeight();
 	viewPort.MinDepth = 0.0f;
 	viewPort.MaxDepth = 1.0f;
+
 	gm.GetContextPtr()->RSSetViewports(1, &viewPort);
 
 	//ポリゴン描画

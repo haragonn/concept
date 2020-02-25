@@ -80,7 +80,7 @@ void Sequence::UnInit()
 		// デバッグなら3分たったらで殺しちゃえ
 		if(WaitForSingleObject(hAsyncLoadThread_, 3 * 60 * 1000) == WAIT_TIMEOUT){
 			MessageBox(NULL, "AsyncLoadThreadが終了しません。強制終了します。", NULL, NULL);
-			TerminateThread(hAsyncLoadThread_ , FALSE);
+			TerminateThread(hAsyncLoadThread_, FALSE);
 		}
 #else
 		WaitForSingleObject(hAsyncLoadThread_, INFINITE);
@@ -108,7 +108,8 @@ int Sequence::Update(bool bRedy)
 		if(pScene_->bAsync_){
 			if(!bLoadCompleted_ && !hAsyncLoadThread_){
 				hAsyncLoadThread_ = CreateThread(NULL, 0, AsyncLoadThread, this, 0, NULL);	// 非同期読み込みスレッドの作成
-			} else{
+			}
+			else{
 				// 非同期読み込みスレッドの監視
 				DWORD ExitCode;
 				GetExitCodeThread(hAsyncLoadThread_, &ExitCode);
@@ -117,7 +118,8 @@ int Sequence::Update(bool bRedy)
 					hAsyncLoadThread_ = nullptr;
 				}
 			}
-		} else{ bLoadCompleted_ = true; }
+		}
+		else{ bLoadCompleted_ = true; }
 
 		Scene* pNext = pScene_->Update();	// シーンのアップデートから次のシーンを受け取る
 
@@ -142,7 +144,8 @@ int Sequence::Update(bool bRedy)
 		// ストレージの破棄要請チェック
 		if(StorageManager::Instance().IsUnLoadAllRequest()){
 			StorageManager::Instance().UnLoadAll();
-		} else{
+		}
+		else{
 			if(StorageManager::Instance().GetUnLoadImageRequestSize()){
 				StorageManager::Instance().UnLoadImage();
 			}
@@ -153,7 +156,8 @@ int Sequence::Update(bool bRedy)
 
 		if(eidosStorageManager::Instance().IsUnLoadAllRequest()){
 			eidosStorageManager::Instance().UnLoadAll();
-		} else{
+		}
+		else{
 			if(eidosStorageManager::Instance().GetUnLoadObjModelRequestSize()){
 				eidosStorageManager::Instance().UnLoadObjModel();
 			}

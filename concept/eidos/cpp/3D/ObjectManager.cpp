@@ -51,7 +51,7 @@ bool ObjectManager::Init()
 
 			// 入力レイアウト定義
 			D3D11_INPUT_ELEMENT_DESC layout[] = {
-				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			};
@@ -80,7 +80,7 @@ bool ObjectManager::Init()
 
 			// 入力レイアウト定義
 			D3D11_INPUT_ELEMENT_DESC layout[] = {
-				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -97,9 +97,9 @@ bool ObjectManager::Init()
 	}
 
 	// ピクセルシェーダの読み込み(通常)
-	if(!pixelShaderDefault_.LoadPixelShaderFromArchiveFile("shader.dat", "PSDefault.cso")){ return false; }
+	if(!pixelShaderDefault_.LoadPixelShaderFromCSO("PSDefault.cso")){ return false; }
 	// ピクセルシェーダの読み込み(テクスチャ)
-	if(!pixelShaderTexture_.LoadPixelShaderFromArchiveFile("shader.dat", "PSTexture.cso")){ return false; }
+	if(!pixelShaderTexture_.LoadPixelShaderFromCSO("PSTexture.cso")){ return false; }
 
 	// 定数バッファ
 	{
@@ -111,11 +111,10 @@ bool ObjectManager::Init()
 		bd.CPUAccessFlags = 0;
 		bd.MiscFlags = 0;
 		bd.StructureByteStride = 0;
+
 		hr = gm.GetDevicePtr()->CreateBuffer(&bd, nullptr, &pConstBuffer_);
 		if(FAILED(hr)){ return false; }
 
-
-		///
 		XMMATRIX worldMatrix = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
 
 		XMVECTOR eye = XMVectorSet(2.0f, 2.0f, -2.0f, 0.0f);
@@ -123,12 +122,14 @@ bool ObjectManager::Init()
 		XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 		XMMATRIX viewMatrix = XMMatrixLookAtLH(eye, focus, up);
 
-		float    fov = XMConvertToRadians(45.0f);
-		float    aspect = (float)gm.GetWidth() / gm.GetHeight();
-		float    nearZ = 0.1f;
-		float    farZ = 100.0f;
+		float fov = XMConvertToRadians(60);
+		float aspect = (float)gm.GetWidth() / gm.GetHeight();
+		float nearZ = 0.1f;
+		float farZ = 100.0f;
 		XMMATRIX projMatrix = XMMatrixPerspectiveFovLH(fov, aspect, nearZ, farZ);
+
 		XMVECTOR light = XMVector3Normalize(XMVectorSet(0.0f, 0.5f, -1.0f, 0.0f));
+
 		//定数バッファ
 		ConstBuffer3D cbuff;
 
@@ -137,10 +138,11 @@ bool ObjectManager::Init()
 		XMStoreFloat4x4(&cbuff.proj, XMMatrixTranspose(projMatrix));
 		XMStoreFloat4(&cbuff.color, XMVector3Normalize(XMVectorSet(1.0f, 1.0f, 1.0f,1.0f)));
 		XMStoreFloat4(&cbuff.light, light);
+
 		// 定数バッファ内容更新
 		gm.GetContextPtr()->UpdateSubresource(pConstBuffer_, 0, NULL, &cbuff, 0, 0);
 
-		// 定数バッファ
+		// 定数バッファセット
 		UINT cb_slot = 1;
 		ID3D11Buffer* cb[1] = { pConstBuffer_ };
 		gm.GetContextPtr()->VSSetConstantBuffers(cb_slot, 1, cb);
@@ -161,7 +163,7 @@ bool ObjectManager::Init()
 		ConstBufferBoneWorld cbuff;
 		ZeroMemory(&cbuff, sizeof(cbuff));
 
-		// ワールド行列の初期化
+		// ボーンワールド行列の初期化
 		XMMATRIX matWorld = XMMatrixIdentity();
 
 		for(int i = 0; i < 512; ++i){
@@ -171,7 +173,7 @@ bool ObjectManager::Init()
 		// 定数バッファ内容更新
 		gm.GetContextPtr()->UpdateSubresource(pPmdConstBuffer_, 0, NULL, &cbuff, 0, 0);
 
-		// 定数バッファ
+		// 定数バッファセット
 		UINT cb_slot = 2;
 		ID3D11Buffer* cb[1] = { pPmdConstBuffer_ };
 		gm.GetContextPtr()->VSSetConstantBuffers(cb_slot, 1, cb);
@@ -180,7 +182,7 @@ bool ObjectManager::Init()
 	// 頂点バッファ
 	{
 		VertexData3D cubeVertexList[]{
-			{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, { 0.0f, 0.0f } },
+		{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, { 0.0f, 0.0f } },
 		{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, { 1.0f, 0.0f } },
 		{ { -0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, { 0.0f, 1.0f } },
 		{ {  0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, { 1.0f, 1.0f } },
@@ -220,9 +222,13 @@ bool ObjectManager::Init()
 		bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 		bd.MiscFlags = 0;
 		bd.StructureByteStride = 0;
+
 		D3D11_SUBRESOURCE_DATA InitData;
 		ZeroMemory(&InitData, sizeof(InitData));
 		InitData.pSysMem = cubeVertexList;
+		InitData.SysMemPitch = 0;
+		InitData.SysMemSlicePitch = 0;
+
 		hr = gm.GetDevicePtr()->CreateBuffer(&bd, &InitData, &pCubeVertexBuffer_);
 		if(FAILED(hr)){ return false; }
 	}
@@ -264,7 +270,6 @@ bool ObjectManager::Init()
 		{ {  0.5f, -0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, { 1.0f, 1.0f } }
 		};
 
-
 		D3D11_BUFFER_DESC bd;
 		ZeroMemory(&bd, sizeof(bd));
 		bd.ByteWidth = sizeof(VertexData3D) * 4;
@@ -273,40 +278,16 @@ bool ObjectManager::Init()
 		bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 		bd.MiscFlags = 0;
 		bd.StructureByteStride = 0;
+
 		D3D11_SUBRESOURCE_DATA InitData;
 		ZeroMemory(&InitData, sizeof(InitData));
 		InitData.pSysMem = billboardVertexList;
+		InitData.SysMemPitch = 0;
+		InitData.SysMemSlicePitch = 0;
+
 		hr = gm.GetDevicePtr()->CreateBuffer(&bd, &InitData, &pBillboardVertexBuffer_);
 		if(FAILED(hr)){ return false; }
 	}
-
-	// インデックスバッファ
-	//{
-	//	WORD cubeIndexList[]{
-	//		0,  1,  2,     3,  2,  1,
-	//		4,  5,  6,     7,  6,  5,
-	//		8,  9, 10,    11, 10,  9,
-	//		12, 13, 14,    15, 14, 13,
-	//		16, 17, 18,    19, 18, 17,
-	//		20, 21, 22,    23, 22, 21,
-	//	};
-
-	//	D3D11_BUFFER_DESC bd;
-	//	bd.ByteWidth = sizeof(WORD) * CUBE_INDEX_NUM;
-	//	bd.Usage = D3D11_USAGE_DEFAULT;
-	//	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	//	bd.CPUAccessFlags = 0;
-	//	bd.MiscFlags = 0;
-	//	bd.StructureByteStride = 0;
-
-	//	D3D11_SUBRESOURCE_DATA InitData;
-	//	InitData.pSysMem = cubeIndexList;
-	//	InitData.SysMemPitch = 0;
-	//	InitData.SysMemSlicePitch = 0;
-
-	//	hr = gm.GetDevicePtr()->CreateBuffer(&bd, &InitData, &pBillboardIndexBuffer_);
-	//	if(FAILED(hr)){ return false; }
-	//}
 
 	return true;
 }

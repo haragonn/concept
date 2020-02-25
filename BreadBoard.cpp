@@ -34,7 +34,6 @@ public:
 	Target trg2_;
 
 	Sound sndBGM_;
-	//Sound sndBGM2_;
 	Sound sndGet_;
 };
 
@@ -95,8 +94,6 @@ void BreadBoard::Init()
 	im.sndBGM_.SetVolume(1.0f);
 	im.sndGet_.LoadWaveFromFile("data/SOUND/get000.wav");
 	im.sndGet_.SetVolume(1.0f);
-	//im.sndBGM2_.LoadWaveFromFile("data/SOUND/Good-bye my earth.wav");
-	//im.sndBGM2_.SetVolume(1.0f);
 
 	im.sndBGM_.Play(true);
 }
@@ -118,10 +115,6 @@ Scene * BreadBoard::Update()
 		return new BreadBoardLoad;
 	}
 
-	//if(im.trg_.IsTekisei() && im.sndBGM_.IsPlaying()){
-	//	im.sndBGM_.Stop();
-	//	im.sndBGM2_.Play(true);
-	//}
 	im.player_.Update(im.wcmr_, im.trg_.GetShild());
 	//im.trg2_.Update(im.wcmr_, im.player_);
 	if(im.trg_.Update(im.wcmr_, im.player_)){

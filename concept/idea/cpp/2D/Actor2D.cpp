@@ -62,12 +62,6 @@ void Actor2D::Init(float posX, float posY, float width, float height)
 	SetPos(Vector2D(posX, posY));
 	SetSize(Vector2D(width, height));
 	SetRotate(0.0f);
-
-
-	//pos_ = Vector2D(posX, posY);
-	//prePos_ = Vector2D(posX, posY);
-	//SetSize(width, height);
-	//rad_ = 0.0f;
 }
 
 //------------------------------------------------------------------------------
@@ -81,8 +75,6 @@ void Actor2D::UnInit()
 	pos_ = Vector2D(0.0f, 0.0f);
 	prePos_ = Vector2D(0.0f, 0.0f);
 	size_ = Vector2D(0.0f, 0.0f);
-	//halfWidth_ = 0.0f;
-	//halfHeight_ = 0.0f;
 	rad_ = 0.0f;
 	color_ = Color(0.0f, 0.0f, 0.0f, 0.0f);
 
@@ -97,11 +89,9 @@ void Actor2D::SetPos(Vector2D pos)
 {
 	// 位置の保持
 	Vector2D tPos = pos_;
-	float tPosX = pos_.x;
-	float tPosY = pos_.y;
 
-	// 引数の反映
 	pos_ = pos;
+
 	// リーダーならばフォロワーを移動させる
 	if(pFollower_ && !pLeader_){ pFollower_->MoveFollower(pos_ - tPos); }
 }
@@ -117,7 +107,6 @@ void Actor2D::SetPos(float posX, float posY)
 
 void Actor2D::MovePos(Vector2D axis)
 {
-	// 移動量をプラスする
 	pos_ += axis;
 
 	// リーダーならばフォロワーを移動させる
@@ -145,11 +134,14 @@ void Actor2D::SetSize(Vector2D size)
 
 	// 値がマイナスの時は反転フラグをオンにして正数にする
 	bReversedU_ = false;
+
 	if(size_.x < 0.0f){
 		size_.x *= -1.0f;
 		bReversedU_ = true;
 	}
+
 	bReversedV_ = false;
+
 	if(size_.y < 0.0f){
 		size_.y *= -1.0f;
 		bReversedV_ = true;
@@ -173,7 +165,6 @@ void Actor2D::SetSize(float width, float height)
 //------------------------------------------------------------------------------
 void Actor2D::SetRotate(float rad)
 {
-	// 引数の反映
 	rad_ = rad;
 }
 
@@ -184,7 +175,6 @@ void Actor2D::SetRotate(float rad)
 //------------------------------------------------------------------------------
 void Actor2D::MoveRotate(float rad)
 {
-	// 回転量をプラスする
 	rad_ += rad;
 }
 
@@ -225,7 +215,7 @@ bool Actor2D::CheckHitRect(const Actor2D& target)
 		float y4 = target.pos_.y + target.size_.y * 0.5f;
 
 		// 矩形判定
-		if(x1 < x4 && x2 > x3 && y1 < y4 && y2 > y3){ return true; }
+		if(x1 < x4 && x2 > x3&& y1 < y4 && y2 > y3){ return true; }
 
 		// 移動量の計算
 		float movementX = fabsf((pos_.x - prePos_.x) + (target.pos_.x - target.prePos_.x));
@@ -238,11 +228,13 @@ bool Actor2D::CheckHitRect(const Actor2D& target)
 
 		// 当たり判定の大きさに合わせ移動量を分解する
 		int division = 1;
+
 		if(movementX - size_.x > movementY - size_.y){
 			division = (int)(movementX / size_.x) + 1;
 		} else{
 			division = (int)(movementY / size_.y) + 1;
 		}
+
 		float axisX1 = (pos_.x - prePos_.x) / division;
 		float axisY1 = (pos_.y - prePos_.y) / division;
 		float axisX2 = (target.pos_.x - target.prePos_.x) / division;
@@ -269,7 +261,7 @@ bool Actor2D::CheckHitRect(const Actor2D& target)
 			y3 += axisY2;
 			y4 += axisY2;
 			// 矩形判定
-			if(x1 < x4 && x2 > x3 && y1 < y4 && y2 > y3){ return true; }
+			if(x1 < x4 && x2 > x3&& y1 < y4 && y2 > y3){ return true; }
 		}
 	} else{
 		// 頂点情報の計算(上を＋とする)
@@ -278,6 +270,7 @@ bool Actor2D::CheckHitRect(const Actor2D& target)
 		float x, y, axisX, axisY;
 		float tSin = sinf(rad_);
 		float tCos = cosf(rad_);
+
 		for(int i = 4 - 1; i >= 0; --i){
 			x = (i % 2) ? size_.x * 0.5f : -(size_.x * 0.5f);
 			y = (i < 2) ? size_.y * 0.5f : -(size_.y * 0.5f);
@@ -286,10 +279,12 @@ bool Actor2D::CheckHitRect(const Actor2D& target)
 			vx[i] = axisX + pos_.x;
 			vy[i] = axisY + pos_.y;
 		}
+
 		float tvx[4] = {};
 		float tvy[4] = {};
 		tSin = sinf(target.rad_);
 		tCos = cosf(target.rad_);
+
 		for(int i = 4 - 1; i >= 0; --i){
 			x = (i % 2) ? target.size_.x * 0.5f : -(target.size_.x * 0.5f);
 			y = (i < 2) ? target.size_.y * 0.5f : -(target.size_.y * 0.5f);
@@ -304,6 +299,7 @@ bool Actor2D::CheckHitRect(const Actor2D& target)
 		Vector2D vec2 = Vector2D(vx[3], vy[3]) - Vector2D(vx[1], vy[1]);
 		Vector2D vec3 = Vector2D(vx[2], vy[2]) - Vector2D(vx[3], vy[3]);
 		Vector2D vec4 = Vector2D(vx[0], vy[0]) - Vector2D(vx[2], vy[2]);
+
 		// 頂点から頂点へのベクトル
 		Vector2D vec11 = Vector2D(tvx[0], tvy[0]) - Vector2D(vx[0], vy[0]);
 		Vector2D vec21 = Vector2D(tvx[0], tvy[0]) - Vector2D(vx[1], vy[1]);
@@ -347,6 +343,7 @@ bool Actor2D::CheckHitRect(const Actor2D& target)
 		vec2 = Vector2D(tvx[3], tvy[3]) - Vector2D(tvx[1], tvy[1]);
 		vec3 = Vector2D(tvx[2], tvy[2]) - Vector2D(tvx[3], tvy[3]);
 		vec4 = Vector2D(tvx[0], tvy[0]) - Vector2D(tvx[2], tvy[2]);
+
 		// 頂点から頂点へのベクトル
 		vec11 = Vector2D(vx[0], vy[0]) - Vector2D(tvx[0], tvy[0]);
 		vec21 = Vector2D(vx[0], vy[0]) - Vector2D(tvx[1], tvy[1]);
@@ -416,11 +413,13 @@ bool Actor2D::CheckHitCircle(const Actor2D& target)
 
 	// 当たり判定の大きさに合わせ移動量を分解する
 	int division = 1;
+
 	if(movementX > movementY){
 		division = (int)(movementX / r) + 1;
 	} else{
 		division = (int)(movementY / r) + 1;
 	}
+
 	float axisX1 = (pos_.x - prePos_.x) / division;
 	float axisY1 = (pos_.y - prePos_.y) / division;
 	float axisX2 = (target.pos_.x - target.prePos_.x) / division;
@@ -440,6 +439,7 @@ bool Actor2D::CheckHitCircle(const Actor2D& target)
 		posY2 += axisY2;
 		x = posX1 - posX2;
 		y = posY1 - posY2;
+
 		if((x * x) + (y * y) < r * r){ return true; }	// 円の判定
 	}
 
@@ -453,7 +453,7 @@ bool Actor2D::CheckHitCircle(const Actor2D& target)
 //------------------------------------------------------------------------------
 float Actor2D::GetRelation(const Actor2D& target)
 {
-	return 3.141592f - atan2f(target.pos_.x - pos_.x, target.pos_.y - pos_.y);
+	return ideaPI - atan2f(target.pos_.x - pos_.x, target.pos_.y - pos_.y);
 }
 
 //------------------------------------------------------------------------------
@@ -463,7 +463,7 @@ float Actor2D::GetRelation(const Actor2D& target)
 //------------------------------------------------------------------------------
 float Actor2D::GetPreFrameRelation(const Actor2D& target)
 {
-	return 3.141592f - atan2f(target.prePos_.x - prePos_.x, target.prePos_.y - prePos_.y);
+	return ideaPI - atan2f(target.prePos_.x - prePos_.x, target.prePos_.y - prePos_.y);
 }
 
 //------------------------------------------------------------------------------
@@ -495,6 +495,7 @@ void Actor2D::QuitFollower()
 			pLeader_->pFollower_ = pFollower_;
 			pFollower_->pLeader_ = pLeader_;
 		} else{ pLeader_->pFollower_ = nullptr; }
+
 		pFollower_ = nullptr;
 		pLeader_ = nullptr;
 	}
@@ -509,7 +510,6 @@ void Actor2D::MoveFollower(Vector2D axis)
 {
 	// 移動
 	pos_ += axis;
-	//pos_.y += axisY;
 
 	// 次のフォロワーへとつなぐ
 	if(pFollower_){ pFollower_->MoveFollower(axis); }
@@ -520,7 +520,7 @@ void Actor2D::MoveFollower(Vector2D axis)
 // 引数　：対象となるActor2Dのポインター(Actor2D* pTarget)
 // 戻り値：なし
 //------------------------------------------------------------------------------
-void Actor2D::ResetFollower(Actor2D * pTarget)
+void Actor2D::ResetFollower(Actor2D* pTarget)
 {
 	if(pTarget){
 		ResetFollower(pTarget->pFollower_);
@@ -537,6 +537,4 @@ void Actor2D::WriteDownPosition()
 {
 	// 前フレームの位置を保存
 	prePos_ = pos_;
-	//prePos_.x = pos_.x;
-	//prePos_.y = pos_.y;
 }

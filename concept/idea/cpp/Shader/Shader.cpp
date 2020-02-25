@@ -49,6 +49,7 @@ bool PixelShader::LoadPixelShaderFromCSO(const char * pFileName)
 	if(size == 0){ return false; }
 
 	hr = gm.GetDevicePtr()->CreatePixelShader(pData, size, NULL, &pPixelShader_);
+	delete[] pData;
 	if(FAILED(hr)){ return false; }
 
 	return true;

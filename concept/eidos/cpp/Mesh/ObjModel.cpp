@@ -787,6 +787,7 @@ void ObjModel::Draw(Camera * pCamera)
 	XMStoreFloat4x4(&cbuff.proj, XMMatrixTranspose(XMLoadFloat4x4(&matProj)));
 
 	XMStoreFloat4(&cbuff.color, XMVectorSet(color_.r, color_.g, color_.b, color_.a));
+
 	XMStoreFloat4(&cbuff.light, om.GetLight());
 
 	// 定数バッファ内容更新

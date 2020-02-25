@@ -43,7 +43,8 @@ private:
 	UINT height_;				// スクリーンの高さ
 	bool bWindowed_;			// ウィンドウモード
 
-	std::atomic<bool> bReady_;	// 実行準備
+	std::atomic<bool> bReady_;			// 実行準備
+	std::atomic<Scene*> pInitScene_;	// 初期シーン
 
 	bool bOnWindowed_;			// ウィンドウ時のマウスカーソル
 	bool bOnFullscreen_;		// フルスクリーン時のマウスカーソル
@@ -51,11 +52,11 @@ private:
 	std::atomic<bool> bChangeDispRequest_;	// ウィンドウモードの切り替え要請
 	std::atomic<bool> bChangeDispReady_;	// ウインドウモードの切り替えの完了
 
-	std::atomic<UINT> targetFps_;			// 目標のFPS
-	float fps_;					// 現在のFPS
-	bool bFpsShow_;				// FPSの簡易表示フラグ
-	std::atomic<UINT> frameSkipMax_;		// 最大フレームスキップ数
-	std::atomic<UINT> frameSkipCount_;		// フレームスキップ回数
+	std::atomic<UINT> targetFps_;		// 目標のFPS
+	float fps_;							// 現在のFPS
+	bool bFpsShow_;						// FPSの簡易表示フラグ
+	std::atomic<UINT> frameSkipMax_;	// 最大フレームスキップ数
+	std::atomic<UINT> frameSkipCount_;	// フレームスキップ回数
 
 	bool bStorage_;				// ストレージの使用可能フラグ
 

@@ -1,4 +1,3 @@
-
 #include "concept/eidos/h/Mesh/FbxModel.h"
 #include "BreadBoard3.h"
 
@@ -35,7 +34,7 @@ void BreadBoard3::Init()
 
 	im.fnt_.Init(30);
 
-	im.wcmr_.Init(DegreeToRadian(65.5f), S_W / S_H, 0.0001f, 100000.0f, 2.0f);
+	im.wcmr_.Init(DegreeToRadian(65.5f), S_W / S_H, 0.0001f, 10000.0f, 2.0f);
 
 	im.fm_.LoadFbxMeshFromFile("model/PronamaChan_SD.fbx");
 
@@ -68,7 +67,7 @@ Scene * BreadBoard3::Update()
 		im.wcmr_.SetWrapTarget(0.0f, 0.0f);
 	}
 
-	im.wcmr_.UpdateWrap(0.02f);
+	im.wcmr_.UpdateWrap(0.05f);
 
 	return this;
 }

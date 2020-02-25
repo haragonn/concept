@@ -53,9 +53,9 @@ bool SpriteManager::Init()
 	}
 
 	// ピクセルシェーダの読み込み(通常)
-	if(!pixelShaderDefault_.LoadPixelShaderFromArchiveFile(ARCHIVE_FILENAME, PS_DEF_FILENAME)){ return false; }
+	if(!pixelShaderDefault_.LoadPixelShaderFromCSO(PS_DEF_FILENAME)){ return false; }
 	// ピクセルシェーダの読み込み(テクスチャ)
-	if(!pixelShaderTexture_.LoadPixelShaderFromArchiveFile(ARCHIVE_FILENAME, PS_TEX_FILENAME)){ return false; }
+	if(!pixelShaderTexture_.LoadPixelShaderFromCSO(PS_TEX_FILENAME)){ return false; }
 
 
 	// 定数バッファ
@@ -68,6 +68,7 @@ bool SpriteManager::Init()
 		bd.CPUAccessFlags = 0;
 		bd.MiscFlags = 0;
 		bd.StructureByteStride = 0;
+
 		hr = gm.GetDevicePtr()->CreateBuffer(&bd, nullptr, &pConstBuffer_);
 		if(FAILED(hr)){ return false; }
 
@@ -88,6 +89,7 @@ bool SpriteManager::Init()
 		// 定数バッファのセット
 		UINT cb_slot = 0;
 		ID3D11Buffer* cb[1] ={ pConstBuffer_ };
+
 		gm.GetContextPtr()->VSSetConstantBuffers(cb_slot, 1, cb);
 	}
 
@@ -102,12 +104,17 @@ bool SpriteManager::Init()
 		bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 		bd.MiscFlags = 0;
+
 		D3D11_SUBRESOURCE_DATA InitData;
 		ZeroMemory(&InitData, sizeof(InitData));
 		InitData.pSysMem = v;
+		InitData.SysMemPitch = 0;
+		InitData.SysMemSlicePitch = 0;
+
 		hr = gm.GetDevicePtr()->CreateBuffer(&bd, &InitData, &pRectVertexBuffer_);
 		if(FAILED(hr)){ return false; }
 	}
+
 	// 円
 	{
 		VertexData2D v[CIRCLE_VERTEX_NUM] ={};
@@ -118,9 +125,13 @@ bool SpriteManager::Init()
 		bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 		bd.MiscFlags = 0;
+
 		D3D11_SUBRESOURCE_DATA InitData;
 		ZeroMemory(&InitData, sizeof(InitData));
 		InitData.pSysMem = v;
+		InitData.SysMemPitch = 0;
+		InitData.SysMemSlicePitch = 0;
+
 		hr = gm.GetDevicePtr()->CreateBuffer(&bd, &InitData, &pCircleVertexBuffer_);
 		if(FAILED(hr)){ return false; }
 	}

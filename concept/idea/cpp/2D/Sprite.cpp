@@ -50,6 +50,7 @@ void Sprite::DrawRect(int blend)
 	// 準備ができていなければ終了
 	GraphicManager& gm = GraphicManager::Instance();
 	SpriteManager& sm = SpriteManager::Instance();
+
 	if(!gm.GetContextPtr()
 		|| !sm.GetRectVertexBufferPtr()
 		|| !sm.GetVertexShederPtr()
@@ -71,6 +72,7 @@ void Sprite::DrawRect(int blend)
 
 	// 頂点情報
 	VertexData2D vd[SpriteManager::RECT_VERTEX_NUM];
+
 	vd[0] = { XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(color_.r, color_.g, color_.b, color_.a), XMFLOAT2(0.0f, 0.0f) };
 	vd[1] = { XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(color_.r, color_.g, color_.b, color_.a), XMFLOAT2(1.0f, 0.0f) };
 	vd[2] = { XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(color_.r, color_.g, color_.b, color_.a), XMFLOAT2(0.0f, 1.0f) };
@@ -80,6 +82,7 @@ void Sprite::DrawRect(int blend)
 	float x, y, axisX, axisY;
 	float tSin = sinf(rad_);
 	float tCos = cosf(rad_);
+
 	for(int i = SpriteManager::RECT_VERTEX_NUM - 1; i >= 0; --i){
 		x = (i % 2) ? halfWidth : -halfWidth;
 		y = (i > 1) ? halfHeight : -halfHeight;
@@ -92,6 +95,7 @@ void Sprite::DrawRect(int blend)
 	// バッファ書き込み
 	D3D11_MAPPED_SUBRESOURCE msr;
 	ID3D11Buffer* pVBuf = sm.GetRectVertexBufferPtr();
+
 	gm.GetContextPtr()->Map(pVBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
 	memcpy(msr.pData, vd, sizeof(VertexData2D) * SpriteManager::RECT_VERTEX_NUM);
 	gm.GetContextPtr()->Unmap(pVBuf, 0);
@@ -99,6 +103,7 @@ void Sprite::DrawRect(int blend)
 	// 頂点バッファのセット
 	UINT stride = sizeof(VertexData2D);
 	UINT offset = 0;
+
 	gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVBuf, &stride, &offset);
 
 	// 入力レイアウトのセット
@@ -132,6 +137,7 @@ void Sprite::DrawRect(int blend)
 	viewPort.Height = (FLOAT)gm.GetHeight();
 	viewPort.MinDepth = 0.0f;
 	viewPort.MaxDepth = 1.0f;
+
 	gm.GetContextPtr()->RSSetViewports(1, &viewPort);
 
 	//ポリゴン描画
@@ -148,6 +154,7 @@ void Sprite::DrawCircle(float ratio, int blend)
 	// 準備ができていなければ終了
 	GraphicManager& gm = GraphicManager::Instance();
 	SpriteManager& sm = SpriteManager::Instance();
+
 	if(!gm.GetContextPtr()
 		|| !sm.GetCircleVertexBufferPtr()
 		|| !sm.GetVertexShederPtr()
@@ -174,14 +181,14 @@ void Sprite::DrawCircle(float ratio, int blend)
 
 	// 頂点情報
 	VertexData2D vd[SpriteManager::CIRCLE_VERTEX_NUM] = {};
-
-	// 頂点情報の計算
 	vd[0].pos.x = pos_.x;
 	vd[0].pos.y = pos_.y;
 	vd[0].color.x = color_.r;
 	vd[0].color.y = color_.g;
 	vd[0].color.z = color_.b;
 	vd[0].color.w = color_.a;
+
+	// 頂点情報の計算
 	for(int i = 1; i < SpriteManager::CIRCLE_VERTEX_NUM; ++i){
 		vd[i].pos.x = pos_.x + max(halfWidth, halfHeight) * -sinf(ideaPI * 2.0f - rad_ - ideaPI * 2.0f / (SpriteManager::CIRCLE_VERTEX_NUM - 2) * (i - 1));
 		vd[i].pos.y = pos_.y + max(halfWidth, halfHeight) * -cosf(ideaPI * 2.0f - rad_ - ideaPI * 2.0f / (SpriteManager::CIRCLE_VERTEX_NUM - 2) * (i - 1));
@@ -194,6 +201,7 @@ void Sprite::DrawCircle(float ratio, int blend)
 	// 頂点バッファ書き込み
 	D3D11_MAPPED_SUBRESOURCE msr;
 	ID3D11Buffer* pVBuf = sm.GetCircleVertexBufferPtr();
+
 	gm.GetContextPtr()->Map(pVBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
 	memcpy(msr.pData, vd, sizeof(VertexData2D) * SpriteManager::CIRCLE_VERTEX_NUM);
 	gm.GetContextPtr()->Unmap(pVBuf, 0);
@@ -201,6 +209,7 @@ void Sprite::DrawCircle(float ratio, int blend)
 	// 頂点バッファのセット
 	UINT stride = sizeof(VertexData2D);
 	UINT offset = 0;
+
 	gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVBuf, &stride, &offset);
 	gm.GetContextPtr()->IASetIndexBuffer(sm.GetCircleIndexBufferPtr(), DXGI_FORMAT_R16_UINT, 0);
 
@@ -235,6 +244,7 @@ void Sprite::DrawCircle(float ratio, int blend)
 	viewPort.Height = (FLOAT)gm.GetHeight();
 	viewPort.MinDepth = 0.0f;
 	viewPort.MaxDepth = 1.0f;
+
 	gm.GetContextPtr()->RSSetViewports(1, &viewPort);
 
 	//ポリゴン描画
@@ -251,6 +261,7 @@ void Sprite::DrawPhoton(float ratio, int blend)
 	// 準備ができていなければ終了
 	GraphicManager& gm = GraphicManager::Instance();
 	SpriteManager& sm = SpriteManager::Instance();
+
 	if(!gm.GetContextPtr()
 		|| !sm.GetCircleVertexBufferPtr()
 		|| !sm.GetVertexShederPtr()
@@ -277,14 +288,14 @@ void Sprite::DrawPhoton(float ratio, int blend)
 
 	// 頂点情報
 	VertexData2D vd[SpriteManager::CIRCLE_VERTEX_NUM] = {};
-
-	// 頂点情報の計算
 	vd[0].pos.x = pos_.x;
 	vd[0].pos.y = pos_.y;
 	vd[0].color.x = color_.r;
 	vd[0].color.y = color_.g;
 	vd[0].color.z = color_.b;
 	vd[0].color.w = color_.a;
+
+	// 頂点情報の計算
 	for(int i = 1; i < SpriteManager::CIRCLE_VERTEX_NUM; ++i){
 		vd[i].pos.x = pos_.x + max(halfWidth, halfHeight) * -sinf(ideaPI * 2.0f - rad_ - ideaPI * 2.0f / (SpriteManager::CIRCLE_VERTEX_NUM - 2) * (i - 1));
 		vd[i].pos.y = pos_.y + max(halfWidth, halfHeight) * -cosf(ideaPI * 2.0f - rad_ - ideaPI * 2.0f / (SpriteManager::CIRCLE_VERTEX_NUM - 2) * (i - 1));
@@ -297,6 +308,7 @@ void Sprite::DrawPhoton(float ratio, int blend)
 	// バッファ書き込み
 	D3D11_MAPPED_SUBRESOURCE msr;
 	ID3D11Buffer* pVBuf = sm.GetCircleVertexBufferPtr();
+
 	gm.GetContextPtr()->Map(pVBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
 	memcpy(msr.pData, vd, sizeof(VertexData2D) * SpriteManager::CIRCLE_VERTEX_NUM);
 	gm.GetContextPtr()->Unmap(pVBuf, 0);
@@ -304,6 +316,7 @@ void Sprite::DrawPhoton(float ratio, int blend)
 	// 頂点バッファのセット
 	UINT stride = sizeof(VertexData2D);
 	UINT offset = 0;
+
 	gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVBuf, &stride, &offset);
 	gm.GetContextPtr()->IASetIndexBuffer(sm.GetCircleIndexBufferPtr(), DXGI_FORMAT_R16_UINT, 0);
 
@@ -337,6 +350,7 @@ void Sprite::DrawPhoton(float ratio, int blend)
 	viewPort.Height = (FLOAT)gm.GetHeight();
 	viewPort.MinDepth = 0.0f;
 	viewPort.MaxDepth = 1.0f;
+
 	gm.GetContextPtr()->RSSetViewports(1, &viewPort);
 
 	//ポリゴン描画
@@ -353,6 +367,7 @@ void Sprite::DrawTexture(const Texture& tex, int blend)
 	// 準備ができていなければ終了
 	GraphicManager& gm = GraphicManager::Instance();
 	SpriteManager& sm = SpriteManager::Instance();
+
 	if(!gm.GetContextPtr()
 		|| !sm.GetRectVertexBufferPtr()
 		|| !sm.GetVertexShederPtr()
@@ -384,6 +399,7 @@ void Sprite::DrawTexture(const Texture& tex, int blend)
 	float x, y, axisX, axisY;
 	float tSin = sinf(rad_);
 	float tCos = cosf(rad_);
+
 	for(int i = SpriteManager::RECT_VERTEX_NUM - 1; i >= 0; --i){
 		x = (i % 2) ? halfWidth : -halfWidth;
 		y = (i > 1) ? halfHeight : -halfHeight;
@@ -398,6 +414,7 @@ void Sprite::DrawTexture(const Texture& tex, int blend)
 	// バッファ書き込み
 	D3D11_MAPPED_SUBRESOURCE msr;
 	ID3D11Buffer* pVBuf = sm.GetRectVertexBufferPtr();
+
 	gm.GetContextPtr()->Map(pVBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
 	memcpy(msr.pData, vd, sizeof(VertexData2D) * SpriteManager::RECT_VERTEX_NUM);
 	gm.GetContextPtr()->Unmap(pVBuf, 0);
@@ -405,10 +422,12 @@ void Sprite::DrawTexture(const Texture& tex, int blend)
 	// 頂点バッファのセット
 	UINT stride = sizeof(VertexData2D);
 	UINT offset = 0;
+
 	gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVBuf, &stride, &offset);
 
 	// テクスチャ書き込み
 	ID3D11ShaderResourceView* pTexView = tex.GetTextureViewPtr();
+
 	if(pTexView){
 		gm.GetContextPtr()->PSSetShaderResources(0, 1, &pTexView);
 	}
@@ -448,6 +467,7 @@ void Sprite::DrawTexture(const Texture& tex, int blend)
 	viewPort.Height = (FLOAT)gm.GetHeight();
 	viewPort.MinDepth = 0.0f;
 	viewPort.MaxDepth = 1.0f;
+
 	gm.GetContextPtr()->RSSetViewports(1, &viewPort);
 
 	//ポリゴン描画
@@ -465,6 +485,7 @@ void Sprite::DrawDividedTexture(const Texture& tex, int uNum, int vNum, int blen
 	// 準備ができていなければ終了
 	GraphicManager& gm = GraphicManager::Instance();
 	SpriteManager& sm = SpriteManager::Instance();
+
 	if(!gm.GetContextPtr()
 		|| !sm.GetRectVertexBufferPtr()
 		|| !sm.GetVertexShederPtr()
@@ -500,6 +521,7 @@ void Sprite::DrawDividedTexture(const Texture& tex, int uNum, int vNum, int blen
 	float u2 = tex.GetDivU() * (uNum + 1);
 	float v1 = tex.GetDivV() * vNum;
 	float v2 = tex.GetDivV() * (vNum + 1);
+
 	for(int i = SpriteManager::RECT_VERTEX_NUM - 1; i >= 0; --i){
 		x = (i % 2) ? halfWidth : -halfWidth;
 		y = (i > 1) ? halfHeight : -halfHeight;
@@ -514,6 +536,7 @@ void Sprite::DrawDividedTexture(const Texture& tex, int uNum, int vNum, int blen
 	// バッファ書き込み
 	D3D11_MAPPED_SUBRESOURCE msr;
 	ID3D11Buffer* pVBuf = sm.GetRectVertexBufferPtr();
+
 	gm.GetContextPtr()->Map(pVBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
 	memcpy(msr.pData, vd, sizeof(VertexData2D) * SpriteManager::RECT_VERTEX_NUM);
 	gm.GetContextPtr()->Unmap(pVBuf, 0);
@@ -521,10 +544,12 @@ void Sprite::DrawDividedTexture(const Texture& tex, int uNum, int vNum, int blen
 	// 頂点バッファのセット
 	UINT stride = sizeof(VertexData2D);
 	UINT offset = 0;
+
 	gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVBuf, &stride, &offset);
 
 	// テクスチャ書き込み
 	ID3D11ShaderResourceView* pTexView = tex.GetTextureViewPtr();
+
 	if(pTexView){
 		gm.GetContextPtr()->PSSetShaderResources(0, 1, &pTexView);
 	}
@@ -564,6 +589,7 @@ void Sprite::DrawDividedTexture(const Texture& tex, int uNum, int vNum, int blen
 	viewPort.Height = (FLOAT)gm.GetHeight();
 	viewPort.MinDepth = 0.0f;
 	viewPort.MaxDepth = 1.0f;
+
 	gm.GetContextPtr()->RSSetViewports(1, &viewPort);
 
 	//ポリゴン描画
@@ -582,6 +608,7 @@ void Sprite::DrawDelimitedTexture(const Texture& tex, float u, float v, float wi
 	// 準備ができていなければ終了
 	GraphicManager& gm = GraphicManager::Instance();
 	SpriteManager& sm = SpriteManager::Instance();
+
 	if(!gm.GetContextPtr()
 		|| !sm.GetRectVertexBufferPtr()
 		|| !sm.GetVertexShederPtr()
@@ -617,6 +644,7 @@ void Sprite::DrawDelimitedTexture(const Texture& tex, float u, float v, float wi
 	float u2 = u + width;
 	float v1 = v;
 	float v2 = v + height;
+
 	for(int i = SpriteManager::RECT_VERTEX_NUM - 1; i >= 0; --i){
 		x = (i % 2) ? halfWidth : -halfWidth;
 		y = (i > 1) ? halfHeight : -halfHeight;
@@ -631,6 +659,7 @@ void Sprite::DrawDelimitedTexture(const Texture& tex, float u, float v, float wi
 	// バッファ書き込み
 	D3D11_MAPPED_SUBRESOURCE msr;
 	ID3D11Buffer* pVBuf = sm.GetRectVertexBufferPtr();
+
 	gm.GetContextPtr()->Map(pVBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
 	memcpy(msr.pData, vd, sizeof(VertexData2D) * SpriteManager::RECT_VERTEX_NUM);
 	gm.GetContextPtr()->Unmap(pVBuf, 0);
@@ -638,10 +667,12 @@ void Sprite::DrawDelimitedTexture(const Texture& tex, float u, float v, float wi
 	// 頂点バッファのセット
 	UINT stride = sizeof(VertexData2D);
 	UINT offset = 0;
+
 	gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVBuf, &stride, &offset);
 
 	// テクスチャ書き込み
 	ID3D11ShaderResourceView* pTexView = tex.GetTextureViewPtr();
+
 	if(pTexView){
 		gm.GetContextPtr()->PSSetShaderResources(0, 1, &pTexView);
 	}
@@ -681,6 +712,7 @@ void Sprite::DrawDelimitedTexture(const Texture& tex, float u, float v, float wi
 	viewPort.Height = (FLOAT)gm.GetHeight();
 	viewPort.MinDepth = 0.0f;
 	viewPort.MaxDepth = 1.0f;
+
 	gm.GetContextPtr()->RSSetViewports(1, &viewPort);
 
 	//ポリゴン描画

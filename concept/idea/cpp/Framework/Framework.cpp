@@ -52,6 +52,7 @@ Framework::Framework() :
 	height_(480U),
 	bWindowed_(true),
 	bReady_(false),
+	pInitScene_(nullptr),
 	bOnWindowed_(true),
 	bOnFullscreen_(false),
 	bChangeDispRequest_(false),
@@ -115,8 +116,8 @@ bool Framework::Init(HINSTANCE hInst, int nCmdShow, UINT width, UINT height, boo
 	GetWindowRect(GetDesktopWindow(), &dr);
 	int dw = dr.right - dr.left;
 	int dh = dr.bottom - dr.top;
-	int wx = (ww > dw) ? 0 : (dw - ww) >> 1;
-	int wy = (wh > dh) ? 0 : (dh - wh) >> 1;
+	int wx = (ww > dw)?0:(dw - ww) >> 1;
+	int wy = (wh > dh)?0:(dh - wh) >> 1;
 	hWnd_ = CreateWindow(wcex_.lpszClassName, pClassName, WINDOW_STYLE, wx, wy, ww, wh, NULL, NULL, hInst_, this);
 	if(!hWnd_){ return false; }
 
@@ -193,7 +194,7 @@ void Framework::UnInit()
 		// デバッグなら3分たったらで殺しちゃえ
 		if(WaitForSingleObject(hMainLoopThread_, 3 * 60 * 1000) == WAIT_TIMEOUT){
 			MessageBox(hWnd_, "MainLoopThreadが終了しません。強制終了します。", NULL, NULL);
-			TerminateThread(hMainLoopThread_ , FALSE);
+			TerminateThread(hMainLoopThread_, FALSE);
 		}
 #else
 		WaitForSingleObject(hMainLoopThread_, INFINITE);
@@ -226,11 +227,16 @@ void Framework::MainLoop()
 	GraphicManager& gm = GraphicManager::Instance();	// グラフィックマネージャのインスタンス
 	FadeManager& fm = FadeManager::Instance();			// フェードのインスタンス
 
-	Timer tmr;			// タイマー
-	Timer tmrFps;		// FPS計測用タイマー
+	if(!sq.Init(pInitScene_)){	// シーケンスの初期化
+		sq.UnInit();
+		return;
+	}
+
+	Timer tmr;				// タイマー
+	Timer tmrFps;			// FPS計測用タイマー
 	double frameTime = 1000.0 / targetFps_;	// 1フレームの単位時間
 	unsigned long long frameCount = 0U;		// フレーム数
-	UINT fpsCount = 0U;	// FPSカウント
+	UINT fpsCount = 0U;		// FPSカウント
 
 	tmr.SetStartTime();		// タイマー開始
 	tmrFps.SetStartTime();	//
@@ -258,7 +264,7 @@ void Framework::MainLoop()
 			tmrFps.SetStartTime();
 		}
 
-		if(tmr.GetHighPrecisionElapsed() > frameTime * (frameCount + 1) || NetworkManager::Instance().GetSkipFlag()){	// 目標の時間がたったら
+		if(tmr.GetHighPrecisionElapsed() > frameTime* (frameCount + 1) || NetworkManager::Instance().GetSkipFlag()){	// 目標の時間がたったら
 			// 入力
 			InputManager::Instance().UpdateAll();
 
@@ -277,7 +283,8 @@ void Framework::MainLoop()
 					gm.EndScene();
 					frameSkipCount_ = 0U;
 				}
-			} else{
+			}
+			else{
 				++frameSkipCount_;
 			}
 
@@ -293,7 +300,8 @@ void Framework::MainLoop()
 			// 回したフレームのカウント
 			++frameCount;
 			++fpsCount;
-		} else{
+		}
+		else{
 			NetworkManager::Instance().WritingEnd();
 			Sleep(1);	// 目標の時間が立っていなければ休む
 		}
@@ -316,7 +324,7 @@ void Framework::Run(Scene* pInitScene)
 {
 	if(!bReady_ || !pInitScene){ return; }	// 準備はいいか,シーンのNULLチェック
 
-	Sequence::Instance().Init(pInitScene);	// シーケンスの初期化
+	pInitScene_ = pInitScene;
 
 	DWORD ExitCode;
 
@@ -338,12 +346,15 @@ void Framework::Run(Scene* pInitScene)
 		}
 
 		// メインループスレッドとウィンドウの監視
-		GetExitCodeThread(hMainLoopThread_, &ExitCode);
-		if(ExitCode != STILL_ACTIVE){
-			CloseHandle(hMainLoopThread_);
-			hMainLoopThread_ = nullptr;
-			break;
-		} else{ Sleep(30); }
+		if(hMainLoopThread_){
+			GetExitCodeThread(hMainLoopThread_, &ExitCode);
+			if(ExitCode != STILL_ACTIVE){
+				CloseHandle(hMainLoopThread_);
+				hMainLoopThread_ = nullptr;
+				break;
+			}else{ Sleep(30); }		
+		}
+		else{ break; }
 	}
 
 	UnInit();
@@ -386,12 +397,13 @@ void Framework::ChangeDisplayMode()
 		GetWindowRect(GetDesktopWindow(), &dr);
 		int dw = dr.right - dr.left;
 		int dh = dr.bottom - dr.top;
-		int wx = (ww > dw) ? 0 : (dw - ww) >> 1;
-		int wy = (wh > dh) ? 0 : (dh - wh) >> 1;
+		int wx = (ww > dw)?0:(dw - ww) >> 1;
+		int wy = (wh > dh)?0:(dh - wh) >> 1;
 
 		SetWindowLong(hWnd_, GWL_STYLE, WINDOW_STYLE);
 		SetWindowPos(hWnd_, HWND_NOTOPMOST, wx, wy, ww, wh, SWP_SHOWWINDOW);
-	} else{	// フルスクリーン時
+	}
+	else{	// フルスクリーン時
 		RECT dr;
 		GetWindowRect(GetDesktopWindow(), &dr);
 
@@ -450,12 +462,14 @@ LRESULT Framework::OnKeyDown(){
 			if(MessageBox(hWnd_, "ゲームを終了しますか？", "終了確認", MB_OKCANCEL) == IDOK){
 				SendMessage(hWnd_, WM_CLOSE, 0, 0);	// 終了
 			}
-		} else{	// フルスクリーン時
+		}
+		else{	// フルスクリーン時
 			bChangeDispRequest_ = true;	// ウィンドウモードの切り替え
 		}
 
 		return 0;
-	} else{
+	}
+	else{
 		return DefaultProc();
 	}
 }
@@ -483,9 +497,10 @@ LRESULT Framework::OnSysKeyDown()
 LRESULT Framework::OnSetCursor()
 {
 	// フラグに合わせて表示を切り替える
-	if(bWindowed_ ? !bOnWindowed_ : !bOnFullscreen_){
+	if(bWindowed_?!bOnWindowed_:!bOnFullscreen_){
 		SetCursor(NULL);	// マウスを非表示
 
 		return 0;
-	} else{ return DefaultProc(); }
+	}
+	else{ return DefaultProc(); }
 }

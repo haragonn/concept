@@ -38,7 +38,7 @@ VS_OUT main(VS_IN input)
 	w._43 = 0.0f;
 
 	nor = mul(normalize(input.nor), w).xyz;
-	//nor = normalize(nor);
+	nor = normalize(nor);
 
 	col = saturate(dot(nor, normalize(light.xyz)));
 	col = (col * 0.5f + 0.5f);

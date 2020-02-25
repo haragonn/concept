@@ -8,6 +8,8 @@
 //------------------------------------------------------------------------------
 // インクルードファイル
 //------------------------------------------------------------------------------
+#include "../Utility/ideaMath.h"
+#include "../Utility/ideaUtility.h"
 #define WIN32_LEAN_AND_MEAN
 #include <d3d11.h>
 
@@ -22,6 +24,11 @@ enum BLEND_STATE{
 	BLEND_MAX
 };
 
+struct PeraVertex{
+	Vector3D pos;
+	Vector2D tex;
+};
+
 //------------------------------------------------------------------------------
 // クラス名　：GraphicManager
 // クラス概要：シングルトン
@@ -29,6 +36,8 @@ enum BLEND_STATE{
 //------------------------------------------------------------------------------
 class GraphicManager{
 public:
+	static const int RENDER_TARGET_VIEW_MAX = 4;
+
 	static GraphicManager& Instance()	// 唯一のインスタンスを返す
 	{
 		static GraphicManager s_Instance;
@@ -48,7 +57,13 @@ public:
 	ID3D11Device* GetDevicePtr()const{ return pD3DDevice_; }								// Direct3Dデバイスの取得
 	ID3D11DeviceContext* GetContextPtr()const{ return pImmediateContext_; }					// コンテキストの取得
 	ID3D11DepthStencilView* GetDepthStencilViewPtr(){ return pDepthStencilView_; }			// デプスステンシルビューの取得
-	ID3D11RenderTargetView* GetDefaultRenderTargetViewPtr(){ return pRenderTargetView_; }	// 標準レンダーターゲットビューの取得
+	ID3D11RenderTargetView* GetBackBufferRenderTargetViewPtr(){ return pBackBufferRenderTargetView_; }	// バックバッファレンダーターゲットビューの取得
+	ID3D11RenderTargetView* GetRenderTargetViewPtr(int idx)	// レンダーターゲットビューの取得
+	{
+		Assert(idx < RENDER_TARGET_VIEW_MAX);
+		return pRenderTargetViews_[idx];
+	}
+	ID3D11Buffer* GetPeraVertexBufferPtr()const{ return pPeraVertexBuffer_; }
 	ID3D11RasterizerState* GetDefaultRasterizerStatePtr(){ return pRsState_; }				// 標準ラスタライザ―ステートの取得
 	ID3D11DepthStencilState* GetDefaultDepthStatePtr(){ return pDsState_; }					// 標準深度ステートの取得
 
@@ -73,11 +88,21 @@ private:
 	IDXGISwapChain* pSwapChain_;				// スワップチェイン
 	D3D_DRIVER_TYPE driverType_;				// ドライバータイプ
 	D3D_FEATURE_LEVEL featureLevel_;			// フューチャーレベル
+
+	ID3D11RenderTargetView* pBackBufferRenderTargetView_;	// バックバッファレンダーターゲットビュー
+	ID3D11RenderTargetView* pRenderTargetViews_[RENDER_TARGET_VIEW_MAX];	// レンダーターゲットビュー
+	ID3D11ShaderResourceView* pShaderResourceViews_[RENDER_TARGET_VIEW_MAX];	// シェーダーリソースビュー
+
 	ID3D11DepthStencilView* pDepthStencilView_;	// デプスステンシルビュー
-	ID3D11RenderTargetView* pRenderTargetView_;	// レンダーターゲットビュー
 	ID3D11RasterizerState* pRsState_;			// ラスタライザ―ステート
 	ID3D11DepthStencilState* pDsState_;			// デプスステンシルステート
+
 	DXGI_SAMPLE_DESC MSAA_;
+
+	ID3D11VertexShader* pPeraVertexShader_;
+	ID3D11PixelShader* pPeraPixelShader_;
+	ID3D11InputLayout* pPeraVertexLayout_;
+	ID3D11Buffer* pPeraVertexBuffer_;
 
 	UINT stencilRef_;				// ステンシルの値
 
