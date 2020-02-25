@@ -28,7 +28,6 @@ GraphicManager::GraphicManager() :
 	featureLevel_(D3D_FEATURE_LEVEL_11_0),
 	pSwapChain_(nullptr),
 	pDepthStencilView_(nullptr),
-	//pBackBufferRenderTargetView_(nullptr),
 	pRenderTargetViews_(),
 	pShaderResourceViews_(),
 	pRsState_(nullptr),
@@ -108,8 +107,6 @@ bool GraphicManager::Init(HWND hWnd, UINT width, UINT height, bool bWindowed, UI
 		MSAA_.Count = 1;
 		MSAA_.Quality = 0;
 	}
-	MSAA_.Count = 1;
-	MSAA_.Quality = 0;
 
 	// インターフェース取得
 	IDXGIDevice1* pInterface = nullptr;
@@ -274,15 +271,13 @@ bool GraphicManager::Init(HWND hWnd, UINT width, UINT height, bool bWindowed, UI
 	pImmediateContext_->RSSetViewports(1, &viewPort);
 
 	// 指定色で画面クリア
+	pImmediateContext_->OMSetRenderTargets(1, &pRenderTargetViews_[0], pDepthStencilView_);
 	static const float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };	// 黒
-	//pImmediateContext_->ClearRenderTargetView(pBackBufferRenderTargetView_, clearColor);
+	pImmediateContext_->ClearRenderTargetView(pRenderTargetViews_[0], clearColor);
 	pImmediateContext_->ClearDepthStencilView(pDepthStencilView_, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0x0);
 
 	//ウインドウに反映
-	ID3D11ShaderResourceView* const pSRV[1] = { NULL };
-	pImmediateContext_->PSSetShaderResources(0, 1, pSRV);
-
-	pImmediateContext_->OMSetRenderTargets(1, &pRenderTargetViews_[0], pDepthStencilView_);
+	pSwapChain_->Present(1, 0);
 
 	return true;
 }
@@ -303,15 +298,16 @@ void GraphicManager::UnInit()
 	SafeRelease(pRsState_);
 
 	SafeRelease(pDepthStencilView_);
-	SafeRelease(pPeraVertexBuffer_);
 
 	for(int i = RENDER_TARGET_VIEW_MAX - 1; i >= 0; --i){
 		SafeRelease(pRenderTargetViews_[i]);
 		SafeRelease(pShaderResourceViews_[i]);
 	}
-	//SafeRelease(pBackBufferRenderTargetView_);
 
 	SafeRelease(pPeraVertexLayout_);
+
+	SafeRelease(pPeraVertexBuffer_);
+
 	SafeRelease(pPeraVertexShader_);
 	SafeRelease(pDefaultPixelShader_);
 	SafeRelease(pPeraPixelShader_);
@@ -366,10 +362,10 @@ bool GraphicManager::EndScene()
 
 	DrawPath(0, 1, pDefaultPixelShader_, viewPort);
 
-	viewPort.TopLeftX = 0;
+	viewPort.TopLeftX = (FLOAT)width_ * -0.5f;
 	viewPort.TopLeftY = 0;
-	viewPort.Width = (FLOAT)width_ * 0.4f;
-	viewPort.Height = (FLOAT)height_ * 0.4f;
+	viewPort.Width = (FLOAT)width_;
+	viewPort.Height = (FLOAT)height_;
 	viewPort.MinDepth = 0.0f;
 	viewPort.MaxDepth = 1.0f;
 
@@ -686,12 +682,15 @@ bool GraphicManager::ChangeDisplayMode(bool bWindowed)
 
 	bWindowed_ = bWindowed;
 
-	// バッファの解放
+	// ビューの解放
 	ID3D11RenderTargetView*	tRTV = NULL;
 	pImmediateContext_->OMSetRenderTargets(1, &tRTV, NULL);
-	pDepthStencilView_->Release();
-	//pBackBufferRenderTargetView_->Release();
-	pRenderTargetViews_[0]->Release();
+
+	SafeRelease(pDepthStencilView_);
+	for(int i = RENDER_TARGET_VIEW_MAX - 1; i >= 0; --i){
+		SafeRelease(pRenderTargetViews_[i]);
+		SafeRelease(pShaderResourceViews_[i]);
+	}
 
 	if(FAILED(pSwapChain_->ResizeBuffers(4, width_, height_, DXGI_FORMAT_R8G8B8A8_UNORM, 0))){ return false; }
 
@@ -728,7 +727,6 @@ bool GraphicManager::CreateRenderTarget()
 		if(FAILED(hr)){ return false; }
 
 		// バックバッファレンダーターゲットの作成
-		//hr = pD3DDevice_->CreateRenderTargetView(backBuffer, NULL, &pBackBufferRenderTargetView_);
 		hr = pD3DDevice_->CreateRenderTargetView(backBuffer, NULL, &pRenderTargetViews_[0]);
 		if(FAILED(hr)){ return false; }
 		SafeRelease(backBuffer);

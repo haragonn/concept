@@ -28,7 +28,7 @@ public:
 		static Framework s_Instance;
 		return s_Instance;
 	}
-	bool Init(HINSTANCE hInst, int nCmdShow, UINT width, UINT height, bool bWindowed = true, UINT fps = 60U, UINT frameSkipMax = 0U, bool bMSAA = false, bool bNetwork = false, const char* pClassName = "idea");	// 初期化
+	bool Init(HINSTANCE hInst, int nCmdShow, UINT width, UINT height, bool bWindowed = true, UINT fps = 60U, UINT frameSkipMax = 0U, bool bNetwork = false, const char* pClassName = "idea");	// 初期化
 	void UnInit();				// 終了処理
 	void Run(Scene* pInitScene);	// シーンの実行
 	float GetFps(){ return fps_; }				// FPSの取得

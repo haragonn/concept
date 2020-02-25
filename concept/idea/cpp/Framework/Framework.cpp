@@ -73,7 +73,7 @@ Framework::Framework() :
 // 　　　　クラスネーム(const char* pClassName)
 // 戻り値：成否
 //------------------------------------------------------------------------------
-bool Framework::Init(HINSTANCE hInst, int nCmdShow, UINT width, UINT height, bool bWindowed, UINT fps, UINT frameSkipMax, bool bMSAA, bool bNetwork, const char* pClassName)
+bool Framework::Init(HINSTANCE hInst, int nCmdShow, UINT width, UINT height, bool bWindowed, UINT fps, UINT frameSkipMax, bool bNetwork, const char* pClassName)
 {
 	if(bReady_){ return false; }
 
@@ -124,7 +124,7 @@ bool Framework::Init(HINSTANCE hInst, int nCmdShow, UINT width, UINT height, boo
 	//========================================
 	// DirectX
 	//========================================
-	if(!GraphicManager::Instance().Init(hWnd_, width_, height_, bWindowed_, targetFps_, bMSAA)){
+	if(!GraphicManager::Instance().Init(hWnd_, width_, height_, bWindowed_, targetFps_)){
 		MessageBox(hWnd_, "DirectX11を初期化できませんでした", NULL, NULL);
 		return false;
 	}

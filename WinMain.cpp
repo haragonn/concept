@@ -20,8 +20,6 @@ namespace{
 
 	const bool WINDOW_MODE = true;
 
-	const bool USE_MSAA = true;
-
 	const bool USE_NETWORK = false;
 }
 
@@ -224,7 +222,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 	Framework& fm = Framework::Instance();
 
 	// idea起動
-	if(!fm.Init(hInstance, nCmdShow, SCREEN_WIDTH, SCREEN_HEIGHT, WINDOW_MODE, FRAME_RATE, FRAME_SKIP, USE_MSAA, USE_NETWORK, GAME_TITLE)){ return -1; }
+	if(!fm.Init(hInstance, nCmdShow, SCREEN_WIDTH, SCREEN_HEIGHT, WINDOW_MODE, FRAME_RATE, FRAME_SKIP, USE_NETWORK, GAME_TITLE)){ return -1; }
 
 	// タイトルの表示
 	fm.SetWindowFormatText(GAME_TITLE);
