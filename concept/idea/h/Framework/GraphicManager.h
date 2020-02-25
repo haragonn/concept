@@ -50,6 +50,8 @@ public:
 	bool BeginScene();	// 描画開始
 	bool EndScene();	// 描画終了
 
+	bool DrawPath(int target, int src, ID3D11PixelShader* pps, D3D11_VIEWPORT viewPort);
+
 	HWND GetHWND()const{ return hWnd_; }	// ウィンドウハンドルの取得
 	int	GetWidth()const{ return width_; }	// スクリーン幅の取得
 	int GetHeight()const{ return height_; }	// スクリーン高さの取得
@@ -57,7 +59,7 @@ public:
 	ID3D11Device* GetDevicePtr()const{ return pD3DDevice_; }								// Direct3Dデバイスの取得
 	ID3D11DeviceContext* GetContextPtr()const{ return pImmediateContext_; }					// コンテキストの取得
 	ID3D11DepthStencilView* GetDepthStencilViewPtr(){ return pDepthStencilView_; }			// デプスステンシルビューの取得
-	ID3D11RenderTargetView* GetBackBufferRenderTargetViewPtr(){ return pBackBufferRenderTargetView_; }	// バックバッファレンダーターゲットビューの取得
+	//ID3D11RenderTargetView* GetBackBufferRenderTargetViewPtr(){ return pBackBufferRenderTargetView_; }	// バックバッファレンダーターゲットビューの取得
 	ID3D11RenderTargetView* GetRenderTargetViewPtr(int idx)	// レンダーターゲットビューの取得
 	{
 		Assert(idx < RENDER_TARGET_VIEW_MAX);
@@ -89,7 +91,7 @@ private:
 	D3D_DRIVER_TYPE driverType_;				// ドライバータイプ
 	D3D_FEATURE_LEVEL featureLevel_;			// フューチャーレベル
 
-	ID3D11RenderTargetView* pBackBufferRenderTargetView_;	// バックバッファレンダーターゲットビュー
+	//ID3D11RenderTargetView* pBackBufferRenderTargetView_;	// バックバッファレンダーターゲットビュー
 	ID3D11RenderTargetView* pRenderTargetViews_[RENDER_TARGET_VIEW_MAX];	// レンダーターゲットビュー
 	ID3D11ShaderResourceView* pShaderResourceViews_[RENDER_TARGET_VIEW_MAX];	// シェーダーリソースビュー
 
@@ -100,6 +102,7 @@ private:
 	DXGI_SAMPLE_DESC MSAA_;
 
 	ID3D11VertexShader* pPeraVertexShader_;
+	ID3D11PixelShader* pDefaultPixelShader_;
 	ID3D11PixelShader* pPeraPixelShader_;
 	ID3D11InputLayout* pPeraVertexLayout_;
 	ID3D11Buffer* pPeraVertexBuffer_;
