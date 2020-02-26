@@ -2,12 +2,13 @@ cbuffer constBuffer : register(b0)
 {
 	float4x4 proj;
 }
+
 struct PerInstanceData
 {
 	float4 pos;
 };
 
-StructuredBuffer<PerInstanceData>	perInstanceData :register(t1);
+StructuredBuffer<PerInstanceData> perInstanceData : register(t1);
 
 struct VS_IN
 {

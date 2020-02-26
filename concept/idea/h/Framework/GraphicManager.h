@@ -50,22 +50,25 @@ public:
 	bool BeginScene();	// 描画開始
 	bool EndScene();	// 描画終了
 
-	bool DrawPath(int target, int src, ID3D11PixelShader* pps, D3D11_VIEWPORT viewPort);
+	bool DrawPath(int target, int src, ID3D11PixelShader* pps, D3D11_VIEWPORT viewPort);	// パスの描画
 
 	HWND GetHWND()const{ return hWnd_; }	// ウィンドウハンドルの取得
 	int	GetWidth()const{ return width_; }	// スクリーン幅の取得
 	int GetHeight()const{ return height_; }	// スクリーン高さの取得
 
 	ID3D11Device* GetDevicePtr()const{ return pD3DDevice_; }								// Direct3Dデバイスの取得
+
 	ID3D11DeviceContext* GetContextPtr()const{ return pImmediateContext_; }					// コンテキストの取得
+
 	ID3D11DepthStencilView* GetDepthStencilViewPtr(){ return pDepthStencilView_; }			// デプスステンシルビューの取得
-	//ID3D11RenderTargetView* GetBackBufferRenderTargetViewPtr(){ return pBackBufferRenderTargetView_; }	// バックバッファレンダーターゲットビューの取得
-	ID3D11RenderTargetView* GetRenderTargetViewPtr(int idx)	// レンダーターゲットビューの取得
+
+	ID3D11RenderTargetView* GetRenderTargetViewPtr(int idx)									// レンダーターゲットビューの取得
 	{
 		Assert(idx < RENDER_TARGET_VIEW_MAX);
 		return pRenderTargetViews_[idx];
 	}
-	ID3D11Buffer* GetPeraVertexBufferPtr()const{ return pPeraVertexBuffer_; }
+	ID3D11Buffer* GetPeraVertexBufferPtr()const{ return pPeraVertexBuffer_; }				// ペラポリゴンの頂点バッファポインタの取得
+
 	ID3D11RasterizerState* GetDefaultRasterizerStatePtr(){ return pRsState_; }				// 標準ラスタライザ―ステートの取得
 	ID3D11DepthStencilState* GetDefaultDepthStatePtr(){ return pDsState_; }					// 標準深度ステートの取得
 
@@ -85,21 +88,26 @@ private:
 	bool bWindowed_;	// ウィンドウモード
 
 	ID3D11Device* pD3DDevice_;					// デバイス
+
 	BLEND_STATE blendState_;					// ブレンドステート
+
 	ID3D11DeviceContext* pImmediateContext_;	// コンテキスト
+
 	IDXGISwapChain* pSwapChain_;				// スワップチェイン
+
 	D3D_DRIVER_TYPE driverType_;				// ドライバータイプ
+
 	D3D_FEATURE_LEVEL featureLevel_;			// フューチャーレベル
 
-	//ID3D11RenderTargetView* pBackBufferRenderTargetView_;	// バックバッファレンダーターゲットビュー
 	ID3D11RenderTargetView* pRenderTargetViews_[RENDER_TARGET_VIEW_MAX];	// レンダーターゲットビュー
 	ID3D11ShaderResourceView* pShaderResourceViews_[RENDER_TARGET_VIEW_MAX];	// シェーダーリソースビュー
 
 	ID3D11DepthStencilView* pDepthStencilView_;	// デプスステンシルビュー
+
 	ID3D11RasterizerState* pRsState_;			// ラスタライザ―ステート
 	ID3D11DepthStencilState* pDsState_;			// デプスステンシルステート
 
-	DXGI_SAMPLE_DESC MSAA_;
+	DXGI_SAMPLE_DESC MSAA_;						// サンプルディスク
 
 	ID3D11VertexShader* pPeraVertexShader_;
 	ID3D11PixelShader* pDefaultPixelShader_;

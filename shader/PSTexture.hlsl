@@ -1,4 +1,4 @@
-Texture2D myTexture : register(t0);
+Texture2D<float4> myTexture : register(t0);
 SamplerState mySampler : register(s0);
 
 struct VS_OUT
