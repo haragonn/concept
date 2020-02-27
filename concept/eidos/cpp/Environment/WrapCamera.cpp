@@ -145,21 +145,13 @@ void WrapCamera::SetWrapTarget(Vector2D rot)
 		startQtn_ = qtn_;
 
 		// ³‹K‰»
-		while(rot.x > ideaPI * 2.0f)
-		{
-			rot.x -= ideaPI * 2.0f;
-		}
-		while(rot.x < 0.0f)
-		{
+		rot.x = fmodf(rot.x, ideaPI * 2.0f);
+		if(rot.x < 0.0f){
 			rot.x += ideaPI * 2.0f;
 		}
 
-		while(rot.y > ideaPI * 2.0f)
-		{
-			rot.y -= ideaPI * 2.0f;
-		}
-		while(rot.y < 0.0f)
-		{
+		rot.y = fmodf(rot.y, ideaPI * 2.0f);
+		if(rot.y < 0.0f){
 			rot.y += ideaPI * 2.0f;
 		}
 
@@ -205,20 +197,13 @@ void WrapCamera::UpdatePosition()
 	rot_.y = qtn_.ToEuler().x;
 
 	// ³‹K‰»
-	while(rot_.x > ideaPI * 2.0f)
-	{
-		rot_.x -= ideaPI * 2.0f;
-	}
-	while(rot_.x < 0.0f)
-	{
+	rot_.x = fmodf(rot_.x, ideaPI * 2.0f);
+	if(rot_.x < 0.0f){
 		rot_.x += ideaPI * 2.0f;
 	}
-	while(rot_.y > ideaPI * 2.0f)
-	{
-		rot_.y -= ideaPI * 2.0f;
-	}
-	while(rot_.y < 0.0f)
-	{
+
+	rot_.y = fmodf(rot_.y, ideaPI * 2.0f);
+	if(rot_.y < 0.0f){
 		rot_.y += ideaPI * 2.0f;
 	}
 

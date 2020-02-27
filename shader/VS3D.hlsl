@@ -11,7 +11,7 @@ struct VS_IN
 {
 	float4 pos : POSITION0;
 	float4 nor : NORMAL0;
-	//float4 col : COLOR0;
+	float4 col : COLOR0;
 	float2 tex : TEXCOORD0;
 };
 

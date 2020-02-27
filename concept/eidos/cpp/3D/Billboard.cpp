@@ -210,10 +210,10 @@ inline void Billboard::DrawTextureBillboard(Camera * pCamera, const Texture & te
 	gm.GetContextPtr()->VSSetConstantBuffers(cb_slot, 1, cb);
 
 	VertexData3D vertexList[]{
-	{ { -0.5f,  0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, { 0.0f, 0.0f } },
-	{ {  0.5f,  0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, { 1.0f, 0.0f } },
-	{ { -0.5f, -0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, { 0.0f, 1.0f } },
-	{ {  0.5f, -0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, { 1.0f, 1.0f } }
+	{ { -0.5f,  0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 0.0f } },
+	{ {  0.5f,  0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 0.0f } },
+	{ { -0.5f, -0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 1.0f } },
+	{ {  0.5f, -0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 1.0f } }
 	};
 
 	// バッファ書き込み
@@ -339,10 +339,10 @@ inline void Billboard::DrawDividedTextureBillboard(Camera * pCamera, const Textu
 	float v2 = tex.GetDivV() * (vNum + 1);
 
 	VertexData3D vertexList[]{
-	{ { -0.5f,  0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, { u1, v1 } },
-	{ {  0.5f,  0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, { u2, v1 } },
-	{ { -0.5f, -0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, { u1, v2 } },
-	{ {  0.5f, -0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, { u2, v2 } }
+	{ { -0.5f,  0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v1 } },
+	{ {  0.5f,  0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v1 } },
+	{ { -0.5f, -0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v2 } },
+	{ {  0.5f, -0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v2 } }
 	};
 
 	// バッファ書き込み

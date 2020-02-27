@@ -9,7 +9,7 @@ Author	:	Keigo Hara
 #include "../../h/2D/SpriteManager.h"
 #include "../../h/Utility/ideaMath.h"
 #include "../../h/Utility/ideaUtility.h"
-#include <vector>
+
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
 
@@ -27,15 +27,17 @@ GraphicManager::GraphicManager() :
 	driverType_(D3D_DRIVER_TYPE_NULL),
 	featureLevel_(D3D_FEATURE_LEVEL_11_0),
 	pSwapChain_(nullptr),
-	pDepthStencilView_(nullptr),
 	pRenderTargetViews_(),
 	pShaderResourceViews_(),
+	pDepthStencilView_(nullptr),
+	pDepthShaderResourceViews_(nullptr),
 	pRsState_(nullptr),
 	pDsState_(nullptr),
 	MSAA_({}),
 	pPeraVertexShader_(nullptr),
 	pDefaultPixelShader_(nullptr),
 	pPeraPixelShader_(nullptr),
+	pPeraShadowPixelShader_(nullptr),
 	pPeraVertexLayout_(nullptr),
 	pPeraVertexBuffer_(nullptr),
 	stencilRef_(0x0){}
@@ -71,11 +73,11 @@ bool GraphicManager::Init(HWND hWnd, UINT width, UINT height, bool bWindowed, UI
 	D3D_FEATURE_LEVEL featureLevels[] =
 	{
 		D3D_FEATURE_LEVEL_11_0,
-		D3D_FEATURE_LEVEL_10_1,
-		D3D_FEATURE_LEVEL_10_0,
-		D3D_FEATURE_LEVEL_9_3,
-		D3D_FEATURE_LEVEL_9_2,
-		D3D_FEATURE_LEVEL_9_1,
+		//D3D_FEATURE_LEVEL_10_1,
+		//D3D_FEATURE_LEVEL_10_0,
+		//D3D_FEATURE_LEVEL_9_3,
+		//D3D_FEATURE_LEVEL_9_2,
+		//D3D_FEATURE_LEVEL_9_1,
 	};
 	UINT featureLevelsNum = ArraySize(featureLevels);
 
@@ -90,22 +92,25 @@ bool GraphicManager::Init(HWND hWnd, UINT width, UINT height, bool bWindowed, UI
 	}
 	if(FAILED(hr)){ return false; }
 
-	if(false && bMSAA){
-		//使用可能なMSAAを取得
-		ZeroMemory(&MSAA_, sizeof(MSAA_));
-		for(int i = 0; i <= 4; ++i){	// Count = 4で十分
-			UINT Quality = 0;
-			if SUCCEEDED(pD3DDevice_->CheckMultisampleQualityLevels(DXGI_FORMAT_D24_UNORM_S8_UINT, i, &Quality)){
-				if(0 < Quality){
-					MSAA_.Count = i;
-					MSAA_.Quality = Quality - 1;
-				}
-			}
-		}
-	} else{
-		MSAA_.Count = 1;
-		MSAA_.Quality = 0;
-	}
+	//if(bMSAA){
+	//	//使用可能なMSAAを取得
+	//	ZeroMemory(&MSAA_, sizeof(MSAA_));
+	//	for(int i = 0; i <= 4; ++i){	// Count = 4で十分
+	//		UINT Quality = 0;
+	//		if SUCCEEDED(pD3DDevice_->CheckMultisampleQualityLevels(DXGI_FORMAT_D24_UNORM_S8_UINT, i, &Quality)){
+	//			if(0 < Quality){
+	//				MSAA_.Count = i;
+	//				MSAA_.Quality = Quality - 1;
+	//			}
+	//		}
+	//	}
+	//} else{
+	//	MSAA_.Count = 1;
+	//	MSAA_.Quality = 0;
+	//}
+
+	MSAA_.Count = 1;
+	MSAA_.Quality = 0;
 
 	// インターフェース取得
 	IDXGIDevice1* pInterface = nullptr;
@@ -225,6 +230,20 @@ bool GraphicManager::Init(HWND hWnd, UINT width, UINT height, bool bWindowed, UI
 
 		delete[] data;
 	}
+	{
+		BYTE* data;
+		int size = 0;
+		size = ReadShader("PSPeraShadow.cso", &data);
+		if(size == 0){ return false; }
+
+		hr = pD3DDevice_->CreatePixelShader(data, size, NULL, &pPeraShadowPixelShader_);
+		if(FAILED(hr)){
+			delete[] data;
+			return false;
+		}
+
+		delete[] data;
+	}
 
 	// 頂点バッファ
 	{
@@ -258,7 +277,7 @@ bool GraphicManager::Init(HWND hWnd, UINT width, UINT height, bool bWindowed, UI
 		samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 		samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 		samplerDesc.MaxAnisotropy = 1;
-		samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+		samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 		samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
 		ID3D11SamplerState* pSamplerState = nullptr;
@@ -329,20 +348,23 @@ void GraphicManager::UnInit()
 	SafeRelease(pDsState_);
 	SafeRelease(pRsState_);
 
-	SafeRelease(pDepthStencilView_);
-
 	for(int i = RENDER_TARGET_VIEW_MAX - 1; i >= 0; --i){
 		SafeRelease(pRenderTargetViews_[i]);
 		SafeRelease(pShaderResourceViews_[i]);
 	}
+
+	SafeRelease(pDepthStencilView_);
+	SafeRelease(pDepthShaderResourceViews_);
 
 	SafeRelease(pPeraVertexLayout_);
 
 	SafeRelease(pPeraVertexBuffer_);
 
 	SafeRelease(pPeraVertexShader_);
+
 	SafeRelease(pDefaultPixelShader_);
 	SafeRelease(pPeraPixelShader_);
+	SafeRelease(pPeraShadowPixelShader_);
 
 	SafeRelease(pSwapChain_);
 	SafeRelease(pImmediateContext_);
@@ -359,8 +381,11 @@ bool GraphicManager::BeginScene()
 	// NULLチェック
 	if(!pImmediateContext_){ return false; }
 
+	pImmediateContext_->OMSetDepthStencilState(pDsState_, 0);
+
 	ID3D11ShaderResourceView* const pSRV[1] = { NULL };
 	pImmediateContext_->PSSetShaderResources(0, 1, pSRV);
+	pImmediateContext_->PSSetShaderResources(2, 1, pSRV);
 
 	pImmediateContext_->OMSetRenderTargets(1, &pRenderTargetViews_[1], pDepthStencilView_);
 
@@ -394,7 +419,9 @@ bool GraphicManager::EndScene()
 	viewPort.MinDepth = 0.0f;
 	viewPort.MaxDepth = 1.0f;
 
-	DrawPath(0, 1, pDefaultPixelShader_, viewPort);
+	DrawShadow(0, viewPort);
+
+	//DrawPath(0, 1, pDefaultPixelShader_, viewPort);
 
 	viewPort.TopLeftX = width_ * -0.5f;
 	viewPort.TopLeftY = 0;
@@ -403,7 +430,7 @@ bool GraphicManager::EndScene()
 	viewPort.MinDepth = 0.0f;
 	viewPort.MaxDepth = 1.0f;
 
-	DrawPath(0, 1, pPeraPixelShader_, viewPort);
+	//DrawPath(0, 1, pPeraPixelShader_, viewPort);
 
 	//ウインドウに反映
 	pSwapChain_->Present(1, 0);
@@ -445,6 +472,53 @@ bool GraphicManager::DrawPath(int target, int src, ID3D11PixelShader* pps, D3D11
 	pImmediateContext_->DSSetShader(NULL, NULL, 0);
 	pImmediateContext_->GSSetShader(NULL, NULL, 0);
 	pImmediateContext_->PSSetShader(pps, NULL, 0);
+	pImmediateContext_->CSSetShader(NULL, NULL, 0);
+
+	// ビューポートの設定
+	pImmediateContext_->RSSetViewports(1, &viewPort);
+
+	//ポリゴン描画
+	pImmediateContext_->Draw(4, 0);
+
+	return false;
+}
+
+
+bool GraphicManager::DrawShadow(int target, D3D11_VIEWPORT viewPort)
+{
+	// NULLチェック
+	if(!pSwapChain_){ return false; }
+	if(!pImmediateContext_){ return false; }
+
+	ID3D11ShaderResourceView* const pSRV[1] = { NULL };
+	pImmediateContext_->PSSetShaderResources(0, 1, pSRV);
+	pImmediateContext_->PSSetShaderResources(2, 1, pSRV);
+
+	pImmediateContext_->OMSetRenderTargets(1, &pRenderTargetViews_[target], nullptr);
+
+	// 頂点バッファのセット
+	UINT stride = sizeof(PeraVertex);
+	UINT offset = 0;
+
+	pImmediateContext_->IASetVertexBuffers(0, 1, &pPeraVertexBuffer_, &stride, &offset);
+
+	// テクスチャ書き込み
+	ID3D11ShaderResourceView* pTexView = pDepthShaderResourceViews_;
+
+	pImmediateContext_->PSSetShaderResources(2, 1, &pTexView);
+
+	// 入力レイアウトのセット
+	pImmediateContext_->IASetInputLayout(pPeraVertexLayout_);
+
+	// プリミティブ形状のセット
+	pImmediateContext_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+	// シェーダのセット
+	pImmediateContext_->VSSetShader(pPeraVertexShader_, NULL, 0);
+	pImmediateContext_->HSSetShader(NULL, NULL, 0);
+	pImmediateContext_->DSSetShader(NULL, NULL, 0);
+	pImmediateContext_->GSSetShader(NULL, NULL, 0);
+	pImmediateContext_->PSSetShader(pPeraShadowPixelShader_, NULL, 0);
 	pImmediateContext_->CSSetShader(NULL, NULL, 0);
 
 	// ビューポートの設定
@@ -557,9 +631,12 @@ bool GraphicManager::DrawMask(bool bVisible)
 	// 深度ステンシルステートを作成
 	ID3D11DepthStencilState* pDepthStencilState = nullptr;
 
-	D3D11_DEPTH_STENCIL_DESC ddsDesc = {};
+	CD3D11_DEFAULT defaultState;
+
+	//デプスステンシルステート
+	CD3D11_DEPTH_STENCIL_DESC ddsDesc(defaultState);
 	ddsDesc.DepthEnable = FALSE;
-	ddsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	ddsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
 	ddsDesc.DepthFunc = D3D11_COMPARISON_ALWAYS;
 	ddsDesc.StencilEnable = TRUE;
 	ddsDesc.StencilReadMask = D3D11_DEFAULT_STENCIL_READ_MASK;
@@ -593,9 +670,12 @@ bool GraphicManager::DrawAnd()
 	// 深度ステンシルステートを作成
 	ID3D11DepthStencilState* pDepthStencilState = nullptr;
 
-	D3D11_DEPTH_STENCIL_DESC ddsDesc = {};
+	CD3D11_DEFAULT defaultState;
+
+	//デプスステンシルステート
+	CD3D11_DEPTH_STENCIL_DESC ddsDesc(defaultState);
 	ddsDesc.DepthEnable = FALSE;
-	ddsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	ddsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
 	ddsDesc.DepthFunc = D3D11_COMPARISON_EQUAL;
 	ddsDesc.StencilEnable = TRUE;
 	ddsDesc.StencilReadMask = D3D11_DEFAULT_STENCIL_READ_MASK;
@@ -629,9 +709,12 @@ bool GraphicManager::DrawXor()
 	// 深度ステンシルステートを作成
 	ID3D11DepthStencilState* pDepthStencilState = nullptr;
 
-	D3D11_DEPTH_STENCIL_DESC ddsDesc = {};
+	CD3D11_DEFAULT defaultState;
+
+	//デプスステンシルステート
+	CD3D11_DEPTH_STENCIL_DESC ddsDesc(defaultState);
 	ddsDesc.DepthEnable = FALSE;
-	ddsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	ddsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
 	ddsDesc.DepthFunc = D3D11_COMPARISON_NOT_EQUAL;
 	ddsDesc.StencilEnable = TRUE;
 	ddsDesc.StencilReadMask = D3D11_DEFAULT_STENCIL_READ_MASK;
@@ -667,11 +750,14 @@ bool GraphicManager::EndMask()
 	// 深度ステンシルステートを作成
 	ID3D11DepthStencilState* pDepthStencilState = nullptr;
 
-	D3D11_DEPTH_STENCIL_DESC ddsDesc = {};
+	CD3D11_DEFAULT defaultState;
+
+	//デプスステンシルステート
+	CD3D11_DEPTH_STENCIL_DESC ddsDesc(defaultState);
 	ddsDesc.DepthEnable = FALSE;
-	ddsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	ddsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
 	ddsDesc.DepthFunc = D3D11_COMPARISON_ALWAYS;
-	ddsDesc.StencilEnable = TRUE;
+	ddsDesc.StencilEnable = FALSE;
 	ddsDesc.StencilReadMask = D3D11_DEFAULT_STENCIL_READ_MASK;
 	ddsDesc.StencilWriteMask = D3D11_DEFAULT_STENCIL_WRITE_MASK;
 	ddsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
@@ -690,7 +776,14 @@ bool GraphicManager::EndMask()
 
 	SafeRelease(pDepthStencilState);
 
-	pImmediateContext_->ClearDepthStencilView(pDepthStencilView_, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0x0); // 深度初期化
+	pImmediateContext_->ClearDepthStencilView(pDepthStencilView_, D3D11_CLEAR_STENCIL, 1.0f, 0x0);
+
+	return true;
+}
+
+bool GraphicManager::Draw3D()
+{
+	pImmediateContext_->OMSetDepthStencilState(pDsState_, 0);
 
 	return true;
 }
@@ -809,17 +902,17 @@ bool GraphicManager::CreateRenderTarget()
 		}
 	}
 
-	// デプステクスチャの作成
 	{
+		// デプステクスチャの作成
 		D3D11_TEXTURE2D_DESC depthDesc = {};
 		depthDesc.Width = width_;
 		depthDesc.Height = height_;
 		depthDesc.MipLevels = 1;
 		depthDesc.ArraySize = 1;
-		depthDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		depthDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
 		depthDesc.SampleDesc = MSAA_;
 		depthDesc.Usage = D3D11_USAGE_DEFAULT;
-		depthDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+		depthDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 
 		ID3D11Texture2D* pDepthBuffer = nullptr;
 
@@ -831,10 +924,21 @@ bool GraphicManager::CreateRenderTarget()
 
 		// デプスステンシルビューの作成
 		D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
-		dsvDesc.Format = depthDesc.Format;
+		dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 		dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 
 		hr = pD3DDevice_->CreateDepthStencilView(pDepthBuffer, &dsvDesc, &pDepthStencilView_);
+		if(FAILED(hr)){
+			SafeRelease(pDepthBuffer);
+			return false;
+		}
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+		srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		srvDesc.Texture2D.MipLevels = 1;
+
+		hr = pD3DDevice_->CreateShaderResourceView(pDepthBuffer, &srvDesc, &pDepthShaderResourceViews_);
 		if(FAILED(hr)){
 			SafeRelease(pDepthBuffer);
 			return false;

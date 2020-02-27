@@ -257,33 +257,20 @@ inline void Actor3D::UpdateWorldMatrix()
 	// Šg‘åk¬ˆ—
 	matScale = XMMatrixScaling(scale_.x, scale_.y, scale_.z);
 
-
-	// 0.0f ` ideaPI * 2.0f‚Ì”ÍˆÍ‚É³‹K‰»
-	while(rot_.x < 0.0f)
-	{
+	// ‰ñ“]‚Ì³‹K‰»
+	rot_.x = fmodf(rot_.x, ideaPI * 2.0f);
+	if(rot_.x < 0.0f){
 		rot_.x += ideaPI * 2.0f;
 	}
-	while(rot_.x > ideaPI * 2.0f)
-	{
-		rot_.x -= ideaPI * 2.0f;
-	}
 
-	while(rot_.y < 0.0f)
-	{
+	rot_.y = fmodf(rot_.y, ideaPI * 2.0f);
+	if(rot_.y < 0.0f){
 		rot_.y += ideaPI * 2.0f;
 	}
-	while(rot_.y > ideaPI * 2.0f)
-	{
-		rot_.y -= ideaPI * 2.0f;
-	}
 
-	while(rot_.z < 0.0f)
-	{
+	rot_.z = fmodf(rot_.z, ideaPI * 2.0f);
+	if(rot_.z < 0.0f){
 		rot_.z += ideaPI * 2.0f;
-	}
-	while(rot_.z > ideaPI * 2.0f)
-	{
-		rot_.z -= ideaPI * 2.0f;
 	}
 
 	// ‰ñ“]ˆ—
@@ -298,6 +285,7 @@ inline void Actor3D::UpdateWorldMatrix()
 	matWorld.r[3].m128_f32[1] = pos_.y;
 	matWorld.r[3].m128_f32[2] = pos_.z;
 
+	// Ši”[
 	for(int i = 4 - 1; i >= 0; --i){
 		for(int j = 4 - 1; j >= 0; --j){
 			world_.r[i][j] = matWorld.r[i].m128_f32[j];

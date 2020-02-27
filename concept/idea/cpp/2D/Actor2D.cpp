@@ -40,6 +40,7 @@ Actor2D::~Actor2D()
 void Actor2D::Init(Vector2D pos, Vector2D size)
 {
 	SetPos(pos);
+	prePos_ = pos;
 	SetSize(size);
 	SetRotate(0.0f);
 }
@@ -47,6 +48,7 @@ void Actor2D::Init(Vector2D pos, Vector2D size)
 void Actor2D::Init(Vector2D pos, float width, float height)
 {
 	SetPos(pos);
+	prePos_ = pos;
 	SetSize(Vector2D(width, height));
 	SetRotate(0.0f);
 }
@@ -60,6 +62,7 @@ void Actor2D::Init(Vector2D pos, float width, float height)
 void Actor2D::Init(float posX, float posY, float width, float height)
 {
 	SetPos(Vector2D(posX, posY));
+	prePos_ = Vector2D(posX, posY);
 	SetSize(Vector2D(width, height));
 	SetRotate(0.0f);
 }
@@ -166,6 +169,12 @@ void Actor2D::SetSize(float width, float height)
 void Actor2D::SetRotate(float rad)
 {
 	rad_ = rad;
+
+	// ê≥ãKâª
+	rad_ = fmodf(rad_, ideaPI * 2.0f);
+	if(rad_ < 0.0f){
+		rad_ += ideaPI * 2.0f;
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -176,6 +185,12 @@ void Actor2D::SetRotate(float rad)
 void Actor2D::MoveRotate(float rad)
 {
 	rad_ += rad;
+
+	// ê≥ãKâª
+	rad_ = fmodf(rad_, ideaPI * 2.0f);
+	if(rad_ < 0.0f){
+		rad_ += ideaPI * 2.0f;
+	}
 }
 
 void Actor2D::SetColor(Color color)

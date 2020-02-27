@@ -36,10 +36,10 @@ void BreadBoard2::Init()
 	im.ctr_.Init(1, true);
 	im.ctr_.SetConfig(PadButton::BACK, KeyCode::BACKSPACE);
 
-	im.wcmr_.Init(DegreeToRadian(65.5f), C_W / S_H, 0.0001f, 100000.0f, 5.0f);
+	im.wcmr_.Init(DegreeToRadian(65.5f), C_W / S_H, 0.1f, 10000.0f, 5.0f);
 	im.wcmr_.SetViewPort(C_W, 0.0f, C_W, S_H);
 	im.wcmr_.SetRotate(DegreeToRadian(0), 0.0f);
-	im.wcmr2_.Init(DegreeToRadian(65.5f), C_W / S_H, 0.0001f, 100000.0f, 5.0f);
+	im.wcmr2_.Init(DegreeToRadian(65.5f), C_W / S_H, 0.1f, 10000.0f, 5.0f);
 	im.wcmr2_.SetViewPort(0.0f, 0.0f, C_W, S_H);
 	im.wcmr2_.SetRotate(DegreeToRadian(-90), 0.0f);
 
@@ -78,6 +78,8 @@ Scene * BreadBoard2::Update()
 	} else{
 		im.vm2_.UpdatePmd(1.0f);
 	}
+
+	//im.pmSakuya_.MoveRotate(0.0f, 0.01f, 0.0f);
 
 	if(!im.wcmr_.IsWrap()){
 		float cameraSpeed = 0.02f;

@@ -19,6 +19,7 @@ struct BlendVertexData
 {
 	Vector3D pos;
 	Vector3D nor;
+	Color col;
 	Vector2D tex;
 	float weight[3];
 	unsigned long boneIndex[4];

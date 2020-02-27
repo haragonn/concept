@@ -23,6 +23,45 @@ inline constexpr float RadianToDegree(float rad)
 	return rad / ideaPI * 180.0f;
 }
 
+// 秒からフレームへ変換
+inline constexpr unsigned int SecondToFrame(unsigned int sec, unsigned int fps = 60U)
+{
+	return sec * fps;
+}
+
+// 分からフレームへ変換
+inline constexpr unsigned int MinuteToFrame(unsigned int min, unsigned int fps = 60U)
+{
+	return SecondToFrame(min * 60U);
+}
+
+// 時間からフレームへ変換
+inline constexpr unsigned int HourToFrame(unsigned int hour, unsigned int fps = 60U)
+{
+	return MinuteToFrame(hour * 60U);
+}
+
+// フレームから秒へ変換
+inline constexpr unsigned int FrameToSecond(unsigned int frame, unsigned int fps = 60U)
+{
+	Assert(fps);
+	return frame / SecondToFrame(1U, fps);
+}
+
+// フレームから分へ変換
+inline constexpr unsigned int FrameToMinute(unsigned int frame, unsigned int fps = 60U)
+{
+	Assert(fps);
+	return frame / MinuteToFrame(1U, fps);
+}
+
+// フレームから時間へ変換
+inline constexpr unsigned int FrameToHour(unsigned int frame, unsigned int fps = 60U)
+{
+	Assert(fps);
+	return frame / HourToFrame(1U, fps);
+}
+
 struct Vector2D{
 	union{
 		struct{

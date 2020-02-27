@@ -11,7 +11,7 @@ struct VertexData3D
 {
 	DirectX::XMFLOAT3 pos;
 	DirectX::XMFLOAT3 nor;
-	//DirectX::XMFLOAT4 color;
+	DirectX::XMFLOAT4 color;
 	DirectX::XMFLOAT2 tex;
 };
 

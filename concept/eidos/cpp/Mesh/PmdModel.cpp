@@ -69,6 +69,7 @@ bool PmdModel::LoadPmdMeshFromFile(const char * pFileName)
 		vecVertex_[i].nor.x = vecTmpPV[i].nor.x;
 		vecVertex_[i].nor.y = vecTmpPV[i].nor.y;
 		vecVertex_[i].nor.z = vecTmpPV[i].nor.z;
+		vecVertex_[i].col = ideaColor::WHITE;
 		vecVertex_[i].tex.x = vecTmpPV[i].tex.x;
 		vecVertex_[i].tex.y = vecTmpPV[i].tex.y;
 		vecVertex_[i].weight[0] = (float)(vecTmpPV[i].boneWeight) * 0.01f;

@@ -233,6 +233,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 	// マウスカーソルの表示設定
 	fm.SetMouseCursorVisibleFlag(true, false);
 
+	//fm.Run(new DemoLoad);	// 実行
 	//fm.Run(new BreadBoardLoad);	// 実行
 	fm.Run(new BreadBoard2);	// 実行
 	//fm.Run(new BreadBoard3);	// 実行

@@ -10,6 +10,7 @@
 //------------------------------------------------------------------------------
 #include "../Utility/ideaMath.h"
 #include "../Utility/ideaUtility.h"
+
 #define WIN32_LEAN_AND_MEAN
 #include <d3d11.h>
 
@@ -51,6 +52,7 @@ public:
 	bool EndScene();	// 描画終了
 
 	bool DrawPath(int target, int src, ID3D11PixelShader* pps, D3D11_VIEWPORT viewPort);	// パスの描画
+	bool DrawShadow(int target, D3D11_VIEWPORT viewPort);	// パスの描画
 
 	HWND GetHWND()const{ return hWnd_; }	// ウィンドウハンドルの取得
 	int	GetWidth()const{ return width_; }	// スクリーン幅の取得
@@ -78,6 +80,7 @@ public:
 	bool DrawAnd();					// マスクのAND判定
 	bool DrawXor();					// マスクのXOR判定
 	bool EndMask();					// マスクの終了
+	bool Draw3D();
 
 	bool ChangeDisplayMode(bool bWindowed);		// ウィンドウモードの切り替え
 
@@ -103,6 +106,7 @@ private:
 	ID3D11ShaderResourceView* pShaderResourceViews_[RENDER_TARGET_VIEW_MAX];	// シェーダーリソースビュー
 
 	ID3D11DepthStencilView* pDepthStencilView_;	// デプスステンシルビュー
+	ID3D11ShaderResourceView* pDepthShaderResourceViews_;	// シェーダーリソースビュー
 
 	ID3D11RasterizerState* pRsState_;			// ラスタライザ―ステート
 	ID3D11DepthStencilState* pDsState_;			// デプスステンシルステート
@@ -110,9 +114,13 @@ private:
 	DXGI_SAMPLE_DESC MSAA_;						// サンプルディスク
 
 	ID3D11VertexShader* pPeraVertexShader_;
+
 	ID3D11PixelShader* pDefaultPixelShader_;
 	ID3D11PixelShader* pPeraPixelShader_;
+	ID3D11PixelShader* pPeraShadowPixelShader_;
+
 	ID3D11InputLayout* pPeraVertexLayout_;
+
 	ID3D11Buffer* pPeraVertexBuffer_;
 
 	UINT stencilRef_;				// ステンシルの値

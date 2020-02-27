@@ -277,8 +277,8 @@ void Framework::MainLoop()
 			// 描画
 			if((frameSkipMax_ <= frameSkipCount_ || !NetworkManager::Instance().GetSkipFlag())){
 				if(gm.BeginScene()){
-					sq.Draw();		// シーケンスの描画
 					gm.EndMask();	// マスクのクリーン
+					sq.Draw();		// シーケンスの描画
 					fm.Draw();		// フェードの描画
 					gm.EndScene();
 					frameSkipCount_ = 0U;

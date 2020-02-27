@@ -14,6 +14,7 @@ cbuffer ConstantBuffer : register(b2)
 struct VS_IN {
 	float4	pos		: POSITION;
 	float4	nor		: NORMAL;
+	float4	col		: COLOR0;
 	float2	tex		: TEXCOORD0;
 	float4	weight	: BLENDWEIGHT; 
 	uint4	idx		: BLENDINDICES;
