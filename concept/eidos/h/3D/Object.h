@@ -44,6 +44,7 @@ public:
 
 protected:
 	friend class Camera;
+	friend class ShadowCamera;
 
 	std::vector<Camera*> vecCameraPtr_;
 

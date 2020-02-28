@@ -30,7 +30,7 @@ GraphicManager::GraphicManager() :
 	pRenderTargetViews_(),
 	pShaderResourceViews_(),
 	pDepthStencilView_(nullptr),
-	pDepthShaderResourceViews_(nullptr),
+	pDepthShaderResourceView_(nullptr),
 	pRsState_(nullptr),
 	pDsState_(nullptr),
 	MSAA_({}),
@@ -307,6 +307,8 @@ bool GraphicManager::Init(HWND hWnd, UINT width, UINT height, bool bWindowed, UI
 
 	pImmediateContext_->OMSetDepthStencilState(pDsState_, 0);
 
+	//EndMask();
+
 	// ビューポートの設定
 	D3D11_VIEWPORT viewPort = {};
 	viewPort.TopLeftX = 0;
@@ -354,7 +356,7 @@ void GraphicManager::UnInit()
 	}
 
 	SafeRelease(pDepthStencilView_);
-	SafeRelease(pDepthShaderResourceViews_);
+	SafeRelease(pDepthShaderResourceView_);
 
 	SafeRelease(pPeraVertexLayout_);
 
@@ -395,6 +397,7 @@ bool GraphicManager::BeginScene()
 		pImmediateContext_->ClearRenderTargetView(pRenderTargetViews_[i], clearColor);
 	}
 	pImmediateContext_->ClearDepthStencilView(pDepthStencilView_, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0x0);
+	//EndMask();
 
 	return true;
 }
@@ -409,7 +412,6 @@ bool GraphicManager::EndScene()
 	// NULLチェック
 	if(!pSwapChain_){ return false; }
 	if(!pImmediateContext_){ return false; }
-
 	// ビューポートの設定
 	D3D11_VIEWPORT viewPort = {};
 	viewPort.TopLeftX = 0;
@@ -503,7 +505,7 @@ bool GraphicManager::DrawShadow(int target, D3D11_VIEWPORT viewPort)
 	pImmediateContext_->IASetVertexBuffers(0, 1, &pPeraVertexBuffer_, &stride, &offset);
 
 	// テクスチャ書き込み
-	ID3D11ShaderResourceView* pTexView = pDepthShaderResourceViews_;
+	ID3D11ShaderResourceView* pTexView = pDepthShaderResourceView_;
 
 	pImmediateContext_->PSSetShaderResources(2, 1, &pTexView);
 
@@ -938,7 +940,7 @@ bool GraphicManager::CreateRenderTarget()
 		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 		srvDesc.Texture2D.MipLevels = 1;
 
-		hr = pD3DDevice_->CreateShaderResourceView(pDepthBuffer, &srvDesc, &pDepthShaderResourceViews_);
+		hr = pD3DDevice_->CreateShaderResourceView(pDepthBuffer, &srvDesc, &pDepthShaderResourceView_);
 		if(FAILED(hr)){
 			SafeRelease(pDepthBuffer);
 			return false;

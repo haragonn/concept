@@ -63,6 +63,10 @@ public:
 	ID3D11DeviceContext* GetContextPtr()const{ return pImmediateContext_; }					// コンテキストの取得
 
 	ID3D11DepthStencilView* GetDepthStencilViewPtr(){ return pDepthStencilView_; }			// デプスステンシルビューの取得
+	ID3D11ShaderResourceView* GetDepthShaderResourceViewPtr(){ return pDepthShaderResourceView_; }			// デプスステンシルビューの取得
+	ID3D11PixelShader* GetPeraShadowPixelShaderPtr(){
+		return pPeraShadowPixelShader_;
+	}
 
 	ID3D11RenderTargetView* GetRenderTargetViewPtr(int idx)									// レンダーターゲットビューの取得
 	{
@@ -106,7 +110,7 @@ private:
 	ID3D11ShaderResourceView* pShaderResourceViews_[RENDER_TARGET_VIEW_MAX];	// シェーダーリソースビュー
 
 	ID3D11DepthStencilView* pDepthStencilView_;	// デプスステンシルビュー
-	ID3D11ShaderResourceView* pDepthShaderResourceViews_;	// シェーダーリソースビュー
+	ID3D11ShaderResourceView* pDepthShaderResourceView_;	// シェーダーリソースビュー
 
 	ID3D11RasterizerState* pRsState_;			// ラスタライザ―ステート
 	ID3D11DepthStencilState* pDsState_;			// デプスステンシルステート

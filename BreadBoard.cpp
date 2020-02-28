@@ -58,7 +58,7 @@ void BreadBoard::Init()
 	im.sprBG_.Init(C_W, C_H, S_W, S_H);
 	im.sprBG_.SetColor(ideaColor::SOFT_BLACK);
 
-	im.wcmr_.Init(DegreeToRadian(65.5f), S_W / S_H, 0.0001f, 10000.0f, 3.5f);
+	im.wcmr_.Init(DegreeToRadian(65.5f), S_W / S_H, 0.1f, 10000.0f, 3.5f);
 	im.wcmr_.SetFocus(0.0f, 5.0f, 0.0f);
 	im.wcmr_.SetPitchThreshold(DegreeToRadian(-20), DegreeToRadian(60));
 	im.wcmr_.SetViewPort(0.0f, 0.0f, S_W, S_H);

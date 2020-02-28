@@ -7,6 +7,7 @@
 
 #include "Environment/Camera.h"
 #include "Environment/WrapCamera.h"
+#include "Environment/ShadowCamera.h"
 #include "Environment/Light.h"
 #include "3D/Cube.h"
 #include "3D/Billboard.h"
