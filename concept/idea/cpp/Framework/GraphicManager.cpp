@@ -397,7 +397,7 @@ bool GraphicManager::BeginScene()
 		pImmediateContext_->ClearRenderTargetView(pRenderTargetViews_[i], clearColor);
 	}
 	pImmediateContext_->ClearDepthStencilView(pDepthStencilView_, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0x0);
-	//EndMask();
+	EndMask();
 
 	return true;
 }
@@ -421,9 +421,9 @@ bool GraphicManager::EndScene()
 	viewPort.MinDepth = 0.0f;
 	viewPort.MaxDepth = 1.0f;
 
-	DrawShadow(0, viewPort);
+	//DrawShadow(0, viewPort);
 
-	//DrawPath(0, 1, pDefaultPixelShader_, viewPort);
+	DrawPath(0, 1, pDefaultPixelShader_, viewPort);
 
 	viewPort.TopLeftX = width_ * -0.5f;
 	viewPort.TopLeftY = 0;

@@ -14,6 +14,8 @@ public:
 
 	PlaneMesh pln_;
 
+	Cube cb_;
+
 	PmdModel pmSakuya_;
 	VmdMotion vm_;
 	VmdMotion vm2_;
@@ -41,20 +43,29 @@ void BreadBoard2::Init()
 	im.ctr_.Init(1, true);
 	im.ctr_.SetConfig(PadButton::BACK, KeyCode::BACKSPACE);
 
-	im.wcmr_.Init(DegreeToRadian(65.5f), C_W / S_H, 1.1f, 10000.0f, 5.0f);
-	im.wcmr_.SetViewPort(C_W, 0.0f, C_W, S_H);
+	im.wcmr_.Init(DegreeToRadian(65.5f), S_W / S_H, 0.1f, 10000.0f, 5.0f);
+	im.wcmr_.SetFocus(0.0f, 2.0f, 0.0f);
+	im.wcmr_.SetViewPort(0.0f, 0.0f, S_W, S_H);
 	im.wcmr_.SetRotate(DegreeToRadian(0), 0.0f);
-	im.wcmr2_.Init(DegreeToRadian(65.5f), C_W / S_H, 1.1f, 10000.0f, 5.0f);
+
+	im.wcmr2_.Init(DegreeToRadian(65.5f), C_W / S_H, 0.1f, 10000.0f, 5.0f);
 	im.wcmr2_.SetViewPort(0.0f, 0.0f, C_W, S_H);
 	im.wcmr2_.SetRotate(DegreeToRadian(-90), 0.0f);
 
-	im.scmr_.Init(DegreeToRadian(65.5f), C_W / S_H, 1.1f, 10000.0f);
-	im.scmr_.SetPos(10, 10, 0);
+	im.scmr_.Init(DegreeToRadian(65.5f), C_W / S_H, 1.0f, 10000.0f);
+	im.scmr_.SetFocus(0.0f, 2.0f, 0.0f);
+	im.scmr_.SetPos(6, 6, 0);
 
 	im.sprBG_.Init(C_W, C_H, S_W, S_H);
 	im.texBG_.LoadImageFromFile("data/TEXTURE/grid04.bmp");
 
-	im.pmSakuya_.Init(0.0f, -2.5f, 0.0f);
+	im.cb_.Init(-2.0f, 1.0f, 0.0f);
+	im.cb_.SetScale(2.0f, 2.0f, 2.0f);
+	im.cb_.SetRotate(0.0f, DegreeToRadian(45), 0.0f);
+	im.wcmr_.AddObject(im.cb_);
+	im.scmr_.AddObject(im.cb_);
+
+	im.pmSakuya_.Init(2.0f, 0.0f, 0.0f);
 	im.pmSakuya_.SetScale(0.24f, 0.24f, 0.24f);
 	im.pmSakuya_.SetRotate(0.0f, DegreeToRadian(0), 0.0f);
 	//im.pmSakuya_.LoadPmdMeshFromFile("model/èââπÉ~ÉN.pmd");
@@ -63,7 +74,7 @@ void BreadBoard2::Init()
 	im.wcmr2_.AddObject(im.pmSakuya_);
 	im.scmr_.AddObject(im.pmSakuya_);
 
-	im.pln_.Init(0, -3, 0);
+	im.pln_.Init(0, 0, 0);
 	im.pln_.Create(0, 0, 10, 10, 10, 10);
 	im.wcmr_.AddObject(im.pln_);
 
@@ -122,9 +133,9 @@ void BreadBoard2::Draw()
 	im.sprBG_.Init(C_W * 1.5f, C_H, C_W, S_H);
 	im.sprBG_.DrawDelimitedTexture(im.texBG_, 0.5f - C_W / S_H * 5.0f * 0.5f, 0.0f, C_W / S_H * 5.0f, 5.0f);
 
-	//im.scmr_.DrawObject();
+	im.scmr_.DrawObject();
 	im.wcmr_.DrawObject();
-	im.wcmr2_.DrawObject();
+	//im.wcmr2_.DrawObject();
 
 	im.fnt_.DrawFormatText(0.0f, 0.0f, "%3d", im.time_ / 60);
 }

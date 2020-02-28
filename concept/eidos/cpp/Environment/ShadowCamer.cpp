@@ -22,6 +22,7 @@ void ShadowCamera::DrawObject()
 	for(auto it = begin(vecObjPtr_), itEnd = end(vecObjPtr_); it != itEnd; ++it){
 			(*it)->Draw(this);
 	}
+	gm.EndMask();
 
 	D3D11_VIEWPORT viewPort = {};
 	viewPort.TopLeftX = 0;
@@ -30,10 +31,10 @@ void ShadowCamera::DrawObject()
 	viewPort.Height = (FLOAT)gm.GetHeight();
 	viewPort.MinDepth = 0.0f;
 	viewPort.MaxDepth = 1.0f;
+	gm.DrawShadow(1, viewPort);
 	ID3D11ShaderResourceView* const pSRV[1] = { NULL };
 	gm.GetContextPtr()->PSSetShaderResources(0, 1, pSRV);
 	gm.GetContextPtr()->PSSetShaderResources(2, 1, pSRV);
-	//gm.DrawShadow(1, viewPort);
 
 	ID3D11RenderTargetView* pathMain = gm.GetRenderTargetViewPtr(0);
 	gm.GetContextPtr()->ClearDepthStencilView(gm.GetDepthStencilViewPtr(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0x0);
