@@ -212,7 +212,7 @@ inline void PlaneMesh::DrawPlain(Camera * pCamera, int blend)
 	gm.GetContextPtr()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
 	// ラスタライザステート
-	gm.GetContextPtr()->RSSetState(gm.GetDefaultRasterizerStatePtr());
+	//gm.GetContextPtr()->RSSetState(gm.GetDefaultRasterizerStatePtr());
 
 	// デプスステンシルステート
 	gm.GetContextPtr()->OMSetDepthStencilState(gm.GetDefaultDepthStatePtr(), 0);

@@ -25,13 +25,15 @@ struct VS_OUT
 VS_OUT main(VS_IN input)
 {
 	VS_OUT output;
+
 	float4x4 w = world;
 	float3 nor;
 	float  col;
+	float4x4 mat;
 
-	output.pos = mul(input.pos, world);
-	output.pos = mul(output.pos, view);
-	output.pos = mul(output.pos, projection);
+	mat = mul(world, view);
+	mat = mul(mat, projection);
+	output.pos = mul(input.pos, mat);
 	
 	w._41 = 0.0f;
 	w._42 = 0.0f;

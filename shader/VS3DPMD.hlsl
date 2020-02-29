@@ -34,6 +34,7 @@ VS_OUT main(VS_IN input)
 	float4 normalHead;
 	float3 normal;
 	float col;
+	float4x4 mat;
 
 	float w[3] = (float[3])input.weight;
 	float4x4 comb = boneWorld[input.idx[0]] * w[0] + boneWorld[input.idx[1]] * w[1];
@@ -42,9 +43,9 @@ VS_OUT main(VS_IN input)
 	normalHead = mul(float4(input.pos.xyz + input.nor.xyz, 1.0), comb);
 	normal = normalize(input.nor.xyz);
 
-	output.pos = mul(pos, world);
-	output.pos = mul(output.pos, view);
-	output.pos = mul(output.pos, projection);
+	mat = mul(world, view);
+	mat = mul(mat, projection);
+	output.pos = mul(pos, mat);
 
 	col = saturate(dot(normal, normalize(light.xyz)));
 	col = (col * 0.5f + 0.5f);

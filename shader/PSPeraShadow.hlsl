@@ -1,4 +1,4 @@
-Texture2D<float> depthTex : register(t2);
+Texture2D<float> depthTex : register(t1);
 SamplerState mySampler : register(s0);
 
 struct VS_OUT

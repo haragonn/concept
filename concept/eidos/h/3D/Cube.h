@@ -16,6 +16,7 @@
 // ‘O•ûéŒ¾
 //------------------------------------------------------------------------------
 class Camera;
+class ShadowCamera;
 class Texture;
 
 //------------------------------------------------------------------------------
@@ -31,6 +32,7 @@ public:
 	void SetDividedTexture(Texture& tex, int uNum, int vNum);
 	void SetDelimitedTexture(Texture& tex, float u, float v, float width, float height);
 	void ExclusionTexture();
+	void SetShadow(ShadowCamera& scmr);
 
 private:
 	int uNum_;
@@ -40,9 +42,11 @@ private:
 	Vector2D uv_;
 	Vector2D size_;
 	bool bDelimited_;
+	ShadowCamera* pScmr_;
 
 	void Draw(Camera* pCamera)override;
 	inline void DrawCube(Camera* pCamera, int blend = 0);	// ‹éŒ`‚Ì•`‰æ
+	inline void DrawShadowCube(Camera* pCamera, int blend = 0);	// ‹éŒ`‚Ì•`‰æ
 	inline void DrawTextureCube(Camera* pCamera, const Texture& tex, int blend = 0);	// ‹éŒ`‚Ì•`‰æ
 	inline void DrawDividedTextureCube(Camera* pCamera, const Texture& tex, int uNum, int vNum, int blend = 0);
 	inline void DrawDelimitedTextureCube(Camera* pCamera, const Texture& tex, float u, float v, float width, float height, int blend = 0);

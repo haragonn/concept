@@ -14,14 +14,17 @@ using namespace DirectX;
 ObjectManager::ObjectManager() :
 	pVertexShader_(nullptr),
 	pPmdVertexShader_(nullptr),
+	pShadowVertexShader_(nullptr),
 	pVertexLayout_(nullptr),
+	pShadowVertexLayout_(nullptr),
 	pPmdVertexLayout_(nullptr),
 	pCubeVertexBuffer_(nullptr),
 	pCubeIndexBuffer_(nullptr),
 	pBillboardVertexBuffer_(nullptr),
 	pBillboardIndexBuffer_(nullptr),
 	pConstBuffer_(nullptr),
-	pPmdConstBuffer_(nullptr)
+	pPmdConstBuffer_(nullptr),
+	pShadowConstBuffer_(nullptr)
 {
 	light_ = XMVector3Normalize(XMVectorSet(0.2f, 1.0f, -0.5f, 0.0f));
 }
@@ -96,10 +99,42 @@ bool ObjectManager::Init()
 			delete[] data;
 			if(FAILED(hr)){ return false; }
 		}
+		// 頂点シェーダの読み込み
+		{
+			// 頂点シェーダ作成
+			//ArchiveLoader loader;
+			//if(!loader.Load(ARCHIVE_FILENAME, VS_FILENAME)){ return false; }
+			//hr = gm.GetDevicePtr()->CreateVertexShader(&loader.GetData()[0], loader.GetSize(), NULL, &pVertexShader_);
+			//if(FAILED(hr)){ return false; }
+
+			BYTE* data;
+			int size = 0;
+			size = ReadShader("VS3DShadow.cso", &data);
+			if(size == 0){ return false; }
+			hr = gm.GetDevicePtr()->CreateVertexShader(data, size, NULL, &pShadowVertexShader_);
+			if(FAILED(hr)){ return false; }
+
+			// 入力レイアウト定義
+			D3D11_INPUT_ELEMENT_DESC layout[] = {
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			};
+			UINT elem_num = ARRAYSIZE(layout);
+
+			// 入力レイアウト作成
+			//hr = gm.GetDevicePtr()->CreateInputLayout(layout, elem_num, &loader.GetData()[0], loader.GetSize(), &pVertexLayout_);
+			hr = gm.GetDevicePtr()->CreateInputLayout(layout, elem_num, data, size, &pShadowVertexLayout_);
+			delete[] data;
+			if(FAILED(hr)){ return false; }
+		}
 	}
 
 	// ピクセルシェーダの読み込み(通常)
 	if(!pixelShaderDefault_.LoadPixelShaderFromCSO("PSDefault.cso")){ return false; }
+	// ピクセルシェーダの読み込み(通常)
+	if(!pixelShaderShadow_.LoadPixelShaderFromCSO("PSShadow.cso")){ return false; }
 	// ピクセルシェーダの読み込み(テクスチャ)
 	if(!pixelShaderTexture_.LoadPixelShaderFromCSO("PSTexture.cso")){ return false; }
 
@@ -107,7 +142,7 @@ bool ObjectManager::Init()
 	{
 		D3D11_BUFFER_DESC bd;
 		ZeroMemory(&bd, sizeof(bd));
-		bd.ByteWidth = sizeof(ConstBuffer3D);
+		bd.ByteWidth = sizeof(ConstBuffer3DShadow);
 		bd.Usage = D3D11_USAGE_DEFAULT;
 		bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 		bd.CPUAccessFlags = 0;
@@ -138,7 +173,7 @@ bool ObjectManager::Init()
 		XMStoreFloat4x4(&cbuff.world, XMMatrixTranspose(worldMatrix));
 		XMStoreFloat4x4(&cbuff.view, XMMatrixTranspose(viewMatrix));
 		XMStoreFloat4x4(&cbuff.proj, XMMatrixTranspose(projMatrix));
-		XMStoreFloat4(&cbuff.color, XMVector3Normalize(XMVectorSet(1.0f, 1.0f, 1.0f,1.0f)));
+		XMStoreFloat4(&cbuff.color, XMVector3Normalize(XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f)));
 		XMStoreFloat4(&cbuff.light, light);
 
 		// 定数バッファ内容更新
@@ -178,6 +213,62 @@ bool ObjectManager::Init()
 		// 定数バッファセット
 		UINT cb_slot = 2;
 		ID3D11Buffer* cb[1] = { pPmdConstBuffer_ };
+		gm.GetContextPtr()->VSSetConstantBuffers(cb_slot, 1, cb);
+	}
+
+	{
+		D3D11_BUFFER_DESC bd;
+		ZeroMemory(&bd, sizeof(bd));
+		bd.ByteWidth = sizeof(ConstBuffer3DShadow);
+		bd.Usage = D3D11_USAGE_DEFAULT;
+		bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		bd.CPUAccessFlags = 0;
+		bd.MiscFlags = 0;
+		bd.StructureByteStride = 0;
+
+		hr = gm.GetDevicePtr()->CreateBuffer(&bd, nullptr, &pShadowConstBuffer_);
+		if(FAILED(hr)){ return false; }
+
+		XMMATRIX worldMatrix = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+
+		XMVECTOR eye = XMVectorSet(2.0f, 2.0f, -2.0f, 0.0f);
+		XMVECTOR focus = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+		XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+		XMMATRIX viewMatrix = XMMatrixLookAtLH(eye, focus, up);
+
+		float fov = XMConvertToRadians(60);
+		float aspect = (float)gm.GetWidth() / gm.GetHeight();
+		float nearZ = 0.1f;
+		float farZ = 100.0f;
+		XMMATRIX projMatrix = XMMatrixPerspectiveFovLH(fov, aspect, nearZ, farZ);
+
+		XMVECTOR light = XMVector3Normalize(XMVectorSet(0.0f, 0.5f, -1.0f, 0.0f));
+
+
+		XMVECTOR lightEye = XMVectorSet(2.0f, 2.0f, -2.0f, 0.0f);
+		XMVECTOR lightFocus = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+		XMVECTOR lightUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+		XMMATRIX lightViewMatrix = XMMatrixLookAtLH(lightEye, lightFocus, lightUp);
+
+		XMMATRIX lightProjMatrix = XMMatrixPerspectiveFovLH(fov, aspect, nearZ, farZ);
+
+		//定数バッファ
+		ConstBuffer3DShadow cbuff;
+
+		XMStoreFloat4x4(&cbuff.world, XMMatrixTranspose(worldMatrix));
+		XMStoreFloat4x4(&cbuff.view, XMMatrixTranspose(viewMatrix));
+		XMStoreFloat4x4(&cbuff.proj, XMMatrixTranspose(projMatrix));
+		XMStoreFloat4(&cbuff.color, XMVector3Normalize(XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f)));
+		XMStoreFloat4(&cbuff.light, light);
+		XMStoreFloat4x4(&cbuff.lightView, XMMatrixTranspose(lightViewMatrix));
+		XMStoreFloat4x4(&cbuff.lightProj, XMMatrixTranspose(lightProjMatrix));
+
+		// 定数バッファ内容更新
+		gm.GetContextPtr()->UpdateSubresource(pShadowConstBuffer_, 0, NULL, &cbuff, 0, 0);
+
+		// 定数バッファセット
+		UINT cb_slot = 3;
+		ID3D11Buffer* cb[1] = { pShadowConstBuffer_ };
 		gm.GetContextPtr()->VSSetConstantBuffers(cb_slot, 1, cb);
 	}
 
@@ -302,10 +393,13 @@ void ObjectManager::UnInit()
 	SafeRelease(pCubeVertexBuffer_);
 	SafeRelease(pConstBuffer_);
 	SafeRelease(pPmdConstBuffer_);
+	SafeRelease(pShadowConstBuffer_);
 	SafeRelease(pVertexLayout_);
 	SafeRelease(pPmdVertexLayout_);
+	SafeRelease(pShadowVertexLayout_);
 	SafeRelease(pVertexShader_);
 	SafeRelease(pPmdVertexShader_);
+	SafeRelease(pShadowVertexShader_);
 }
 
 void ObjectManager::SetLight(float axisX, float axisY, float axisZ)

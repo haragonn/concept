@@ -363,7 +363,7 @@ void PmdModel::Draw(Camera * pCamera)
 	gm.GetContextPtr()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// ラスタライザステート
-	gm.GetContextPtr()->RSSetState(gm.GetDefaultRasterizerStatePtr());
+	//gm.GetContextPtr()->RSSetState(gm.GetDefaultRasterizerStatePtr());
 
 	// デプスステンシルステート
 	gm.GetContextPtr()->OMSetDepthStencilState(gm.GetDefaultDepthStatePtr(), 0);

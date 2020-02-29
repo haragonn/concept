@@ -73,6 +73,11 @@ public:
 		Assert(idx < RENDER_TARGET_VIEW_MAX);
 		return pRenderTargetViews_[idx];
 	}
+	ID3D11ShaderResourceView* GetShaderResourceViewPtr(int idx)									// レンダーターゲットビューの取得
+	{
+		Assert(idx < RENDER_TARGET_VIEW_MAX);
+		return pShaderResourceViews_[idx];
+	}
 	ID3D11Buffer* GetPeraVertexBufferPtr()const{ return pPeraVertexBuffer_; }				// ペラポリゴンの頂点バッファポインタの取得
 
 	ID3D11RasterizerState* GetDefaultRasterizerStatePtr(){ return pRsState_; }				// 標準ラスタライザ―ステートの取得

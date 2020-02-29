@@ -324,9 +324,9 @@ void Camera::UpdateViewMatrix()
 		eye_.z -= nearZ_;
 	}
 
-	XMVECTOR eye = XMVectorSet(eye_.x, eye_.y, eye_.z, 0.0f);
-	XMVECTOR focus = XMVectorSet(focus_.x, focus_.y, focus_.z, 0.0f);
-	XMVECTOR up = XMVectorSet(0.0f, upY_, 0.0f, 0.0f);
+	XMVECTOR eye = XMVectorSet(eye_.x, eye_.y, eye_.z, 1.0f);
+	XMVECTOR focus = XMVectorSet(focus_.x, focus_.y, focus_.z, 1.0f);
+	XMVECTOR up = XMVectorSet(0.0f, upY_, 0.0f, 1.0f);
 
 	XMFLOAT4X4 matView;
 	XMStoreFloat4x4(&matView, XMMatrixLookAtLH(eye, focus, up));

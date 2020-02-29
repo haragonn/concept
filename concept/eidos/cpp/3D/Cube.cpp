@@ -11,6 +11,7 @@ Author	:	Keigo Hara
 #include "../../h/3D/Cube.h"
 #include "../../h/3D/ObjectManager.h"
 #include "../../h/Environment/Camera.h"
+#include "../../h/Environment/ShadowCamera.h"
 #include "../../../idea/h/Framework/GraphicManager.h"
 #include "../../../idea/h/Texture/Texture.h"
 
@@ -23,7 +24,8 @@ Cube::Cube() :
 	uNum_(1),
 	vNum_(1),
 	bDivided_(false),
-	bDelimited_(false)
+	bDelimited_(false),
+	pScmr_(nullptr)
 {
 }
 
@@ -65,16 +67,30 @@ void Cube::ExclusionTexture()
 	vNum_ = 1;
 }
 
+void Cube::SetShadow(ShadowCamera& scmr)
+{
+	pScmr_ = &scmr;
+}
+
 void Cube::Draw(Camera* pCamera)
 {
-	if(!pTex_){
-		DrawCube(pCamera);
-	} else if(bDivided_){
-		DrawDividedTextureCube(pCamera, *pTex_, uNum_, vNum_);
-	} else if(bDelimited_){
-		DrawDelimitedTextureCube(pCamera, *pTex_, uv_.x, uv_.y, size_.x, size_.y);
+	if(pScmr_){
+		if(!pTex_){
+			DrawShadowCube(pCamera);
+		} else if(bDivided_){
+		} else if(bDelimited_){
+		} else{
+		}
 	} else{
-		DrawTextureCube(pCamera, *pTex_);
+		if(!pTex_){
+			DrawCube(pCamera);
+		} else if(bDivided_){
+			DrawDividedTextureCube(pCamera, *pTex_, uNum_, vNum_);
+		} else if(bDelimited_){
+			DrawDelimitedTextureCube(pCamera, *pTex_, uv_.x, uv_.y, size_.x, size_.y);
+		} else{
+			DrawTextureCube(pCamera, *pTex_);
+		}
 	}
 }
 
@@ -181,6 +197,139 @@ void Cube::DrawCube(Camera* pCamera, int blend)
 
 	//ポリゴン描画
 	gm.GetContextPtr()->DrawIndexed(ObjectManager::CUBE_INDEX_NUM, 0, 0);
+}
+
+inline void Cube::DrawShadowCube(Camera* pCamera, int blend)
+{
+	// 準備ができていなければ終了
+	GraphicManager& gm = GraphicManager::Instance();
+	ObjectManager& om = ObjectManager::Instance();
+	if(!gm.GetContextPtr()
+		|| !om.GetCubeVertexBufferPtr()
+		|| !om.GetCubeIndexBufferPtr()
+		|| !om.GetVertexShederPtr()
+		|| !pCamera){
+		return;
+	}
+
+	//定数バッファ
+	ConstBuffer3DShadow cbuff;
+	XMFLOAT4X4 matWorld;
+
+	for(int i = 4 - 1; i >= 0; --i){
+		for(int j = 4 - 1; j >= 0; --j){
+			matWorld.m[i][j] = world_.r[i][j];
+		}
+	}
+	XMStoreFloat4x4(&cbuff.world, XMMatrixTranspose(XMLoadFloat4x4(&matWorld)));
+
+	XMFLOAT4X4 matView;
+	for(int i = 4 - 1; i >= 0; --i){
+		for(int j = 4 - 1; j >= 0; --j){
+			matView.m[i][j] = pCamera->GetViewMatrix().r[i][j];
+		}
+	}
+	XMStoreFloat4x4(&cbuff.view, XMMatrixTranspose(XMLoadFloat4x4(&matView)));
+
+	XMFLOAT4X4 matProj;
+	for(int i = 4 - 1; i >= 0; --i){
+		for(int j = 4 - 1; j >= 0; --j){
+			matProj.m[i][j] = pCamera->GetProjectionMatrix().r[i][j];
+		}
+	}
+	XMStoreFloat4x4(&cbuff.proj, XMMatrixTranspose(XMLoadFloat4x4(&matProj)));
+
+	XMStoreFloat4(&cbuff.color, XMVectorSet(color_.r, color_.g, color_.b, color_.a));
+	XMStoreFloat4(&cbuff.light, om.GetLight());
+
+	XMFLOAT4X4 matLightView;
+	for(int i = 4 - 1; i >= 0; --i){
+		for(int j = 4 - 1; j >= 0; --j){
+			matLightView.m[i][j] = pScmr_->GetViewMatrix().r[i][j];
+		}
+	}
+	XMStoreFloat4x4(&cbuff.lightView, XMMatrixTranspose(XMLoadFloat4x4(&matLightView)));
+
+	XMFLOAT4X4 matLightProj;
+	for(int i = 4 - 1; i >= 0; --i){
+		for(int j = 4 - 1; j >= 0; --j){
+			matLightProj.m[i][j] = pScmr_->GetProjectionMatrix().r[i][j];
+		}
+	}
+	XMStoreFloat4x4(&cbuff.lightProj, XMMatrixTranspose(XMLoadFloat4x4(&matLightProj)));
+
+	// 定数バッファ内容更新
+	gm.GetContextPtr()->UpdateSubresource(om.GetShadowConstBufferPtr(), 0, NULL, &cbuff, 0, 0);
+
+	// 定数バッファ
+	UINT cb_slot = 3;
+	ID3D11Buffer* cb[1] = { om.GetShadowConstBufferPtr() };
+	gm.GetContextPtr()->VSSetConstantBuffers(cb_slot, 1, cb);
+
+	// バッファ書き込み
+	ID3D11Buffer* pVBuf = om.GetCubeVertexBufferPtr();
+
+	// 頂点バッファのセット
+	UINT stride = sizeof(VertexData3D);
+	UINT offset = 0;
+	gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVBuf, &stride, &offset);
+
+	// インデックスバッファのセット
+	gm.GetContextPtr()->IASetIndexBuffer(om.GetCubeIndexBufferPtr(), DXGI_FORMAT_R16_UINT, 0);
+
+	// 入力レイアウトのセット
+	gm.GetContextPtr()->IASetInputLayout(om.GetShadowInputLayoutPtr());
+
+	// プリミティブ形状のセット
+	gm.GetContextPtr()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	// ラスタライザステート
+	//gm.GetContextPtr()->RSSetState(gm.GetDefaultRasterizerStatePtr());
+
+	// デプスステンシルステート
+	gm.GetContextPtr()->OMSetDepthStencilState(gm.GetDefaultDepthStatePtr(), 0);
+
+	// ブレンディングのセット
+	if(!blend){
+		gm.SetBlendState(BLEND_ALIGNMENT);
+	} else if(blend > 0){
+		gm.SetBlendState(BLEND_ADD);
+	} else{
+		gm.SetBlendState(BLEND_SUBTRACT);
+	}
+
+	ID3D11ShaderResourceView* const pSRV[1] = { NULL };
+	gm.GetContextPtr()->PSSetShaderResources(0, 1, pSRV);
+	gm.GetContextPtr()->PSSetShaderResources(1, 1, pSRV);
+
+	// テクスチャ書き込み
+	ID3D11ShaderResourceView* pTexView = gm.GetShaderResourceViewPtr(1);
+
+	gm.GetContextPtr()->PSSetShaderResources(1, 1, &pTexView);
+
+	// シェーダのセット
+	gm.GetContextPtr()->VSSetShader(om.GetShadowVertexShederPtr(), NULL, 0);
+	gm.GetContextPtr()->HSSetShader(NULL, NULL, 0);
+	gm.GetContextPtr()->DSSetShader(NULL, NULL, 0);
+	gm.GetContextPtr()->GSSetShader(NULL, NULL, 0);
+	gm.GetContextPtr()->PSSetShader(om.GetPixelShaderShadowPtr(), NULL, 0);
+	gm.GetContextPtr()->CSSetShader(NULL, NULL, 0);
+
+	// ビューポートの設定
+	D3D11_VIEWPORT viewPort;
+	viewPort.TopLeftX = pCamera->GetViewPort().topLeftX;
+	viewPort.TopLeftY = pCamera->GetViewPort().topLeftY;
+	viewPort.Width = pCamera->GetViewPort().width;
+	viewPort.Height = pCamera->GetViewPort().height;
+	viewPort.MinDepth = pCamera->GetViewPort().minDepth;
+	viewPort.MaxDepth = pCamera->GetViewPort().maxDepth;
+	gm.GetContextPtr()->RSSetViewports(1, &viewPort);
+
+	//ポリゴン描画
+	gm.GetContextPtr()->DrawIndexed(ObjectManager::CUBE_INDEX_NUM, 0, 0);
+
+	gm.GetContextPtr()->PSSetShaderResources(0, 1, pSRV);
+	gm.GetContextPtr()->PSSetShaderResources(1, 1, pSRV);
 }
 
 void Cube::DrawTextureCube(Camera* pCamera, const Texture & tex, int blend)

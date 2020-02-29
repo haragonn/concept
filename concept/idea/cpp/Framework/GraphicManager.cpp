@@ -389,7 +389,7 @@ bool GraphicManager::BeginScene()
 	pImmediateContext_->PSSetShaderResources(0, 1, pSRV);
 	pImmediateContext_->PSSetShaderResources(2, 1, pSRV);
 
-	pImmediateContext_->OMSetRenderTargets(1, &pRenderTargetViews_[1], pDepthStencilView_);
+	pImmediateContext_->OMSetRenderTargets(1, &pRenderTargetViews_[0], pDepthStencilView_);
 
 	// 画面クリア
 	static const float clearColor[] = { 0.2f, 0.3f, 0.475f, 1.0f };	// 紺色
@@ -423,7 +423,7 @@ bool GraphicManager::EndScene()
 
 	//DrawShadow(0, viewPort);
 
-	DrawPath(0, 1, pDefaultPixelShader_, viewPort);
+	//DrawPath(0, 1, pDefaultPixelShader_, viewPort);
 
 	viewPort.TopLeftX = width_ * -0.5f;
 	viewPort.TopLeftY = 0;
@@ -494,7 +494,7 @@ bool GraphicManager::DrawShadow(int target, D3D11_VIEWPORT viewPort)
 
 	ID3D11ShaderResourceView* const pSRV[1] = { NULL };
 	pImmediateContext_->PSSetShaderResources(0, 1, pSRV);
-	pImmediateContext_->PSSetShaderResources(2, 1, pSRV);
+	pImmediateContext_->PSSetShaderResources(1, 1, pSRV);
 
 	pImmediateContext_->OMSetRenderTargets(1, &pRenderTargetViews_[target], nullptr);
 
@@ -507,7 +507,7 @@ bool GraphicManager::DrawShadow(int target, D3D11_VIEWPORT viewPort)
 	// テクスチャ書き込み
 	ID3D11ShaderResourceView* pTexView = pDepthShaderResourceView_;
 
-	pImmediateContext_->PSSetShaderResources(2, 1, &pTexView);
+	pImmediateContext_->PSSetShaderResources(1, 1, &pTexView);
 
 	// 入力レイアウトのセット
 	pImmediateContext_->IASetInputLayout(pPeraVertexLayout_);
