@@ -74,7 +74,7 @@ void Cube::SetShadow(ShadowCamera& scmr)
 
 void Cube::Draw(Camera* pCamera)
 {
-	if(pScmr_){
+	if(pScmr_ && !pScmr_->GetShadowDrawFlag()){
 		if(!pTex_){
 			DrawShadowCube(pCamera);
 		} else if(bDivided_){
@@ -285,6 +285,7 @@ inline void Cube::DrawShadowCube(Camera* pCamera, int blend)
 
 	// ラスタライザステート
 	//gm.GetContextPtr()->RSSetState(gm.GetDefaultRasterizerStatePtr());
+	
 
 	// デプスステンシルステート
 	gm.GetContextPtr()->OMSetDepthStencilState(gm.GetDefaultDepthStatePtr(), 0);

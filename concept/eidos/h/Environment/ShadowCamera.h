@@ -9,7 +9,13 @@
 
 class ShadowCamera : public Camera{
 public:
+	ShadowCamera() : bShadowDraow_(false){}
 	void Init(float viewAngle, float aspect, float nearZ, float farZ);
 
 	void DrawObject();
+
+	bool GetShadowDrawFlag()const{ return bShadowDraow_; }
+
+private:
+	bool bShadowDraow_;
 };
