@@ -8,29 +8,24 @@
 
 using namespace DirectX;
 
-void ShadowCamera::Init(float viewAngle, float aspect, float nearZ, float farZ)
+void ShadowCamera::Init(Vector3D vecLight, float range)
 {
 	GraphicManager& gm = GraphicManager::Instance();
 	if(!gm.GetContextPtr()){ return; }
 
-	viewAngle_ = viewAngle;
-	aspect_ = aspect;
-	nearZ_ = nearZ;
-	farZ_ = farZ;
-
 	XMFLOAT4X4 matProj;
 	XMStoreFloat4x4(&matProj, XMMatrixIdentity());
-	XMStoreFloat4x4(&matProj, XMMatrixOrthographicLH((float)gm.GetWidth() / 50, (float)gm.GetHeight() / 50, 10.0f, 100.0f));
-	//XMStoreFloat4x4(&matProj, XMMatrixPerspectiveFovLH(viewAngle_, aspect_, nearZ_, (farZ_ > nearZ_) ? farZ_ : nearZ_ + 0.0001f));
+	XMStoreFloat4x4(&matProj, XMMatrixOrthographicLH(8.0f * range, 6.0f * range, 10.0f, 50.0f));
+
 	for(int i = 4 - 1; i >= 0; --i){
 		for(int j = 4 - 1; j >= 0; --j){
 			proj_.r[i][j] = matProj.m[i][j];
 		}
 	}
 
-	eye_ = Vector3D(2.0f, 1.0f, 0.0f);
-	eye_ = eye_.Normalized() * 50.0f;
-	focus_ = Vector3D(0.0f, 0.0f, 0.0f);
+	eye_ = vecLight;
+	eye_ = eye_.Normalized() * 30.0f;
+	focus_ = Vector3D(0.0f, 1.0f, 0.0f) - vecLight;
 	upY_ = 1.0f;
 
 	viewPort_.topLeftX = 0.0f;
@@ -41,8 +36,6 @@ void ShadowCamera::Init(float viewAngle, float aspect, float nearZ, float farZ)
 	viewPort_.maxDepth = 1.0f;
 
 	UpdateViewMatrix();
-
-	//Camera::Init(viewAngle, aspect, nearZ, farZ);
 }
 
 void ShadowCamera::DrawObject()

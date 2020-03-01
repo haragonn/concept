@@ -16,10 +16,11 @@ float4 main(VS_OUT input) : SV_TARGET
     // 射影空間のXY座標をテクスチャ座標に変換
     float2 TransTexCoord = (ZValue.xy + float2(1, -1)) * float2(0.5f, -0.5f);
 
-    if(TransTexCoord.x >= 0.0f
-        && TransTexCoord.x <= 1.0f
-        && TransTexCoord.y >= 0.0f
-        && TransTexCoord.y <= 1.0f){
+    if(TransTexCoord.x > 0.001f
+        && TransTexCoord.x < 0.999f
+        && TransTexCoord.y > 0.001f
+        && TransTexCoord.y < 0.999f){
+
         // リアルZ値抽出
         float SM_Z = shadowTexture.Sample(mySampler, TransTexCoord);
 

@@ -43,7 +43,7 @@ void BreadBoard2::Init()
 	im.ctr_.Init(1, true);
 	im.ctr_.SetConfig(PadButton::BACK, KeyCode::BACKSPACE);
 
-	im.wcmr_.Init(DegreeToRadian(65.5f), S_W / S_H, 0.1f, 10000.0f, 10.0f);
+	im.wcmr_.Init(DegreeToRadian(65.5f), S_W / S_H, 0.1f, 10000.0f, 5.0f);
 	im.wcmr_.SetFocus(0.0f, 3.0f, 0.0f);
 	im.wcmr_.SetViewPort(0.0f, 0.0f, S_W, S_H);
 	im.wcmr_.SetRotate(DegreeToRadian(0), 0.0f);
@@ -52,14 +52,14 @@ void BreadBoard2::Init()
 	im.wcmr2_.SetViewPort(0.0f, 0.0f, C_W, S_H);
 	im.wcmr2_.SetRotate(DegreeToRadian(-90), 0.0f);
 
-	im.scmr_.Init(DegreeToRadian(65.5f), S_W / S_H, 1.0f, 10000.0f);
+	im.scmr_.Init(Vector3D(0.2f, 1.0f, -0.5f), 2.0f);
 	//im.scmr_.SetFocus(-1.0f, -1.0f, 0.0f);
 	//im.scmr_.SetPos(10, 10, 0);
 
 	im.sprBG_.Init(C_W, C_H, S_W, S_H);
 	im.texBG_.LoadImageFromFile("data/TEXTURE/grid04.bmp");
 
-	im.cb_.Init(0.0f, -0.4f, 0.0f);
+	im.cb_.Init(0.0f, -0.5f, 0.0f);
 	im.cb_.SetScale(100.0f, 1.0f, 100.0f);
 	im.cb_.SetRotate(0.0f, DegreeToRadian(45), 0.0f);
 	im.wcmr_.AddObject(im.cb_);
@@ -119,6 +119,9 @@ Scene * BreadBoard2::Update()
 
 	Vector3D vv(move.x, 0.0f, move.y);
 	im.pmSakuya_.MovePos(vv);
+	im.scmr_.MovePos(vv);
+	im.scmr_.MoveFocus(vv);
+	im.wcmr_.SetFocus(im.pmSakuya_.GetPos().x, im.pmSakuya_.GetPos().y + 2.0f, im.pmSakuya_.GetPos().z);
 
 	if(!im.wcmr_.IsWrap()){
 		float cameraSpeed = 0.02f;

@@ -417,14 +417,14 @@ bool GraphicManager::EndScene()
 	D3D11_VIEWPORT viewPort = {};
 	viewPort.TopLeftX = 0;
 	viewPort.TopLeftY = 0;
-	viewPort.Width = (FLOAT)width_;
-	viewPort.Height = (FLOAT)height_;
+	viewPort.Width = (FLOAT)width_ * 0.3f;
+	viewPort.Height = (FLOAT)height_ * 0.3f;
 	viewPort.MinDepth = 0.0f;
 	viewPort.MaxDepth = 1.0f;
 
 	//DrawShadow(0, viewPort);
 
-	//DrawPath(0, 1, pDefaultPixelShader_, viewPort);
+	DrawPath(0, 1, pDefaultPixelShader_, viewPort);
 
 	viewPort.TopLeftX = width_ * -0.5f;
 	viewPort.TopLeftY = 0;

@@ -10,7 +10,7 @@
 class ShadowCamera : public Camera{
 public:
 	ShadowCamera() : bShadowDraow_(false){}
-	void Init(float viewAngle, float aspect, float nearZ, float farZ);
+	void Init(Vector3D vecLight, float range);
 
 	void DrawObject();
 
@@ -18,4 +18,5 @@ public:
 
 private:
 	bool bShadowDraow_;
+	void Init(float viewAngle, float aspect, float nearZ, float farZ){}
 };
