@@ -137,6 +137,8 @@ bool ObjectManager::Init()
 	if(!pixelShaderShadow_.LoadPixelShaderFromCSO("PSShadow.cso")){ return false; }
 	// ピクセルシェーダの読み込み(テクスチャ)
 	if(!pixelShaderTexture_.LoadPixelShaderFromCSO("PSTexture.cso")){ return false; }
+	// ピクセルシェーダの読み込み(テクスチャ)
+	if(!pixelShaderTextureShadow_.LoadPixelShaderFromCSO("PSTextureShadow.cso")){ return false; }
 
 	// 定数バッファ
 	{
@@ -159,7 +161,7 @@ bool ObjectManager::Init()
 		XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 		XMMATRIX viewMatrix = XMMatrixLookAtLH(eye, focus, up);
 
-		float fov = XMConvertToRadians(60);
+		auto fov = XMConvertToRadians(65.5f);
 		float aspect = (float)gm.GetWidth() / gm.GetHeight();
 		float nearZ = 0.1f;
 		float farZ = 100.0f;
@@ -236,7 +238,7 @@ bool ObjectManager::Init()
 		XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 		XMMATRIX viewMatrix = XMMatrixLookAtLH(eye, focus, up);
 
-		float fov = XMConvertToRadians(60);
+		auto fov = XMConvertToRadians(60);
 		float aspect = (float)gm.GetWidth() / gm.GetHeight();
 		float nearZ = 0.1f;
 		float farZ = 100.0f;

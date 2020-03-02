@@ -48,8 +48,11 @@ private:
 	inline void DrawCube(Camera* pCamera, int blend = 0);	// ‹éŒ`‚Ì•`‰æ
 	inline void DrawShadowCube(Camera* pCamera, int blend = 0);	// ‹éŒ`‚Ì•`‰æ
 	inline void DrawTextureCube(Camera* pCamera, const Texture& tex, int blend = 0);	// ‹éŒ`‚Ì•`‰æ
+	inline void DrawTextureShadowCube(Camera* pCamera, const Texture& tex, int blend = 0);	// ‹éŒ`‚Ì•`‰æ
 	inline void DrawDividedTextureCube(Camera* pCamera, const Texture& tex, int uNum, int vNum, int blend = 0);
+	inline void DrawDividedTextureShadowCube(Camera* pCamera, const Texture& tex, int uNum, int vNum, int blend = 0);
 	inline void DrawDelimitedTextureCube(Camera* pCamera, const Texture& tex, float u, float v, float width, float height, int blend = 0);
+	inline void DrawDelimitedTextureShadowCube(Camera* pCamera, const Texture& tex, float u, float v, float width, float height, int blend = 0);
 };
 
 #endif	// #ifndef INCLUDE_EIDOS_CUBE_H

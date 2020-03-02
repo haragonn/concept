@@ -64,6 +64,7 @@ public:
 	ID3D11PixelShader* GetPixelShederDefaultPtr()const{ return pixelShaderDefault_.GetPixelShaderPtr(); }
 	ID3D11PixelShader* GetPixelShaderShadowPtr()const{ return pixelShaderShadow_.GetPixelShaderPtr(); }
 	ID3D11PixelShader* GetPixelShederTexturePtr()const{ return pixelShaderTexture_.GetPixelShaderPtr(); }
+	ID3D11PixelShader* GetPixelShaderTextureShadowPtr()const{ return pixelShaderTextureShadow_.GetPixelShaderPtr(); }
 	ID3D11Buffer* GetCubeVertexBufferPtr(){ return pCubeVertexBuffer_; }
 	ID3D11Buffer* GetCubeIndexBufferPtr(){ return pCubeIndexBuffer_; }
 	ID3D11Buffer* GetBillboardVertexBufferPtr(){ return pBillboardVertexBuffer_; }
@@ -82,6 +83,7 @@ public:
 	PixelShader pixelShaderDefault_;
 	PixelShader pixelShaderShadow_;
 	PixelShader pixelShaderTexture_;
+	PixelShader pixelShaderTextureShadow_;
 
 	ID3D11InputLayout* pVertexLayout_;
 	ID3D11InputLayout* pShadowVertexLayout_;

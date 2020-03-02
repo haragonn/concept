@@ -43,7 +43,7 @@ void BreadBoard2::Init()
 	im.ctr_.Init(1, true);
 	im.ctr_.SetConfig(PadButton::BACK, KeyCode::BACKSPACE);
 
-	im.wcmr_.Init(DegreeToRadian(65.5f), S_W / S_H, 0.1f, 10000.0f, 5.0f);
+	im.wcmr_.Init(DegreeToRadian(65.5f), S_W / S_H, 0.1f, 10000.0f, 10.0f);
 	im.wcmr_.SetFocus(0.0f, 3.0f, 0.0f);
 	im.wcmr_.SetViewPort(0.0f, 0.0f, S_W, S_H);
 	im.wcmr_.SetRotate(DegreeToRadian(0), 0.0f);
@@ -52,23 +52,24 @@ void BreadBoard2::Init()
 	im.wcmr2_.SetViewPort(0.0f, 0.0f, C_W, S_H);
 	im.wcmr2_.SetRotate(DegreeToRadian(-90), 0.0f);
 
-	im.scmr_.Init(Vector3D(0.2f, 1.0f, -0.5f), 2.0f);
+	im.scmr_.Init(Vector3D(0.2f, 1.0f, 0.6f), 1.5f);
 	//im.scmr_.SetFocus(-1.0f, -1.0f, 0.0f);
 	//im.scmr_.SetPos(10, 10, 0);
 
 	im.sprBG_.Init(C_W, C_H, S_W, S_H);
-	im.texBG_.LoadImageFromFile("data/TEXTURE/grid04.bmp");
+	im.texBG_.LoadImageFromFile("data/TEXTURE/grid02.bmp");
 
-	im.cb_.Init(0.0f, -0.5f, 0.0f);
-	im.cb_.SetScale(100.0f, 1.0f, 100.0f);
+	im.cb_.Init(0.0f, 1.0f, 0.0f);
+	im.cb_.SetScale(2.0f, 2.0f, 2.0f);
 	im.cb_.SetRotate(0.0f, DegreeToRadian(45), 0.0f);
 	im.wcmr_.AddObject(im.cb_);
-	im.scmr_.AddObject(im.cb_);
+	//im.scmr_.AddObject(im.cb_);
+	//im.cb_.SetDelimitedTexture(im.texBG_, 0.0f, 0.0f, 30.0f, 30.0f);
 	im.cb_.SetShadow(im.scmr_);
 
 	im.pmSakuya_.Init(0.0f, 0.0f, 0.0f);
 	im.pmSakuya_.SetScale(0.24f, 0.24f, 0.24f);
-	im.pmSakuya_.SetRotate(0.0f, DegreeToRadian(0), 0.0f);
+	im.pmSakuya_.SetRotate(0.0f, DegreeToRadian(180), 0.0f);
 	//im.pmSakuya_.LoadPmdMeshFromFile("model/初音ミク.pmd");
 	im.pmSakuya_.LoadPmdMeshFromFile("model/十六夜咲夜Type-S.pmd");
 	im.wcmr_.AddObject(im.pmSakuya_);
@@ -77,7 +78,9 @@ void BreadBoard2::Init()
 
 	im.pln_.Init(0, 0, 0);
 	im.pln_.Create(0, 0, 10, 10, 10, 10);
-	//im.wcmr_.AddObject(im.pln_);
+	im.wcmr_.AddObject(im.pln_);
+	im.pln_.SetTexture(im.texBG_);
+	im.pln_.SetShadow(im.scmr_);
 
 	im.vm_.LoadVmdMotionFromFile("motion/歩く.vmd", im.pmSakuya_, true);
 	im.vm2_.LoadVmdMotionFromFile("motion/_待機.vmd", im.pmSakuya_);

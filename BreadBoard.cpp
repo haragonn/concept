@@ -21,6 +21,7 @@ public:
 	int ssecR_;
 
 	WrapCamera wcmr_;
+	ShadowCamera scmr_;
 
 	PlaneMesh pm_;
 
@@ -64,7 +65,9 @@ void BreadBoard::Init()
 	im.wcmr_.SetViewPort(0.0f, 0.0f, S_W, S_H);
 	im.wcmr_.SetRotate(DegreeToRadian(0), DegreeToRadian(10));
 
-	im.player_.Init(im.wcmr_);
+	im.scmr_.Init(Vector3D(0.7f, 0.7f, -0.7f), 0.7f);
+
+	im.player_.Init(im.wcmr_, im.scmr_);
 	im.trg_.Init(im.wcmr_, 0.0f, 0.0f);
 	//im.trg2_.Init(im.wcmr_, -5.0f, 0.0f);
 
@@ -75,10 +78,11 @@ void BreadBoard::Init()
 	im.pm_.SetColor(ideaColor::CYAN);
 	im.pm_.SetTexture(im.texPlain_);
 	im.wcmr_.AddObject(im.pm_);
+	im.pm_.SetShadow(im.scmr_);
 
 	im.trg_.Init2(im.wcmr_);
 	//im.trg2_.Init2(im.wcmr_);
-	im.wll_.Init(im.wcmr_);
+	im.wll_.Init(im.wcmr_, im.scmr_);
 	im.time_ = 0;
 	im.min_ = 0;
 	im.sec_ = 0;
@@ -115,7 +119,7 @@ Scene * BreadBoard::Update()
 		return new BreadBoardLoad;
 	}
 
-	im.player_.Update(im.wcmr_, im.trg_.GetShild());
+	im.player_.Update(im.wcmr_, im.scmr_, im.trg_.GetShild());
 	//im.trg2_.Update(im.wcmr_, im.player_);
 	if(im.trg_.Update(im.wcmr_, im.player_)){
 		if(im.trg_.IsTekisei()){
@@ -153,7 +157,9 @@ void BreadBoard::Draw()
 {
 	BreadBoard::Impl& im = *pImpl_;
 
+
 	im.sprBG_.DrawRect();
+	im.scmr_.DrawObject();
 	im.wcmr_.DrawObject();
 
 	im.player_.DrawSprite(im.trg_.GetShild());

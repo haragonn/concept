@@ -9,7 +9,6 @@ struct VS_OUT
 
 float4 main(VS_OUT input) : SV_TARGET
 {
-	//float dep = pow(abs(depthTex.Sample(mySampler, input.tex)), 20);
 	float dep = depthTex.Sample(mySampler, input.tex);
 
 	return float4(dep, dep, dep, 1.0f);

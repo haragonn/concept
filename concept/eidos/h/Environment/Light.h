@@ -5,8 +5,8 @@
 
 class Light{
 public:
-	void SetLight(Vector3D axis);
-	void SetLight(float axisX, float axisY, float axisZ);
+	static void SetLight(Vector3D axis);
+	static void SetLight(float axisX, float axisY, float axisZ);
 };
 
 #endif	// #ifndef INCLUDE_EIDOS_LIGHT_H

@@ -278,7 +278,6 @@ bool GraphicManager::Init(HWND hWnd, UINT width, UINT height, bool bWindowed, UI
 		samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 		samplerDesc.MaxAnisotropy = 1;
 		samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-		samplerDesc.MinLOD = -D3D11_FLOAT32_MAX;
 		samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
 		ID3D11SamplerState* pSamplerState = nullptr;
@@ -413,27 +412,21 @@ bool GraphicManager::EndScene()
 	// NULLチェック
 	if(!pSwapChain_){ return false; }
 	if(!pImmediateContext_){ return false; }
+
+#if 0
+
 	// ビューポートの設定
 	D3D11_VIEWPORT viewPort = {};
 	viewPort.TopLeftX = 0;
 	viewPort.TopLeftY = 0;
-	viewPort.Width = (FLOAT)width_ * 0.3f;
-	viewPort.Height = (FLOAT)height_ * 0.3f;
+	viewPort.Width = (FLOAT)width_ * 0.2f;
+	viewPort.Height = (FLOAT)height_ * 0.2f;
 	viewPort.MinDepth = 0.0f;
 	viewPort.MaxDepth = 1.0f;
-
-	//DrawShadow(0, viewPort);
 
 	DrawPath(0, 1, pDefaultPixelShader_, viewPort);
 
-	viewPort.TopLeftX = width_ * -0.5f;
-	viewPort.TopLeftY = 0;
-	viewPort.Width = (FLOAT)width_;
-	viewPort.Height = (FLOAT)height_;
-	viewPort.MinDepth = 0.0f;
-	viewPort.MaxDepth = 1.0f;
-
-	//DrawPath(0, 1, pPeraPixelShader_, viewPort);
+#endif	// #ifdef _DEBUG
 
 	//ウインドウに反映
 	pSwapChain_->Present(1, 0);

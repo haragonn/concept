@@ -7,6 +7,11 @@
 #include "../3D/Object.h"
 #include "../../../idea/h/Texture/TextureHolder.h"
 
+//------------------------------------------------------------------------------
+// ‘O•ûéŒ¾
+//------------------------------------------------------------------------------
+class Camera;
+class ShadowCamera;
 struct ID3D11Buffer;
 
 class PlaneMesh : public Object, public TextureHolder{
@@ -17,6 +22,7 @@ public:
 	void Release();
 	void SetTexture(Texture& tex);
 	void ExclusionTexture();
+	void SetShadow(ShadowCamera& scmr);
 
 private:
 	float widthX_;
@@ -26,10 +32,13 @@ private:
 	int indexNum_;
 	ID3D11Buffer* pVertexBuffer_;
 	ID3D11Buffer* pIndexBuffer_;
+	ShadowCamera* pScmr_;
 
 	void Draw(Camera* pCamera)override;
 	inline void DrawPlain(Camera* pCamera, int blend = 0);	// ‹éŒ`‚Ì•`‰æ
+	inline void DrawPlainShadow(Camera* pCamera, int blend = 0);	// ‹éŒ`‚Ì•`‰æ
 	inline void DrawTexturePlain(Camera* pCamera, const Texture& tex, int blend = 0);	// ‹éŒ`‚Ì•`‰æ
+	inline void DrawTexturePlainShadow(Camera* pCamera, const Texture& tex, int blend = 0);	// ‹éŒ`‚Ì•`‰æ
 };
 
 #endif	// #ifndef INCLUDE_EIDOS_PLAINMESH_H

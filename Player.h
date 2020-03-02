@@ -45,16 +45,19 @@ private:
 	Font fnt_;
 
 public:
-	void Init(WrapCamera& cmr)
+	void Init(WrapCamera& cmr, ShadowCamera& scmr)
 	{
 		ctr_.Init(1, true);
 		ctr_.SetConfig(PadButton::BACK, KeyCode::BACKSPACE);
 
 		pmSakuya_.Init(0.0f, 0.0f, -20.0f);
+		scmr.MovePos(0.0f, 0.5f, -20.0f);
+		scmr.MoveFocus(0.0f, 0.5f, -20.0f);
 		pmSakuya_.SetScale(0.135f, 0.135f, 0.135f);
 		pmSakuya_.SetRotate(0.0f, DegreeToRadian(180), 0.0f);
 		pmSakuya_.LoadPmdMeshFromStorage("model/è\òZñÈçÁñÈType-S.pmd");
 		cmr.AddObject(pmSakuya_);
+		scmr.AddObject(pmSakuya_);
 
 		vmSakuyaMove_.LoadVmdMotionFromFile("motion/ï‡Ç≠.vmd", pmSakuya_, true);
 		vmSakuyaStay_.LoadVmdMotionFromFile("motion/_ë“ã@.vmd", pmSakuya_, true);
@@ -94,15 +97,18 @@ public:
 		sndShild_.SetVolume(0.5f);
 		sndDamage_.LoadWaveFromFile("data/SOUND/gyan000.wav");
 
+		prePos_ = cbSakuya_.GetPos();
 	}
 
-	void Update(WrapCamera& cmr, Object& target)
+	void Update(WrapCamera& cmr, ShadowCamera& scmr, Object& target)
 	{
 		ctr_.Update();
 		int set = ctr_.GetButton(PadButton::L);
 		int dash = ctr_.GetButton(PadButton::R);
 		int shot = ctr_.GetButton(PadButton::X);
 
+		scmr.MovePos(cbSakuya_.GetPos() - prePos_);
+		scmr.MoveFocus(cbSakuya_.GetPos() - prePos_);
 		prePos_ = cbSakuya_.GetPos();
 
 		if(damage_){
@@ -165,15 +171,15 @@ public:
 			moveSpeed_ += (0.06f - moveSpeed_) * 0.075f;
 			if(dash){
 				moveSpeed_ += (0.06f - moveSpeed_) * 0.075f;
-				sakuHead_ += (pmSakuya_.GetPosY() + 2.5f - sakuHead_) * 0.0664f;
-				distance_ += (3.5f - distance_) * 0.0664f;
+				sakuHead_ += (pmSakuya_.GetPosY() + 2.0f - sakuHead_) * 0.0664f;
+				distance_ += (4.0f - distance_) * 0.0664f;
 			} else{
 				sakuHead_ += (pmSakuya_.GetPosY() + 3.1f - sakuHead_) * 0.3f * accel_;
 				distance_ += (1.2f - distance_) * 0.334f * accel_;
 			}
 		} else{
-			sakuHead_ += (pmSakuya_.GetPosY() + 2.5f - sakuHead_) * 0.0664f;
-			distance_ += (3.5f - distance_) * 0.0664f;
+			sakuHead_ += (pmSakuya_.GetPosY() + 2.0f - sakuHead_) * 0.0664f;
+			distance_ += (4.0f - distance_) * 0.0664f;
 		}
 
 		cmr.SetFocus(pmSakuya_.GetPosX(), sakuHead_, pmSakuya_.GetPosZ());

@@ -15,7 +15,7 @@ private:
 	Texture texWall_;
 
 public:
-	void Init(WrapCamera& cmr)
+	void Init(WrapCamera& cmr, ShadowCamera& scmr)
 	{
 		texWall_.LoadImageFromFile("data/TEXTURE/grid05.bmp");
 
@@ -24,20 +24,24 @@ public:
 		cbNorth_.SetScale(80.0f, 140.0f, 0.0f);
 		cbNorth_.SetDelimitedTexture(texWall_, 0.0f, 0.0f, 8.0f, 14.0f);
 		cbNorth_.SetRotate(0.0f, ideaPI * 1.0f, 0.0f);
+		cbNorth_.SetShadow(scmr);
 
 		cbSouth_.Init(0.0f, 70.0f, -40.0f);
 		cbSouth_.SetScale(80.0f, 140.0f, 0.0f);
 		cbSouth_.SetDelimitedTexture(texWall_, 0.0f, 0.0f, 8.0f, 14.0f);
+		cbSouth_.SetShadow(scmr);
 
 		cbWest_.Init(40.0f, 70.0f, 0.0f);
 		cbWest_.SetScale(80.0f, 140.0f, 0.0f);
 		cbWest_.SetDelimitedTexture(texWall_, 0.0f, 0.0f, 8.0f, 14.0f);
 		cbWest_.SetRotate(0.0f, ideaPI * 0.5f, 0.0f);
+		cbWest_.SetShadow(scmr);
 
 		cbEast_.Init(-40.0f, 70.0f, 0.0f);
 		cbEast_.SetScale(80.0f, 140.0f, 0.0f);
 		cbEast_.SetDelimitedTexture(texWall_, 0.0f, 0.0f, 8.0f, 14.0f);
 		cbEast_.SetRotate(0.0f, ideaPI * 1.5f, 0.0f);
+		cbEast_.SetShadow(scmr);
 
 		cmr.AddObject(cbSouth_);
 		cmr.AddObject(cbNorth_);

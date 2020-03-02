@@ -74,6 +74,10 @@ void FbxModel::SetupNode(FbxNode* pNode, std::string parentName, int faceStart, 
 				vertex.nor.x = (float)nor.mData[0];
 				vertex.nor.y = (float)nor.mData[2];
 				vertex.nor.z = (float)nor.mData[1];
+				vertex.color.r = 1.0f;
+				vertex.color.g = 1.0f;
+				vertex.color.b = 1.0f;
+				vertex.color.a = 1.0f;
 				FbxStringList	uvsetName;
 				pMesh->GetUVSetNames(uvsetName);
 				FbxString name = uvsetName.GetStringAt(0);

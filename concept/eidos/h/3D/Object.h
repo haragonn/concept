@@ -17,6 +17,7 @@ struct MeshVertexData
 {
 	Vector3D pos;
 	Vector3D nor;
+	Color color;
 	Vector2D tex;
 };
 

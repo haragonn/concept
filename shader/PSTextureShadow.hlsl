@@ -1,3 +1,4 @@
+Texture2D<float4> myTexture : register(t0);
 Texture2D<float> shadowTexture : register(t1);
 SamplerState mySampler : register(s0);
 
@@ -29,5 +30,6 @@ float4 main(VS_OUT input) : SV_TARGET
 		}
 	}
 
-	return input.col;
+	clip(myTexture.Sample(mySampler, input.tex).w - 1.175494351e-38f);
+	return myTexture.Sample(mySampler, input.tex) * input.col;
 }
