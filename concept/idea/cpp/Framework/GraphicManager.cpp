@@ -802,6 +802,7 @@ bool GraphicManager::ChangeDisplayMode(bool bWindowed)
 	pImmediateContext_->OMSetRenderTargets(1, &tRTV, NULL);
 
 	SafeRelease(pDepthStencilView_);
+	SafeRelease(pDepthShaderResourceView_);
 
 	for(int i = RENDER_TARGET_VIEW_MAX - 1; i >= 0; --i){
 		SafeRelease(pRenderTargetViews_[i]);
