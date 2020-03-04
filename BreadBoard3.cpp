@@ -34,11 +34,11 @@ void BreadBoard3::Init()
 
 	im.fnt_.Init(30);
 
-	im.wcmr_.Init(DegreeToRadian(65.5f), S_W / S_H, 0.0001f, 10000.0f, 2.0f);
+	im.wcmr_.Init(DegreeToRadian(65.5f), S_W / S_H, 0.0001f, 10000.0f, 4.0f);
 
-	im.fm_.LoadFbxMeshFromFile("model/PronamaChan_SD.fbx");
+	im.fm_.LoadFbxMeshFromFile("model/PronamaChan_Tshirt.fbx");
 
-	im.fm_.Init(0.0f, -1.0f, 0.0f);
+	im.fm_.Init(0.0f, -2.0f, 0.0f);
 
 	im.wcmr_.AddObject(im.fm_);
 

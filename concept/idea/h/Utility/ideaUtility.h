@@ -54,6 +54,15 @@ inline void SafeRelease(T*& p)
 	}
 }
 
+template <typename T>
+inline void SafeDestroy(T*& p)
+{
+	if(p) {
+		p->Destroy();
+		p = nullptr;
+	}
+}
+
 template <typename T, size_t SIZE>
 size_t ArraySize(const T(&)[SIZE])
 {

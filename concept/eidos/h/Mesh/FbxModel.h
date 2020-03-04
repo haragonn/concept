@@ -9,7 +9,8 @@
 #include "../../../idea/h/Texture/Texture.h"
 #include "../../../idea/h/Utility/ideaMath.h"
 #include "../../../eidos/h/3D/Object.h"
-#include "../../../eidos//h//Mesh/ObjModel.h"
+#include "../../../eidos/h/3D/ObjectManager.h"
+#include "../../../eidos//h/Mesh/ObjModel.h"
 
 class FbxMeshHolder;
 //class FbxManager;
@@ -18,20 +19,14 @@ class FbxMeshHolder;
 struct ID3D11ShaderResourceView;
 struct ID3D11Buffer;
 //
-////マテリアル構造体
-//struct ObjMaterial
-//{
-//	char name[256];
-//	Vector3D ambient;
-//	Vector3D diffuse;
-//	Vector3D specular;
-//	float shininess;
-//	float alpha;
-//	char ambientMapName[256];
-//	char diffuseMapName[256];
-//	char specularMapName[256];
-//	char bumpMapName[256];
-//};
+//マテリアル構造体
+struct Material
+{
+	char* pMaterialName;
+	Color color;
+	const char* pFileName;
+	Texture* pTexture;
+};
 //
 //struct ObjSubset
 //{
@@ -39,13 +34,22 @@ struct ID3D11Buffer;
 //	unsigned int faceStart;
 //	unsigned int faceCount;
 //};
-////頂点構造体
-//struct VertexDataMesh
-//{
-//	Vector3D pos;
-//	Vector3D nor;
-//	Vector2D tex;
-//};
+//頂点構造体
+struct FbxMeshData
+{
+	char* pTextureFileName;
+	Texture* pTexture;
+	unsigned int nNumPolygon;
+	unsigned int nNumPolygonVertex;
+	unsigned int nNumVertex;
+	unsigned int nNumUv;
+	unsigned int nNumIndexUv;
+	VertexData3D* pVd;
+	Vector2D* pTexIndex;
+	unsigned short* pIndexNumber;
+	int* pUvIndexNumber;
+	Color color;
+};
 
 class FbxModel : public Object{
 public:
@@ -69,7 +73,12 @@ private:
 	FbxMesh* pFbxMesh_;
 	ID3D11Buffer* pVertexBuffer_;//頂点バッファ
 	ID3D11Buffer* pIndexBuffer_;//インデックスバッファ
+	std::vector<ID3D11Buffer*> vecVertexBufferPtr_;
+	std::vector<ID3D11Buffer*> vecIndexBufferPtr_;
+
 	std::vector<MeshVertexData> vecVertex_;
+	FbxMeshData* m_pMesh;
+	Material* m_pMaterial;
 	std::vector<ObjSubset> vecSubset_;
 	std::vector<ObjMaterial> vecMaterial_;
 	std::vector<unsigned short> vecIndex_;
@@ -78,6 +87,7 @@ private:
 	unsigned int subsetSize_;
 	unsigned int materialSize_;
 	unsigned int texPtrSize_;
+	unsigned int m_nNumMesh;
 	std::vector<Texture*> vecTexPtr_;
 	bool bStorage_;		// ストレージ使用フラグ
 
