@@ -163,7 +163,7 @@ public:
 			cm *= cameraSpeed;
 			cmr.MoveRotate(cm.x, cm.y);
 			if((set && dash) && cm.Normalized().LengthSquare() > 0.001f && backAccel_ <= 0.0f){
-				pmSakuya_.SetRotate(0.0f, ideaPI - cmr.GetYaw(), 0.0f);
+				pmSakuya_.SetRotate(0.0f, ideaMath::PI - cmr.GetYaw(), 0.0f);
 			}
 		}
 
@@ -198,8 +198,8 @@ public:
 
 		Vector2D move(ctr_.GetLAxisX(), ctr_.GetLAxisY());
 		Vector2D tMove = move;
-		float tmpX = (move.x * cos(cmr.GetYaw()) - move.y * cos(cmr.GetYaw() - ideaPI * 0.5f));
-		float tmpZ = (move.y * cos(cmr.GetYaw()) + move.x * cos(cmr.GetYaw() - ideaPI * 0.5f));
+		float tmpX = (move.x * cos(cmr.GetYaw()) - move.y * cos(cmr.GetYaw() - ideaMath::PI * 0.5f));
+		float tmpZ = (move.y * cos(cmr.GetYaw()) + move.x * cos(cmr.GetYaw() - ideaMath::PI * 0.5f));
 		move.x = tmpX;
 		move.y = tmpZ;
 		move = move.Normalized();
@@ -256,10 +256,10 @@ public:
 			vvvv = cmr.GetPos() - target.GetPos();
 			if(vvvv.Normalized().LengthSquare() > 0.001f){
 				float rad = atan2f(vvvv.z, vvvv.x);
-				if(sinf(rad - cmr.GetYaw() - ideaPI) > sin(DegreeToRadian(90.0f - 39.6f))){
+				if(sinf(rad - cmr.GetYaw() - ideaMath::PI) > sin(DegreeToRadian(90.0f - 39.6f))){
 					concentration_ = 0.1f;
 				}
-				if(sinf(rad - cmr.GetYaw() - ideaPI) > sin(DegreeToRadian(90.0f - 10.0f))){
+				if(sinf(rad - cmr.GetYaw() - ideaMath::PI) > sin(DegreeToRadian(90.0f - 10.0f))){
 					concentration_ = 0.25f;
 				}
 			}
@@ -314,26 +314,26 @@ public:
 		if(!set){
 			if(vv.Normalized().LengthSquare() > 0.001f && backAccel_ <= 0.0f){
 				Vector3D vvv(0.0f, 0.0f, 1.0f);
-				rad2_ = atan2f(vv.z, vv.x) + ideaPI * 0.5f;
+				rad2_ = atan2f(vv.z, vv.x) + ideaMath::PI * 0.5f;
 				pmSakuya_.SetRotate(0.0f, -rad2_, 0.0f);
 			}
 		} else if(!dash){
 			Vector3D vvvv;
 			vvvv = pmSakuya_.GetPos() - target.GetPos();
 			if(vvvv.Normalized().LengthSquare() > 0.001f){
-				rad2_ = -atan2f(vvvv.z, vvvv.x) + ideaPI * 0.5f;
+				rad2_ = -atan2f(vvvv.z, vvvv.x) + ideaMath::PI * 0.5f;
 				pmSakuya_.SetRotate(0.0f, rad2_, 0.0f);
 				cmr.InterruptionWrap();
-				cmr.SetWrapTarget(ideaPI * 1.0f - pmSakuya_.GetRotateY(), DegreeToRadian(10));
+				cmr.SetWrapTarget(ideaMath::PI * 1.0f - pmSakuya_.GetRotateY(), DegreeToRadian(10));
 			}
 		} else{
 			if(vv.Normalized().LengthSquare() > 0.001f && backAccel_ <= 0.0f){
 				Vector3D vvv(0.0f, 0.0f, 1.0f);
-				rad2_ = atan2f(vv.z, vv.x) + ideaPI * 0.5f;
+				rad2_ = atan2f(vv.z, vv.x) + ideaMath::PI * 0.5f;
 				pmSakuya_.SetRotate(0.0f, -rad2_, 0.0f);
 			}
 			//if(set == 1){
-			//	rad_ = ideaPI * 1.0f - pmSakuya_.GetRotateY();
+			//	rad_ = ideaMath::PI * 1.0f - pmSakuya_.GetRotateY();
 			//	cmr.WrapInterruption();
 			//	cmr.WrapTarget(rad_, DegreeToRadian(15));
 			//}
@@ -363,7 +363,7 @@ public:
 			bKacha_ = false;
 			backAccel_ = 3.0f;
 			back = cbSakuya_.GetPos() - obj.GetPos();
-			rad2_ = atan2f(-back.z, -back.x) + ideaPI * 0.5f;
+			rad2_ = atan2f(-back.z, -back.x) + ideaMath::PI * 0.5f;
 			pmSakuya_.SetRotate(0.0f, -rad2_, 0.0f);
 
 			return true;
@@ -383,7 +383,7 @@ public:
 			bKacha_ = false;
 			backAccel_ = 3.0f;
 			back = cbSakuya_.GetPos() - target.GetPos();
-			rad2_ = atan2f(-back.z, -back.x) + ideaPI * 0.5f;
+			rad2_ = atan2f(-back.z, -back.x) + ideaMath::PI * 0.5f;
 			pmSakuya_.SetRotate(0.0f, -rad2_, 0.0f);
 
 			return true;

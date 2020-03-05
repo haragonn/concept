@@ -40,14 +40,14 @@ struct FbxMeshData
 	char* pTextureFileName;
 	Texture* pTexture;
 	unsigned int nNumPolygon;
-	unsigned int nNumPolygonVertex;
+	unsigned int nNumIndex;
 	unsigned int nNumVertex;
 	unsigned int nNumUv;
 	unsigned int nNumIndexUv;
-	VertexData3D* pVd;
-	Vector2D* pTexIndex;
-	unsigned short* pIndexNumber;
-	int* pUvIndexNumber;
+	std::vector<VertexData3D> vecVd;
+	std::vector<Vector2D> vecTexIndex;
+	std::vector<unsigned short> vecIndexNumber;
+	std::vector<int> vecUvIndexNumber;
 	Color color;
 };
 
@@ -77,10 +77,10 @@ private:
 	std::vector<ID3D11Buffer*> vecIndexBufferPtr_;
 
 	std::vector<MeshVertexData> vecVertex_;
-	FbxMeshData* m_pMesh;
-	Material* m_pMaterial;
+	std::vector<FbxMeshData> vecMesh_;
+	std::vector<Material> vecMaterial_;
 	std::vector<ObjSubset> vecSubset_;
-	std::vector<ObjMaterial> vecMaterial_;
+	//std::vector<ObjMaterial> vecMaterial_;
 	std::vector<unsigned short> vecIndex_;
 	unsigned int vertexSize_;
 	unsigned int indexSize_;

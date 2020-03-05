@@ -440,32 +440,32 @@ inline void Billboard::UpdateMatrix(Camera* pCamera)
 	// Šg‘åk¬ˆ—
 	matScale = XMMatrixScaling(scale_.x, scale_.y, 0.0f);
 
-	// 0.0f ` ideaPI * 2.0f‚Ì”ÍˆÍ‚É³‹K‰»
+	// 0.0f ` ideaMath::PI * 2.0f‚Ì”ÍˆÍ‚É³‹K‰»
 	while(rot_.x < 0.0f)
 	{
-		rot_.x += ideaPI * 2.0f;
+		rot_.x += ideaMath::PI * 2.0f;
 	}
-	while(rot_.x > ideaPI * 2.0f)
+	while(rot_.x > ideaMath::PI * 2.0f)
 	{
-		rot_.x -= ideaPI * 2.0f;
+		rot_.x -= ideaMath::PI * 2.0f;
 	}
 
 	while(rot_.y < 0.0f)
 	{
-		rot_.y += ideaPI * 2.0f;
+		rot_.y += ideaMath::PI * 2.0f;
 	}
-	while(rot_.y > ideaPI * 2.0f)
+	while(rot_.y > ideaMath::PI * 2.0f)
 	{
-		rot_.y -= ideaPI * 2.0f;
+		rot_.y -= ideaMath::PI * 2.0f;
 	}
 
 	while(rot_.z < 0.0f)
 	{
-		rot_.z += ideaPI * 2.0f;
+		rot_.z += ideaMath::PI * 2.0f;
 	}
-	while(rot_.z > ideaPI * 2.0f)
+	while(rot_.z > ideaMath::PI * 2.0f)
 	{
-		rot_.z -= ideaPI * 2.0f;
+		rot_.z -= ideaMath::PI * 2.0f;
 	}
 
 	// ‰ñ“]ˆ—

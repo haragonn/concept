@@ -45,6 +45,7 @@ private:
 
 	std::atomic<bool> bReady_;			// 実行準備
 	std::atomic<Scene*> pInitScene_;	// 初期シーン
+	bool bExit_;						// 終了フラグ
 
 	bool bOnWindowed_;			// ウィンドウ時のマウスカーソル
 	bool bOnFullscreen_;		// フルスクリーン時のマウスカーソル

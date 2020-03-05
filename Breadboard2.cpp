@@ -112,8 +112,8 @@ Scene * BreadBoard2::Update()
 
 	Vector2D move(im.ctr_.GetLAxisX(), im.ctr_.GetLAxisY());
 	Vector2D tMove = move;
-	float tmpX = (move.x * cos(im.wcmr_.GetYaw()) - move.y * cos(im.wcmr_.GetYaw() - ideaPI * 0.5f));
-	float tmpZ = (move.y * cos(im.wcmr_.GetYaw()) + move.x * cos(im.wcmr_.GetYaw() - ideaPI * 0.5f));
+	float tmpX = (move.x * cos(im.wcmr_.GetYaw()) - move.y * cos(im.wcmr_.GetYaw() - ideaMath::PI * 0.5f));
+	float tmpZ = (move.y * cos(im.wcmr_.GetYaw()) + move.x * cos(im.wcmr_.GetYaw() - ideaMath::PI * 0.5f));
 	move.x = tmpX;
 	move.y = tmpZ;
 	move = move.Normalized();

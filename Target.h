@@ -234,14 +234,14 @@ public:
 			Vector3D vvvv;
 			vvvv = cbTarget_.GetPos() - player.GetPos();
 			if(vvvv.Normalized().LengthSquare() > 0.001f){
-				rad2 = -atan2f(vvvv.z, vvvv.x) + ideaPI * 0.5f;
+				rad2 = -atan2f(vvvv.z, vvvv.x) + ideaMath::PI * 0.5f;
 				q2 = Quaternion::Euler(0.0f, rad2, 0.0f);
 			}
 		} else if(attack_ <= 100){
 			Vector3D vvvv;
 			vvvv = cbTarget_.GetPos() - player.GetPos();
 			if(vvvv.Normalized().LengthSquare() > 0.001f){
-				rad2 = -atan2f(vvvv.z, vvvv.x) + ideaPI * 0.5f;
+				rad2 = -atan2f(vvvv.z, vvvv.x) + ideaMath::PI * 0.5f;
 				q2 = Quaternion::Euler(0.0f, rad2, 0.0f);
 			}
 		}
@@ -276,7 +276,7 @@ public:
 		}
 
 		cbAttack_[0].SetRotate(0.0f, cbTarget_.GetRotateY(), 0.00f);
-		cbAttack_[1].SetRotate(0.0f, cbTarget_.GetRotateY() + ideaPI * 0.5f, 0.00f);
+		cbAttack_[1].SetRotate(0.0f, cbTarget_.GetRotateY() + ideaMath::PI * 0.5f, 0.00f);
 		cbAttack_[2].SetRotate(0.0f, cbTarget_.GetRotateY(), 0.00f);
 
 		static float ff = 0.0f;

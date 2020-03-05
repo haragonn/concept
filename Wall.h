@@ -23,7 +23,7 @@ public:
 		cbNorth_.Init(0.0f, 70.0f, 40.0f);
 		cbNorth_.SetScale(80.0f, 140.0f, 0.0f);
 		cbNorth_.SetDelimitedTexture(texWall_, 0.0f, 0.0f, 8.0f, 14.0f);
-		cbNorth_.SetRotate(0.0f, ideaPI * 1.0f, 0.0f);
+		cbNorth_.SetRotate(0.0f, ideaMath::PI * 1.0f, 0.0f);
 		cbNorth_.SetShadow(scmr);
 
 		cbSouth_.Init(0.0f, 70.0f, -40.0f);
@@ -34,13 +34,13 @@ public:
 		cbWest_.Init(40.0f, 70.0f, 0.0f);
 		cbWest_.SetScale(80.0f, 140.0f, 0.0f);
 		cbWest_.SetDelimitedTexture(texWall_, 0.0f, 0.0f, 8.0f, 14.0f);
-		cbWest_.SetRotate(0.0f, ideaPI * 0.5f, 0.0f);
+		cbWest_.SetRotate(0.0f, ideaMath::PI * 0.5f, 0.0f);
 		cbWest_.SetShadow(scmr);
 
 		cbEast_.Init(-40.0f, 70.0f, 0.0f);
 		cbEast_.SetScale(80.0f, 140.0f, 0.0f);
 		cbEast_.SetDelimitedTexture(texWall_, 0.0f, 0.0f, 8.0f, 14.0f);
-		cbEast_.SetRotate(0.0f, ideaPI * 1.5f, 0.0f);
+		cbEast_.SetRotate(0.0f, ideaMath::PI * 1.5f, 0.0f);
 		cbEast_.SetShadow(scmr);
 
 		cmr.AddObject(cbSouth_);
@@ -49,20 +49,20 @@ public:
 		cmr.AddObject(cbEast_);
 
 		for(int i = 32 - 1; i >= 0; --i){
-			cbNorthViwe_[i].Init(1.5625f * 2.0f * i - 50.0f, 5.0f, 40.0f - 9 * ROOT2);
+			cbNorthViwe_[i].Init(1.5625f * 2.0f * i - 50.0f, 5.0f, 40.0f - 9 * ideaMath::ROOT2);
 			cbNorthViwe_[i].SetScale(10.0f, 10.0f, 10.0f);
-			cbNorthViwe_[i].SetRotate(0.0f, ideaPI * 1.0f, 0.0f);
+			cbNorthViwe_[i].SetRotate(0.0f, ideaMath::PI * 1.0f, 0.0f);
 
-			cbSouthViwe_[i].Init(1.5625f * 2.0f * i - 50.0f, 5.0f, -40.0f - 9 * ROOT2);
+			cbSouthViwe_[i].Init(1.5625f * 2.0f * i - 50.0f, 5.0f, -40.0f - 9 * ideaMath::ROOT2);
 			cbSouthViwe_[i].SetScale(10.0f, 10.0f, 10.0f);
 
-			cbWestViwe_[i].Init(40.0f - 9 * ROOT2, 5.0f, 1.5625f * 2.0f * i - 50.0f);
+			cbWestViwe_[i].Init(40.0f - 9 * ideaMath::ROOT2, 5.0f, 1.5625f * 2.0f * i - 50.0f);
 			cbWestViwe_[i].SetScale(10.0f, 10.0f, 10.0f);
-			cbWestViwe_[i].SetRotate(0.0f, ideaPI * 0.5f, 0.0f);
+			cbWestViwe_[i].SetRotate(0.0f, ideaMath::PI * 0.5f, 0.0f);
 
-			cbEastViwe_[i].Init(-40.0f - 9 * ROOT2, 5.0f, 1.5625f * 2.0f * i - 50.0f);
+			cbEastViwe_[i].Init(-40.0f - 9 * ideaMath::ROOT2, 5.0f, 1.5625f * 2.0f * i - 50.0f);
 			cbEastViwe_[i].SetScale(10.0f, 10.0f, 10.0f);
-			cbEastViwe_[i].SetRotate(0.0f, ideaPI * 1.5f, 0.0f);
+			cbEastViwe_[i].SetRotate(0.0f, ideaMath::PI * 1.5f, 0.0f);
 
 			//cmr.AddObject(cbNorthViwe_[i]);
 			//cmr.AddObject(cbSouthViwe_[i]);

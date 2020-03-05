@@ -5,52 +5,6 @@
 
 using namespace DirectX;
 
-Matrix4x4 Matrix4x4::Inverse()const
-{
-	XMMATRIX xmat = XMMatrixIdentity();
-
-	for(int i = 4 - 1; i >= 0; --i){
-		for(int j = 4 - 1; j >= 0; --j){
-			xmat.r[i].m128_f32[j] = r[i][j];
-		}
-	}
-
-	XMMATRIX ximat = XMMatrixInverse(nullptr, xmat);
-
-	Matrix4x4 imat;
-
-	for(int i = 4 - 1; i >= 0; --i){
-		for(int j = 4 - 1; j >= 0; --j){
-			imat.r[i][j] = ximat.r[i].m128_f32[j];
-		}
-	}
-
-	return imat;
-}
-
-float Bezier(float x, Vector2D p1, Vector2D p2, unsigned int n)
-{
-	if(p1.x == p1.y && p2.x == p2.y){ return x; }
-
-	const float k0 = 1.0f + 3.0f * p1.x - 3.0f * p2.x;
-	const float k1 = 3.0f * p2.x - 6.0f * p1.x;
-	const float k2 = 3.0f * p1.x;
-
-	float t = x;
-
-	for(unsigned int i = 0U; i < n; ++i){
-		float ft = k0 * t * t * t + k1 * t * t + k2 * t - x;
-
-		if(abs(ft) <= 0.0000001f){ break; }
-
-		t -= ft * 0.5f;
-	}
-
-	float r = 1.0f - t;
-
-	return t * t * t + 3.0f * t * t * r * p2.y + 3.0f * t * r * r * p1.y;
-}
-
 Quaternion Lerp::Linear(Quaternion & q1, Quaternion & q2, float t)
 {
 	if(t > 1.0f){ t = 1.0f; }

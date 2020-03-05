@@ -171,9 +171,9 @@ void Actor2D::SetRotate(float rad)
 	rad_ = rad;
 
 	// ³‹K‰»
-	rad_ = fmodf(rad_, ideaPI * 2.0f);
+	rad_ = fmodf(rad_, ideaMath::PI * 2.0f);
 	if(rad_ < 0.0f){
-		rad_ += ideaPI * 2.0f;
+		rad_ += ideaMath::PI * 2.0f;
 	}
 }
 
@@ -187,9 +187,9 @@ void Actor2D::MoveRotate(float rad)
 	rad_ += rad;
 
 	// ³‹K‰»
-	rad_ = fmodf(rad_, ideaPI * 2.0f);
+	rad_ = fmodf(rad_, ideaMath::PI * 2.0f);
 	if(rad_ < 0.0f){
-		rad_ += ideaPI * 2.0f;
+		rad_ += ideaMath::PI * 2.0f;
 	}
 }
 
@@ -218,7 +218,7 @@ void Actor2D::SetColor(float r, float g, float b, float a)
 //------------------------------------------------------------------------------
 bool Actor2D::CheckHitRect(const Actor2D& target)
 {
-	if(abs(rad_) < EPSILON && abs(target.rad_) < EPSILON){	// ‰ñ“]‚µ‚Ä‚¢‚È‚¢‹éŒ`“¯m‚©‚Ç‚¤‚©
+	if(abs(rad_) < ideaMath::EPSILON && abs(target.rad_) < ideaMath::EPSILON){	// ‰ñ“]‚µ‚Ä‚¢‚È‚¢‹éŒ`“¯m‚©‚Ç‚¤‚©
 		// ’¸“_î•ñ
 		float x1 = pos_.x - size_.x * 0.5f;
 		float x2 = pos_.x + size_.x * 0.5f;
@@ -468,7 +468,7 @@ bool Actor2D::CheckHitCircle(const Actor2D& target)
 //------------------------------------------------------------------------------
 float Actor2D::GetRelation(const Actor2D& target)
 {
-	return ideaPI - atan2f(target.pos_.x - pos_.x, target.pos_.y - pos_.y);
+	return ideaMath::PI - atan2f(target.pos_.x - pos_.x, target.pos_.y - pos_.y);
 }
 
 //------------------------------------------------------------------------------
@@ -478,7 +478,7 @@ float Actor2D::GetRelation(const Actor2D& target)
 //------------------------------------------------------------------------------
 float Actor2D::GetPreFrameRelation(const Actor2D& target)
 {
-	return ideaPI - atan2f(target.prePos_.x - prePos_.x, target.prePos_.y - prePos_.y);
+	return ideaMath::PI - atan2f(target.prePos_.x - prePos_.x, target.prePos_.y - prePos_.y);
 }
 
 //------------------------------------------------------------------------------

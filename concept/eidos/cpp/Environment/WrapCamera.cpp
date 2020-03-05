@@ -9,7 +9,7 @@ using namespace DirectX;
 WrapCamera::WrapCamera() :
 	farZ_(1000.0f),
 	distance_(1.0f),
-	pitchThreshold_(- ideaPI, ideaPI),
+	pitchThreshold_(- ideaMath::PI, ideaMath::PI),
 	isWrap_(false)
 {
 }
@@ -27,7 +27,7 @@ void WrapCamera::Init(float viewAngle, float aspect, float nearZ, float farZ, fl
 
 	targetQtn_ = qtn_ = Quaternion::Euler(0.0f, 0.0f, 0.0f);
 
-	pitchThreshold_ = Vector2D(-ideaPI * 0.4925f, ideaPI * 0.4925f);
+	pitchThreshold_ = Vector2D(-ideaMath::PI * 0.4925f, ideaMath::PI * 0.4925f);
 
 	t_ = 0.0f;
 
@@ -118,11 +118,11 @@ void WrapCamera::MoveRotate(float yaw, float pitch, float speed)
 
 void WrapCamera::SetPitchThreshold(Vector2D pitch)
 {
-	if(pitch.x < -ideaPI * 0.4925f){
-		pitch.x = -ideaPI * 0.4925f;
+	if(pitch.x < -ideaMath::PI * 0.4925f){
+		pitch.x = -ideaMath::PI * 0.4925f;
 	}
-	if(pitch.y > ideaPI * 0.4925f){
-		pitch.y = ideaPI * 0.4925f;
+	if(pitch.y > ideaMath::PI * 0.4925f){
+		pitch.y = ideaMath::PI * 0.4925f;
 	}
 
 	if(pitch.x <= pitch.y){
@@ -145,14 +145,14 @@ void WrapCamera::SetWrapTarget(Vector2D rot)
 		startQtn_ = qtn_;
 
 		// ê≥ãKâª
-		rot.x = fmodf(rot.x, ideaPI * 2.0f);
+		rot.x = fmodf(rot.x, ideaMath::PI * 2.0f);
 		if(rot.x < 0.0f){
-			rot.x += ideaPI * 2.0f;
+			rot.x += ideaMath::PI * 2.0f;
 		}
 
-		rot.y = fmodf(rot.y, ideaPI * 2.0f);
+		rot.y = fmodf(rot.y, ideaMath::PI * 2.0f);
 		if(rot.y < 0.0f){
-			rot.y += ideaPI * 2.0f;
+			rot.y += ideaMath::PI * 2.0f;
 		}
 
 		targetQtn_ = Quaternion::Euler(rot.y, rot.x, 0.0f);
@@ -197,37 +197,37 @@ void WrapCamera::UpdatePosition()
 	rot_.y = qtn_.ToEuler().x;
 
 	// ê≥ãKâª
-	rot_.x = fmodf(rot_.x, ideaPI * 2.0f);
+	rot_.x = fmodf(rot_.x, ideaMath::PI * 2.0f);
 	if(rot_.x < 0.0f){
-		rot_.x += ideaPI * 2.0f;
+		rot_.x += ideaMath::PI * 2.0f;
 	}
 
-	rot_.y = fmodf(rot_.y, ideaPI * 2.0f);
+	rot_.y = fmodf(rot_.y, ideaMath::PI * 2.0f);
 	if(rot_.y < 0.0f){
-		rot_.y += ideaPI * 2.0f;
+		rot_.y += ideaMath::PI * 2.0f;
 	}
 
 	// Ëáíl
 	Vector2D tmpRot = rot_;
 
-	if(tmpRot.y > ideaPI){
-		tmpRot.y = tmpRot.y - ideaPI * 2.0f;
+	if(tmpRot.y > ideaMath::PI){
+		tmpRot.y = tmpRot.y - ideaMath::PI * 2.0f;
 	}
 
 	if(tmpRot.y < pitchThreshold_.x){
-		rot_.y = pitchThreshold_.x + ideaPI * 2.0f;
-		while(rot_.y > ideaPI * 2.0f)
+		rot_.y = pitchThreshold_.x + ideaMath::PI * 2.0f;
+		while(rot_.y > ideaMath::PI * 2.0f)
 		{
-			rot_.y -= ideaPI * 2.0f;
+			rot_.y -= ideaMath::PI * 2.0f;
 		}
 	}else if(tmpRot.y > pitchThreshold_.y){
 		rot_.y = pitchThreshold_.y;
 	}
 
 	// upÇÃèCê≥
-	if(rot_.y < ideaPI * 0.5f){
+	if(rot_.y < ideaMath::PI * 0.5f){
 		upY_ = 1.0f;
-	} else if(rot_.y < ideaPI * 1.5f){
+	} else if(rot_.y < ideaMath::PI * 1.5f){
 		upY_ = -1.0f;
 	} else{
 		upY_ = 1.0f;

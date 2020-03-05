@@ -38,7 +38,7 @@ FbxModel::FbxModel() :
 {
 	vector<MeshVertexData>().swap(vecVertex_);
 	vector<ObjSubset>().swap(vecSubset_);
-	vector<ObjMaterial>().swap(vecMaterial_);
+	vector<Material>().swap(vecMaterial_);
 	vector<WORD>().swap(vecIndex_);
 	vector<Texture*>().swap(vecTexPtr_);
 }
@@ -188,7 +188,13 @@ bool FbxModel::LoadFbxMeshFromFile(const char * pFileName)
 	pFbxScene_ = FbxScene::Create(pFbxManager_, "Scene");
 
 	FbxImporter *fbxImporter = FbxImporter::Create(pFbxManager_, "Importer");
-	fbxImporter->Initialize(pFileName, -1, pFbxManager_->GetIOSettings());
+	bool hr =fbxImporter->Initialize(pFileName, -1, pFbxManager_->GetIOSettings());
+	if(!hr){
+		SafeDestroy(fbxImporter);
+		pFbxScene_->Destroy();
+		pFbxManager_->Destroy();
+		return false;
+	}
 	fbxImporter->Import(pFbxScene_);
 	SafeDestroy(fbxImporter);
 
@@ -204,6 +210,9 @@ bool FbxModel::LoadFbxMeshFromFile(const char * pFileName)
 	// 三角ポリゴン化
 	geometryConverter.Triangulate(pFbxScene_, true);
 
+	// 縮退ポリゴンの削除
+	geometryConverter.RemoveBadPolygonsFromMeshes(pFbxScene_);
+
 	// マテリアルごとにメッシュを分離
 	geometryConverter.SplitMeshesPerMaterial(pFbxScene_, true);
 
@@ -215,16 +224,16 @@ bool FbxModel::LoadFbxMeshFromFile(const char * pFileName)
 	m_nNumMesh = pFbxScene_->GetSrcObjectCount<FbxMesh>();
 	int nNumMaterial = pFbxScene_->GetMaterialCount();
 
-	m_pMesh = new FbxMeshData[m_nNumMesh];
-	m_pMaterial = new Material[nNumMaterial];
+	vecMesh_.resize(m_nNumMesh);
+	vecMaterial_.resize(nNumMaterial);
 
 	for(unsigned int i = 0; i < m_nNumMesh; i++)
 	{
-		m_pMesh[i].pTexture = nullptr;
+		vecMesh_[i].pTexture = nullptr;
 	}
 	for(int i = 0; i < nNumMaterial; i++)
 	{
-		m_pMaterial[i].pTexture = nullptr;
+		vecMaterial_[i].pTexture = nullptr;
 	}
 	//FbxArray<FbxString*> animation_names;
 	//FbxTime start_time, end_time;
@@ -243,7 +252,7 @@ bool FbxModel::LoadFbxMeshFromFile(const char * pFileName)
 
 		FbxSurfaceMaterial* material = pFbxScene_->GetMaterial(i);
 		// materialはKFbxSurfaceMaterialオブジェクト
-		m_pMaterial[i].pMaterialName = (char*)material->GetName();
+		vecMaterial_[i].pMaterialName = (char*)material->GetName();
 
 		// LambertかPhongか
 		if(material->GetClassId().Is(FbxSurfaceLambert::ClassId))
@@ -252,10 +261,10 @@ bool FbxModel::LoadFbxMeshFromFile(const char * pFileName)
 			lambert = (FbxSurfaceLambert*)material;
 
 			FbxDouble3 diffuse = lambert->Diffuse;
-			m_pMaterial[i].color.r = (float)diffuse[0];
-			m_pMaterial[i].color.g = (float)diffuse[1];
-			m_pMaterial[i].color.b = (float)diffuse[2];
-			m_pMaterial[i].color.a = (float)diffuse[3];
+			vecMaterial_[i].color.r = (float)diffuse[0];
+			vecMaterial_[i].color.g = (float)diffuse[1];
+			vecMaterial_[i].color.b = (float)diffuse[2];
+			vecMaterial_[i].color.a = (float)diffuse[3];
 		} else if(material->GetClassId().Is(FbxSurfacePhong::ClassId))
 		{
 			// Phongにダウンキャスト
@@ -265,7 +274,7 @@ bool FbxModel::LoadFbxMeshFromFile(const char * pFileName)
 
 		// ディフューズプロパティを検索
 		FbxProperty property = material->FindProperty(FbxSurfaceMaterial::sDiffuse);
-		m_pMesh[i].pTextureFileName = NULL;
+		vecMesh_[i].pTextureFileName = NULL;
 		// プロパティが持っているレイヤードテクスチャの枚数をチェック
 		int layerNum = property.GetSrcObjectCount<FbxLayeredTexture>();
 		// レイヤードテクスチャが無ければ通常テクスチャ
@@ -274,7 +283,7 @@ bool FbxModel::LoadFbxMeshFromFile(const char * pFileName)
 			// 通常テクスチャの枚数をチェック
 			int numGeneralTexture = property.GetSrcObjectCount<FbxFileTexture>();
 			numGeneralTexture = numGeneralTexture > 0 ? 1 : 0;///
-			m_pMesh[i].pTextureFileName = NULL;
+			vecMesh_[i].pTextureFileName = NULL;
 			// 各テクスチャについてテクスチャ情報をゲット
 			for(int clusterCnt = 0; clusterCnt < numGeneralTexture; ++clusterCnt)
 			{
@@ -290,13 +299,13 @@ bool FbxModel::LoadFbxMeshFromFile(const char * pFileName)
 				AddDirectoryPath(textureName, s);
 				vecTexPtr_[vecTexPtr_.size() - 1]->LoadImageFromFile(textureName.c_str());
 
-				m_pMaterial[i].pFileName = textureName.c_str();
-				m_pMaterial[i].pTexture = pTex;
+				vecMaterial_[i].pFileName = textureName.c_str();
+				vecMaterial_[i].pTexture = pTex;
 			}
 
 			if(numGeneralTexture == 0)
 			{
-				m_pMaterial[i].pFileName = "NULL";
+				vecMaterial_[i].pFileName = "NULL";
 
 				const FbxImplementation* pImplementation = GetImplementation(material, FBXSDK_IMPLEMENTATION_CGFX);
 
@@ -329,8 +338,8 @@ bool FbxModel::LoadFbxMeshFromFile(const char * pFileName)
 								AddDirectoryPath(textureName, s);
 								vecTexPtr_[vecTexPtr_.size() - 1]->LoadImageFromFile(textureName.c_str());
 
-								m_pMaterial[i].pFileName = textureName.c_str();
-								m_pMaterial[i].pTexture = pTex;
+								vecMaterial_[i].pFileName = textureName.c_str();
+								vecMaterial_[i].pTexture = pTex;
 							}
 						}
 					}
@@ -338,8 +347,8 @@ bool FbxModel::LoadFbxMeshFromFile(const char * pFileName)
 			}
 		} else
 		{
-			m_pMaterial[i].pFileName = "NULL";
-			m_pMaterial[i].pTexture = nullptr;
+			vecMaterial_[i].pFileName = "NULL";
+			vecMaterial_[i].pTexture = nullptr;
 		}
 	}
 
@@ -353,12 +362,7 @@ bool FbxModel::LoadFbxMeshFromFile(const char * pFileName)
 		if(mesh != NULL)
 		{
 			//頂点//////////////////////////////////////////////////
-			m_pMesh[meshCnt].nNumPolygon = mesh->GetPolygonCount();//総ポリゴン数
-			m_pMesh[meshCnt].nNumPolygonVertex = mesh->GetPolygonVertexCount();//ポリゴン頂点インデックス
-			m_pMesh[meshCnt].nNumVertex = mesh->GetControlPointsCount();//頂点数
-			FbxVector4* src = mesh->GetControlPoints();//頂点座標配列
-
-			m_pMesh[meshCnt].pVd = new VertexData3D[m_pMesh[meshCnt].nNumVertex];
+			vecMesh_[meshCnt].nNumPolygon = mesh->GetPolygonCount();//総ポリゴン数
 			//m_pMesh[meshCnt].pBoneIndex = new VECTOR4[m_pMesh[meshCnt].nNumVertex];
 			//m_pMesh[meshCnt].pWeight = new VECTOR4[m_pMesh[meshCnt].nNumVertex];
 			//for(int i = 0; i < 4; i++)
@@ -367,73 +371,92 @@ bool FbxModel::LoadFbxMeshFromFile(const char * pFileName)
 			//	m_pMesh[meshCnt].weight[i] = new float[m_pMesh[meshCnt].nNumVertex];
 			//}
 
-			for(unsigned int i = 0; i < m_pMesh[meshCnt].nNumVertex; ++i)
+			vecMesh_[meshCnt].nNumVertex = mesh->GetControlPointsCount();//頂点数
+
+			FbxVector4* src = mesh->GetControlPoints();//頂点座標配列
+
+			vecMesh_[meshCnt].vecVd.resize(vecMesh_[meshCnt].nNumVertex);
+
+			for(unsigned int i = 0; i < vecMesh_[meshCnt].nNumVertex; ++i)
 			{
-				m_pMesh[meshCnt].pVd[i].pos.x = (float)src[i][0];
-				m_pMesh[meshCnt].pVd[i].pos.y = (float)src[i][2];
-				m_pMesh[meshCnt].pVd[i].pos.z = (float)src[i][1];
-				m_pMesh[meshCnt].pVd[i].color.x = 1.0f;
-				m_pMesh[meshCnt].pVd[i].color.y = 1.0f;
-				m_pMesh[meshCnt].pVd[i].color.z = 1.0f;
-				m_pMesh[meshCnt].pVd[i].color.w = 1.0f;
+				vecMesh_[meshCnt].vecVd[i].pos.x = (float)src[i][0];
+				vecMesh_[meshCnt].vecVd[i].pos.y = (float)src[i][2];
+				vecMesh_[meshCnt].vecVd[i].pos.z = (float)src[i][1];
+				vecMesh_[meshCnt].vecVd[i].color.x = 1.0f;
+				vecMesh_[meshCnt].vecVd[i].color.y = 1.0f;
+				vecMesh_[meshCnt].vecVd[i].color.z = 1.0f;
+				vecMesh_[meshCnt].vecVd[i].color.w = 1.0f;
 			}
 
-			m_pMesh[meshCnt].pIndexNumber = new unsigned short[m_pMesh[meshCnt].nNumPolygonVertex];
+			vecMesh_[meshCnt].nNumIndex = mesh->GetPolygonVertexCount();//ポリゴン頂点インデックス
+
+			vecMesh_[meshCnt].vecIndexNumber.resize(vecMesh_[meshCnt].nNumIndex);
+
 			int* IndexVertices = mesh->GetPolygonVertices();
-			for(unsigned int i = 0; i < m_pMesh[meshCnt].nNumPolygonVertex; ++i)
+			for(unsigned int i = 0; i < vecMesh_[meshCnt].nNumIndex; ++i)
 			{
-				m_pMesh[meshCnt].pIndexNumber[i] = IndexVertices[i];
+				vecMesh_[meshCnt].vecIndexNumber[i] = (unsigned short)IndexVertices[i];
 			}
 
 			//法線//////////////////////////////////////////////////
 			int LayerCount = mesh->GetLayerCount();
-			for(int i = 0; i < LayerCount; i++)
+			for(int i = 0; i < LayerCount; ++i)
 			{
 				FbxLayer* layer = mesh->GetLayer(i);
-				FbxLayerElementNormal* normalLayer = layer->GetNormals();
+				FbxLayerElementNormal* normalLayer = mesh->GetElementNormal(i);
 				if(normalLayer == 0)
 				{
 					continue;//法線ない
 				}
 
+				auto pElementTangent = mesh->GetElementTangent(i);
+				auto pElementBinormal = mesh->GetElementBinormal(i);
+
 				//法線の数・インデックス
 				unsigned int normalCount = normalLayer->GetDirectArray().GetCount();
 
-				Vector3D* normals = new Vector3D[normalCount];
+				vector<Vector3D> normals;
+				normals.resize(normalCount);
 
-				//マッピングモード・リファレンスモード取得
-				FbxLayerElement::EMappingMode mappingMode = normalLayer->GetMappingMode();
-				FbxLayerElement::EReferenceMode referencegMode = normalLayer->GetReferenceMode();
-
-				if(mappingMode == FbxLayerElement::eByPolygonVertex)
+				for(unsigned int count = 0; count < normalCount; ++count)
 				{
-					if(referencegMode == FbxLayerElement::eDirect)
-					{
-						for(unsigned int clusterCnt = 0; clusterCnt < normalCount; clusterCnt++)
-						{
-							normals[clusterCnt].x = (float)normalLayer->GetDirectArray().GetAt(clusterCnt)[0];
-							normals[clusterCnt].y = (float)normalLayer->GetDirectArray().GetAt(clusterCnt)[2];
-							normals[clusterCnt].z = (float)normalLayer->GetDirectArray().GetAt(clusterCnt)[1];
-						}
-					}
-				} else if(mappingMode == FbxLayerElement::eByControlPoint)
-				{
-					if(referencegMode == FbxLayerElement::eDirect)
-					{
-						for(unsigned int clusterCnt = 0; clusterCnt < normalCount; clusterCnt++)
-						{
-							normals[clusterCnt].x = (float)normalLayer->GetDirectArray().GetAt(clusterCnt)[0];
-							normals[clusterCnt].y = (float)normalLayer->GetDirectArray().GetAt(clusterCnt)[2];
-							normals[clusterCnt].z = (float)normalLayer->GetDirectArray().GetAt(clusterCnt)[1];
-						}
-					}
+					normals[count].x = (float)normalLayer->GetDirectArray()[count][0];
+					normals[count].y = (float)normalLayer->GetDirectArray()[count][2];
+					normals[count].z = (float)normalLayer->GetDirectArray()[count][1];
 				}
+				//マッピングモード・リファレンスモード取得
+				//FbxLayerElement::EMappingMode mappingMode = normalLayer->GetMappingMode();
+				//FbxLayerElement::EReferenceMode referencegMode = normalLayer->GetReferenceMode();
 
-				for(unsigned int i = 0; i < m_pMesh[meshCnt].nNumPolygonVertex; ++i)
+				//if(mappingMode == FbxLayerElement::eByPolygonVertex)
+				//{
+				//	if(referencegMode == FbxLayerElement::eDirect)
+				//	{
+				//		for(unsigned int clusterCnt = 0; clusterCnt < normalCount; clusterCnt++)
+				//		{
+				//			normals[clusterCnt].x = (float)normalLayer->GetDirectArray().GetAt(clusterCnt)[0];
+				//			normals[clusterCnt].y = (float)normalLayer->GetDirectArray().GetAt(clusterCnt)[2];
+				//			normals[clusterCnt].z = (float)normalLayer->GetDirectArray().GetAt(clusterCnt)[1];
+				//		}
+				//	}
+				//} else if(mappingMode == FbxLayerElement::eByControlPoint)
+				//{
+				//	if(referencegMode == FbxLayerElement::eDirect)
+				//	{
+				//		for(unsigned int clusterCnt = 0; clusterCnt < normalCount; clusterCnt++)
+				//		{
+				//			normals[clusterCnt].x = (float)normalLayer->GetDirectArray().GetAt(clusterCnt)[0];
+				//			normals[clusterCnt].y = (float)normalLayer->GetDirectArray().GetAt(clusterCnt)[2];
+				//			normals[clusterCnt].z = (float)normalLayer->GetDirectArray().GetAt(clusterCnt)[1];
+				//		}
+				//	}
+				//}
+
+				for(unsigned int i = 0; i < normalCount; ++i)
 				{
-					m_pMesh[meshCnt].pVd[m_pMesh[meshCnt].pIndexNumber[i]].nor.x = normals[i].x;
-					m_pMesh[meshCnt].pVd[m_pMesh[meshCnt].pIndexNumber[i]].nor.y = normals[i].y;
-					m_pMesh[meshCnt].pVd[m_pMesh[meshCnt].pIndexNumber[i]].nor.z = normals[i].z;
+					vecMesh_[meshCnt].vecVd[vecMesh_[meshCnt].vecIndexNumber[i]].nor.x = normals[i].x;
+					vecMesh_[meshCnt].vecVd[vecMesh_[meshCnt].vecIndexNumber[i]].nor.y = normals[i].y;
+					vecMesh_[meshCnt].vecVd[vecMesh_[meshCnt].vecIndexNumber[i]].nor.z = normals[i].z;
 				}
 
 				//UV//////////////////////////////////////////////////
@@ -447,14 +470,15 @@ bool FbxModel::LoadFbxMeshFromFile(const char * pFileName)
 				// UVの数・インデックス
 				int nNumUv = layerUV->GetDirectArray().GetCount();
 				int nNumIndexUv = layerUV->GetIndexArray().GetCount();
-				m_pMesh[meshCnt].nNumUv = layerUV->GetDirectArray().GetCount();
-				m_pMesh[meshCnt].nNumIndexUv = layerUV->GetIndexArray().GetCount();
+				vecMesh_[meshCnt].nNumUv = layerUV->GetDirectArray().GetCount();
+				vecMesh_[meshCnt].nNumIndexUv = layerUV->GetIndexArray().GetCount();
 
-				Vector2D* texies = new Vector2D[m_pMesh[meshCnt].nNumUv];
+				vector<Vector2D> texies;
+				texies.resize(vecMesh_[meshCnt].nNumIndexUv);
 
-				m_pMesh[meshCnt].pTexIndex = new Vector2D[m_pMesh[meshCnt].nNumIndexUv];
+				vecMesh_[meshCnt].vecTexIndex.resize(vecMesh_[meshCnt].nNumIndexUv);
 
-				m_pMesh[meshCnt].pUvIndexNumber = new int[m_pMesh[meshCnt].nNumIndexUv];
+				vecMesh_[meshCnt].vecUvIndexNumber.resize(vecMesh_[meshCnt].nNumIndexUv);
 
 				// 頂点に格納されている全UVセットを名前で取得
 				FbxStringList uvsetName;
@@ -469,7 +493,7 @@ bool FbxModel::LoadFbxMeshFromFile(const char * pFileName)
 					if(refModeUV == FbxLayerElement::eDirect)
 					{
 						// 直接取得
-						for(unsigned int i = 0; i < m_pMesh[meshCnt].nNumIndexUv; ++i)
+						for(unsigned int i = 0; i < vecMesh_[meshCnt].nNumIndexUv; ++i)
 						{
 							texies[i].x = (float)layerUV->GetDirectArray().GetAt(i)[0];
 							texies[i].y = (float)layerUV->GetDirectArray().GetAt(i)[1];
@@ -477,19 +501,19 @@ bool FbxModel::LoadFbxMeshFromFile(const char * pFileName)
 					} else if(refModeUV == FbxLayerElement::eIndexToDirect)
 					{
 						// インデックスから取得
-						for(unsigned int i = 0; i < m_pMesh[meshCnt].nNumIndexUv; ++i) {
-							m_pMesh[meshCnt].pUvIndexNumber[i] = layerUV->GetIndexArray().GetAt(i);
-							texies[i].x = (float)layerUV->GetDirectArray().GetAt(m_pMesh[meshCnt].pUvIndexNumber[i])[0];
-							texies[i].y = (float)layerUV->GetDirectArray().GetAt(m_pMesh[meshCnt].pUvIndexNumber[i])[1];
+						for(unsigned int i = 0; i < vecMesh_[meshCnt].nNumIndexUv; ++i) {
+							vecMesh_[meshCnt].vecUvIndexNumber[i] = layerUV->GetIndexArray().GetAt(i);
+							texies[i].x = (float)layerUV->GetDirectArray().GetAt(vecMesh_[meshCnt].vecUvIndexNumber[i])[0];
+							texies[i].y = (float)layerUV->GetDirectArray().GetAt(vecMesh_[meshCnt].vecUvIndexNumber[i])[1];
 
 						}
 					}
 				}
 
-				for(unsigned int i = 0; i < m_pMesh[meshCnt].nNumPolygonVertex; ++i)
+				for(unsigned int i = 0; i < vecMesh_[meshCnt].nNumIndexUv; ++i)
 				{
-					m_pMesh[meshCnt].pVd[m_pMesh[meshCnt].pIndexNumber[i]].tex.x = texies[i].x;
-					m_pMesh[meshCnt].pVd[m_pMesh[meshCnt].pIndexNumber[i]].tex.y = 1 - texies[i].y;
+					vecMesh_[meshCnt].vecVd[vecMesh_[meshCnt].vecIndexNumber[i]].tex.x = max(0.0f, min(1.0f, texies[i].x));
+					vecMesh_[meshCnt].vecVd[vecMesh_[meshCnt].vecIndexNumber[i]].tex.y = max(0.0f, min(1.0f, 1.0f - texies[i].y));
 				}
 			}
 
@@ -508,16 +532,16 @@ bool FbxModel::LoadFbxMeshFromFile(const char * pFileName)
 
 			for(int i = 0; i < nNumMaterial; i++)
 			{
-				if(m_pMaterial[i].pMaterialName == pUvName)
+				if(vecMaterial_[i].pMaterialName == pUvName)
 				{
-					m_pMesh[meshCnt].color = m_pMaterial[i].color;
-					if(m_pMaterial[i].pFileName != "NULL")
+					vecMesh_[meshCnt].color = vecMaterial_[i].color;
+					if(vecMaterial_[i].pFileName != "NULL")
 					{
-						m_pMesh[meshCnt].pTextureFileName = (char*)m_pMaterial[i].pFileName;
-						m_pMesh[meshCnt].pTexture = m_pMaterial[i].pTexture;
+						vecMesh_[meshCnt].pTextureFileName = (char*)vecMaterial_[i].pFileName;
+						vecMesh_[meshCnt].pTexture = vecMaterial_[i].pTexture;
 					} else{
-						m_pMesh[meshCnt].pTextureFileName = NULL;
-						m_pMesh[meshCnt].pTexture = nullptr;
+						vecMesh_[meshCnt].pTextureFileName = NULL;
+						vecMesh_[meshCnt].pTexture = nullptr;
 					}
 					break;
 				}
@@ -684,26 +708,26 @@ bool FbxModel::LoadFbxMeshFromFile(const char * pFileName)
 		{
 			// 頂点バッファを作成
 			D3D11_BUFFER_DESC bd;
-			bd.ByteWidth = sizeof(VertexData3D) * m_pMesh[meshCnt].nNumVertex;
+			bd.ByteWidth = sizeof(VertexData3D) * vecMesh_[meshCnt].nNumVertex;
 			bd.Usage = D3D11_USAGE_DYNAMIC;
 			bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 			bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 			bd.MiscFlags = 0;
 			D3D11_SUBRESOURCE_DATA InitData;
-			InitData.pSysMem = &m_pMesh[meshCnt].pVd[0];
+			InitData.pSysMem = &vecMesh_[meshCnt].vecVd[0];
 			if(FAILED(gm.GetDevicePtr()->CreateBuffer(&bd, &InitData, &vecVertexBufferPtr_[meshCnt]))){ return false; }
 		}
 
 		{
 			// インデックスバッファを作成
 			D3D11_BUFFER_DESC bd;
-			bd.ByteWidth = sizeof(unsigned short) * m_pMesh[meshCnt].nNumPolygonVertex;
+			bd.ByteWidth = sizeof(unsigned short) * vecMesh_[meshCnt].nNumIndex;
 			bd.Usage = D3D11_USAGE_DEFAULT;
 			bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 			bd.CPUAccessFlags = 0;
 			bd.MiscFlags = 0;
 			D3D11_SUBRESOURCE_DATA InitData;
-			InitData.pSysMem = &m_pMesh[meshCnt].pIndexNumber[0];
+			InitData.pSysMem = &vecMesh_[meshCnt].vecIndexNumber[0];
 			InitData.SysMemPitch = 0;
 			InitData.SysMemSlicePitch = 0;
 			if(FAILED(gm.GetDevicePtr()->CreateBuffer(&bd, &InitData, &vecIndexBufferPtr_[meshCnt]))){ return false; }
@@ -790,6 +814,11 @@ void FbxModel::UnLoad()
 		for(auto it = vecTexPtr_.begin(); it != vecTexPtr_.end(); ++it){
 			SafeDelete((*it));
 		}
+		for(unsigned int meshCnt = 0; meshCnt < m_nNumMesh; meshCnt++)
+		{
+			SafeRelease(vecIndexBufferPtr_[meshCnt]);
+			SafeRelease(vecVertexBufferPtr_[meshCnt]);
+		}
 	}
 
 	pVertexBuffer_ = nullptr;
@@ -802,7 +831,7 @@ void FbxModel::UnLoad()
 	bStorage_ = false;
 	vector<MeshVertexData>().swap(vecVertex_);
 	vector<ObjSubset>().swap(vecSubset_);
-	vector<ObjMaterial>().swap(vecMaterial_);
+	vector<Material>().swap(vecMaterial_);
 	vector<WORD>().swap(vecIndex_);
 	vector<Texture*>().swap(vecTexPtr_);
 }
@@ -909,7 +938,7 @@ void FbxModel::Draw(Camera * pCamera)
 																			   //インデックスバッファをセット
 		gm.GetContextPtr()->IASetIndexBuffer(vecIndexBufferPtr_[meshCnt], DXGI_FORMAT_R16_UINT, 0);///
 
-		Texture* pTexture = m_pMesh[meshCnt].pTexture;
+		Texture* pTexture = vecMesh_[meshCnt].pTexture;
 		if(pTexture){
 			ID3D11ShaderResourceView* pTexView = pTexture->GetTextureViewPtr();
 			if(pTexView){
@@ -924,7 +953,7 @@ void FbxModel::Draw(Camera * pCamera)
 			gm.GetContextPtr()->PSSetShader(om.GetPixelShederDefaultPtr(), NULL, 0);
 		}
 
-		gm.GetContextPtr()->DrawIndexed(m_pMesh[meshCnt].nNumPolygonVertex, 0, 0);///
+		gm.GetContextPtr()->DrawIndexed(vecMesh_[meshCnt].nNumIndex, 0, 0);///
 	}
 
 	//// サブセット毎に描画

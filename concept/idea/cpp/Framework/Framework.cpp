@@ -7,6 +7,7 @@
 //------------------------------------------------------------------------------
 #include "../../../Framework.h"
 #include "../../h/Framework/Sequence.h"
+#include "../../h/Framework/Scene.h"
 #include "../../h/Framework/GraphicManager.h"
 #include "../../h/2D/Actor2DManager.h"
 #include "../../h/2D/SpriteManager.h"
@@ -53,6 +54,7 @@ Framework::Framework() :
 	bWindowed_(true),
 	bReady_(false),
 	pInitScene_(nullptr),
+	bExit_(false),
 	bOnWindowed_(true),
 	bOnFullscreen_(false),
 	bChangeDispRequest_(false),
@@ -324,6 +326,11 @@ void Framework::Run(Scene* pInitScene)
 {
 	if(!bReady_ || !pInitScene){ return; }	// 準備はいいか,シーンのNULLチェック
 
+	if(bExit_){	// Run()の再呼び出しの処理
+		SafeDelete(pInitScene);
+		return;
+	}
+
 	pInitScene_ = pInitScene;
 
 	DWORD ExitCode;
@@ -356,6 +363,8 @@ void Framework::Run(Scene* pInitScene)
 		}
 		else{ break; }
 	}
+
+	bExit_ = true;
 
 	UnInit();
 }

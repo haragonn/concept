@@ -63,10 +63,10 @@ void Sprite::DrawRect(int blend)
 	float halfHeight = size_.y * 0.5f;
 	float longVicinity = max(halfWidth, halfHeight);
 
-	if(pos_.x + longVicinity * ROOT2 < 0.0f
-		|| pos_.x - longVicinity * ROOT2 > gm.GetWidth()
-		|| pos_.y + longVicinity * ROOT2 < 0.0f
-		|| pos_.y - longVicinity * ROOT2 > gm.GetHeight()){
+	if(pos_.x + longVicinity * ideaMath::ROOT2 < 0.0f
+		|| pos_.x - longVicinity * ideaMath::ROOT2 > gm.GetWidth()
+		|| pos_.y + longVicinity * ideaMath::ROOT2 < 0.0f
+		|| pos_.y - longVicinity * ideaMath::ROOT2 > gm.GetHeight()){
 		return;
 	}
 
@@ -167,10 +167,10 @@ void Sprite::DrawCircle(float ratio, int blend)
 	float halfHeight = size_.y * 0.5f;
 	float longVicinity = max(halfWidth, halfHeight);
 
-	if(pos_.x + longVicinity * ROOT2 < 0.0f
-		|| pos_.x - longVicinity * ROOT2 > gm.GetWidth()
-		|| pos_.y + longVicinity * ROOT2 < 0.0f
-		|| pos_.y - longVicinity * ROOT2 > gm.GetHeight()){
+	if(pos_.x + longVicinity * ideaMath::ROOT2 < 0.0f
+		|| pos_.x - longVicinity * ideaMath::ROOT2 > gm.GetWidth()
+		|| pos_.y + longVicinity * ideaMath::ROOT2 < 0.0f
+		|| pos_.y - longVicinity * ideaMath::ROOT2 > gm.GetHeight()){
 		return;
 	}
 
@@ -190,8 +190,8 @@ void Sprite::DrawCircle(float ratio, int blend)
 
 	// 頂点情報の計算
 	for(int i = 1; i < SpriteManager::CIRCLE_VERTEX_NUM; ++i){
-		vd[i].pos.x = pos_.x + max(halfWidth, halfHeight) * -sinf(ideaPI * 2.0f - rad_ - ideaPI * 2.0f / (SpriteManager::CIRCLE_VERTEX_NUM - 2) * (i - 1));
-		vd[i].pos.y = pos_.y + max(halfWidth, halfHeight) * -cosf(ideaPI * 2.0f - rad_ - ideaPI * 2.0f / (SpriteManager::CIRCLE_VERTEX_NUM - 2) * (i - 1));
+		vd[i].pos.x = pos_.x + max(halfWidth, halfHeight) * -sinf(ideaMath::PI * 2.0f - rad_ - ideaMath::PI * 2.0f / (SpriteManager::CIRCLE_VERTEX_NUM - 2) * (i - 1));
+		vd[i].pos.y = pos_.y + max(halfWidth, halfHeight) * -cosf(ideaMath::PI * 2.0f - rad_ - ideaMath::PI * 2.0f / (SpriteManager::CIRCLE_VERTEX_NUM - 2) * (i - 1));
 		vd[i].color.x = color_.r;
 		vd[i].color.y = color_.g;
 		vd[i].color.z = color_.b;
@@ -274,10 +274,10 @@ void Sprite::DrawPhoton(float ratio, int blend)
 	float halfHeight = size_.y * 0.5f;
 	float longVicinity = max(halfWidth, halfHeight);
 
-	if(pos_.x + longVicinity * ROOT2 < 0.0f
-		|| pos_.x - longVicinity * ROOT2 > gm.GetWidth()
-		|| pos_.y + longVicinity * ROOT2 < 0.0f
-		|| pos_.y - longVicinity * ROOT2 > gm.GetHeight()){
+	if(pos_.x + longVicinity * ideaMath::ROOT2 < 0.0f
+		|| pos_.x - longVicinity * ideaMath::ROOT2 > gm.GetWidth()
+		|| pos_.y + longVicinity * ideaMath::ROOT2 < 0.0f
+		|| pos_.y - longVicinity * ideaMath::ROOT2 > gm.GetHeight()){
 		return;
 	}
 
@@ -297,8 +297,8 @@ void Sprite::DrawPhoton(float ratio, int blend)
 
 	// 頂点情報の計算
 	for(int i = 1; i < SpriteManager::CIRCLE_VERTEX_NUM; ++i){
-		vd[i].pos.x = pos_.x + max(halfWidth, halfHeight) * -sinf(ideaPI * 2.0f - rad_ - ideaPI * 2.0f / (SpriteManager::CIRCLE_VERTEX_NUM - 2) * (i - 1));
-		vd[i].pos.y = pos_.y + max(halfWidth, halfHeight) * -cosf(ideaPI * 2.0f - rad_ - ideaPI * 2.0f / (SpriteManager::CIRCLE_VERTEX_NUM - 2) * (i - 1));
+		vd[i].pos.x = pos_.x + max(halfWidth, halfHeight) * -sinf(ideaMath::PI * 2.0f - rad_ - ideaMath::PI * 2.0f / (SpriteManager::CIRCLE_VERTEX_NUM - 2) * (i - 1));
+		vd[i].pos.y = pos_.y + max(halfWidth, halfHeight) * -cosf(ideaMath::PI * 2.0f - rad_ - ideaMath::PI * 2.0f / (SpriteManager::CIRCLE_VERTEX_NUM - 2) * (i - 1));
 		vd[i].color.x = color_.r;
 		vd[i].color.y = color_.g;
 		vd[i].color.z = color_.b;
@@ -381,10 +381,10 @@ void Sprite::DrawTexture(const Texture& tex, int blend)
 	float halfHeight = size_.y * 0.5f;
 	float longVicinity = max(halfWidth, halfHeight);
 
-	if(pos_.x + longVicinity * ROOT2 < 0.0f
-		|| pos_.x - longVicinity * ROOT2 > gm.GetWidth()
-		|| pos_.y + longVicinity * ROOT2 < 0.0f
-		|| pos_.y - longVicinity * ROOT2 > gm.GetHeight()){
+	if(pos_.x + longVicinity * ideaMath::ROOT2 < 0.0f
+		|| pos_.x - longVicinity * ideaMath::ROOT2 > gm.GetWidth()
+		|| pos_.y + longVicinity * ideaMath::ROOT2 < 0.0f
+		|| pos_.y - longVicinity * ideaMath::ROOT2 > gm.GetHeight()){
 		return;
 	}
 
@@ -499,10 +499,10 @@ void Sprite::DrawDividedTexture(const Texture& tex, int uNum, int vNum, int blen
 	float halfHeight = size_.y * 0.5f;
 	float longVicinity = max(halfWidth, halfHeight);
 
-	if(pos_.x + longVicinity * ROOT2 < 0.0f
-		|| pos_.x - longVicinity * ROOT2 > gm.GetWidth()
-		|| pos_.y + longVicinity * ROOT2 < 0.0f
-		|| pos_.y - longVicinity * ROOT2 > gm.GetHeight()){
+	if(pos_.x + longVicinity * ideaMath::ROOT2 < 0.0f
+		|| pos_.x - longVicinity * ideaMath::ROOT2 > gm.GetWidth()
+		|| pos_.y + longVicinity * ideaMath::ROOT2 < 0.0f
+		|| pos_.y - longVicinity * ideaMath::ROOT2 > gm.GetHeight()){
 		return;
 	}
 
@@ -622,10 +622,10 @@ void Sprite::DrawDelimitedTexture(const Texture& tex, float u, float v, float wi
 	float halfHeight = size_.y * 0.5f;
 	float longVicinity = max(halfWidth, halfHeight);
 
-	if(pos_.x + longVicinity * ROOT2 < 0.0f
-		|| pos_.x - longVicinity * ROOT2 > gm.GetWidth()
-		|| pos_.y + longVicinity * ROOT2 < 0.0f
-		|| pos_.y - longVicinity * ROOT2 > gm.GetHeight()){
+	if(pos_.x + longVicinity * ideaMath::ROOT2 < 0.0f
+		|| pos_.x - longVicinity * ideaMath::ROOT2 > gm.GetWidth()
+		|| pos_.y + longVicinity * ideaMath::ROOT2 < 0.0f
+		|| pos_.y - longVicinity * ideaMath::ROOT2 > gm.GetHeight()){
 		return;
 	}
 

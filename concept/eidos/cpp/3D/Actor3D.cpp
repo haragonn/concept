@@ -174,7 +174,7 @@ bool Actor3D::CheckHitBox(Actor3D& target)
 	for(int i = 0; i < 3; ++i){
 		for(int j = 0; j < 3; ++j){
 			R[i][j] = obb_.u[i].Dot(target.obb_.u[j]);
-			absR[i][j] = fabsf(R[i][j]) + EPSILON;
+			absR[i][j] = fabsf(R[i][j]) + ideaMath::EPSILON;
 		}
 	}
 
@@ -258,19 +258,19 @@ inline void Actor3D::UpdateWorldMatrix()
 	matScale = XMMatrixScaling(scale_.x, scale_.y, scale_.z);
 
 	// ‰ñ“]‚Ì³‹K‰»
-	rot_.x = fmodf(rot_.x, ideaPI * 2.0f);
+	rot_.x = fmodf(rot_.x, ideaMath::PI * 2.0f);
 	if(rot_.x < 0.0f){
-		rot_.x += ideaPI * 2.0f;
+		rot_.x += ideaMath::PI * 2.0f;
 	}
 
-	rot_.y = fmodf(rot_.y, ideaPI * 2.0f);
+	rot_.y = fmodf(rot_.y, ideaMath::PI * 2.0f);
 	if(rot_.y < 0.0f){
-		rot_.y += ideaPI * 2.0f;
+		rot_.y += ideaMath::PI * 2.0f;
 	}
 
-	rot_.z = fmodf(rot_.z, ideaPI * 2.0f);
+	rot_.z = fmodf(rot_.z, ideaMath::PI * 2.0f);
 	if(rot_.z < 0.0f){
-		rot_.z += ideaPI * 2.0f;
+		rot_.z += ideaMath::PI * 2.0f;
 	}
 
 	// ‰ñ“]ˆ—

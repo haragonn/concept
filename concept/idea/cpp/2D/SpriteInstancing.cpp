@@ -112,10 +112,10 @@ void SpriteInstancing::AddSprite(Sprite& sprite)
 
 	float longVicinity = max(halfWidth_, halfHeight_);
 
-	if(sprite.pos_.x + longVicinity * ROOT2 < 0.0f
-		|| sprite.pos_.x - longVicinity * ROOT2 > gm.GetWidth()
-		|| sprite.pos_.y + longVicinity * ROOT2 < 0.0f
-		|| sprite.pos_.y - longVicinity * ROOT2 > gm.GetHeight()){
+	if(sprite.pos_.x + longVicinity * ideaMath::ROOT2 < 0.0f
+		|| sprite.pos_.x - longVicinity * ideaMath::ROOT2 > gm.GetWidth()
+		|| sprite.pos_.y + longVicinity * ideaMath::ROOT2 < 0.0f
+		|| sprite.pos_.y - longVicinity * ideaMath::ROOT2 > gm.GetHeight()){
 		return;
 	}
 
