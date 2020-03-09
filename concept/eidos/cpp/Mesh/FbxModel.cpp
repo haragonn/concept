@@ -380,8 +380,8 @@ bool FbxModel::LoadFbxMeshFromFile(const char * pFileName)
 			for(unsigned int i = 0; i < vecMesh_[meshCnt].nNumVertex; ++i)
 			{
 				vecMesh_[meshCnt].vecVd[i].pos.x = (float)src[i][0];
-				vecMesh_[meshCnt].vecVd[i].pos.y = (float)src[i][2];
-				vecMesh_[meshCnt].vecVd[i].pos.z = (float)src[i][1];
+				vecMesh_[meshCnt].vecVd[i].pos.y = (float)src[i][1];
+				vecMesh_[meshCnt].vecVd[i].pos.z = (float)src[i][2];
 				vecMesh_[meshCnt].vecVd[i].color.x = 1.0f;
 				vecMesh_[meshCnt].vecVd[i].color.y = 1.0f;
 				vecMesh_[meshCnt].vecVd[i].color.z = 1.0f;
@@ -418,39 +418,39 @@ bool FbxModel::LoadFbxMeshFromFile(const char * pFileName)
 				vector<Vector3D> normals;
 				normals.resize(normalCount);
 
-				for(unsigned int count = 0; count < normalCount; ++count)
-				{
-					normals[count].x = (float)normalLayer->GetDirectArray()[count][0];
-					normals[count].y = (float)normalLayer->GetDirectArray()[count][2];
-					normals[count].z = (float)normalLayer->GetDirectArray()[count][1];
-				}
-				//マッピングモード・リファレンスモード取得
-				//FbxLayerElement::EMappingMode mappingMode = normalLayer->GetMappingMode();
-				//FbxLayerElement::EReferenceMode referencegMode = normalLayer->GetReferenceMode();
-
-				//if(mappingMode == FbxLayerElement::eByPolygonVertex)
+				//for(unsigned int count = 0; count < normalCount; ++count)
 				//{
-				//	if(referencegMode == FbxLayerElement::eDirect)
-				//	{
-				//		for(unsigned int clusterCnt = 0; clusterCnt < normalCount; clusterCnt++)
-				//		{
-				//			normals[clusterCnt].x = (float)normalLayer->GetDirectArray().GetAt(clusterCnt)[0];
-				//			normals[clusterCnt].y = (float)normalLayer->GetDirectArray().GetAt(clusterCnt)[2];
-				//			normals[clusterCnt].z = (float)normalLayer->GetDirectArray().GetAt(clusterCnt)[1];
-				//		}
-				//	}
-				//} else if(mappingMode == FbxLayerElement::eByControlPoint)
-				//{
-				//	if(referencegMode == FbxLayerElement::eDirect)
-				//	{
-				//		for(unsigned int clusterCnt = 0; clusterCnt < normalCount; clusterCnt++)
-				//		{
-				//			normals[clusterCnt].x = (float)normalLayer->GetDirectArray().GetAt(clusterCnt)[0];
-				//			normals[clusterCnt].y = (float)normalLayer->GetDirectArray().GetAt(clusterCnt)[2];
-				//			normals[clusterCnt].z = (float)normalLayer->GetDirectArray().GetAt(clusterCnt)[1];
-				//		}
-				//	}
+				//	normals[count].x = (float)normalLayer->GetDirectArray()[count][0];
+				//	normals[count].y = (float)normalLayer->GetDirectArray()[count][2];
+				//	normals[count].z = (float)normalLayer->GetDirectArray()[count][1];
 				//}
+				//マッピングモード・リファレンスモード取得
+				FbxLayerElement::EMappingMode mappingMode = normalLayer->GetMappingMode();
+				FbxLayerElement::EReferenceMode referencegMode = normalLayer->GetReferenceMode();
+
+				if(mappingMode == FbxLayerElement::eByPolygonVertex)
+				{
+					if(referencegMode == FbxLayerElement::eDirect)
+					{
+						for(unsigned int clusterCnt = 0; clusterCnt < normalCount; clusterCnt++)
+						{
+							normals[clusterCnt].x = (float)normalLayer->GetDirectArray().GetAt(clusterCnt)[0];
+							normals[clusterCnt].y = (float)normalLayer->GetDirectArray().GetAt(clusterCnt)[1];
+							normals[clusterCnt].z = (float)normalLayer->GetDirectArray().GetAt(clusterCnt)[2];
+						}
+					}
+				} else if(mappingMode == FbxLayerElement::eByControlPoint)
+				{
+					if(referencegMode == FbxLayerElement::eDirect)
+					{
+						for(unsigned int clusterCnt = 0; clusterCnt < normalCount; clusterCnt++)
+						{
+							normals[clusterCnt].x = (float)normalLayer->GetDirectArray().GetAt(clusterCnt)[0];
+							normals[clusterCnt].y = (float)normalLayer->GetDirectArray().GetAt(clusterCnt)[1];
+							normals[clusterCnt].z = (float)normalLayer->GetDirectArray().GetAt(clusterCnt)[2];
+						}
+					}
+				}
 
 				for(unsigned int i = 0; i < normalCount; ++i)
 				{
@@ -474,7 +474,7 @@ bool FbxModel::LoadFbxMeshFromFile(const char * pFileName)
 				vecMesh_[meshCnt].nNumIndexUv = layerUV->GetIndexArray().GetCount();
 
 				vector<Vector2D> texies;
-				texies.resize(vecMesh_[meshCnt].nNumIndexUv);
+				texies.resize(nNumUv);
 
 				vecMesh_[meshCnt].vecTexIndex.resize(vecMesh_[meshCnt].nNumIndexUv);
 
@@ -493,28 +493,64 @@ bool FbxModel::LoadFbxMeshFromFile(const char * pFileName)
 					if(refModeUV == FbxLayerElement::eDirect)
 					{
 						// 直接取得
-						for(unsigned int i = 0; i < vecMesh_[meshCnt].nNumIndexUv; ++i)
+						for(int i = 0; i < nNumUv; ++i)
 						{
-							texies[i].x = (float)layerUV->GetDirectArray().GetAt(i)[0];
-							texies[i].y = (float)layerUV->GetDirectArray().GetAt(i)[1];
+							vecMesh_[meshCnt].vecVd [i].tex.x = (float)layerUV->GetDirectArray().GetAt(i)[0];
+							vecMesh_[meshCnt].vecVd[i].tex.y = 1.0f - (float)layerUV->GetDirectArray().GetAt(i)[1];
 						}
 					} else if(refModeUV == FbxLayerElement::eIndexToDirect)
 					{
-						// インデックスから取得
-						for(unsigned int i = 0; i < vecMesh_[meshCnt].nNumIndexUv; ++i) {
-							vecMesh_[meshCnt].vecUvIndexNumber[i] = layerUV->GetIndexArray().GetAt(i);
-							texies[i].x = (float)layerUV->GetDirectArray().GetAt(vecMesh_[meshCnt].vecUvIndexNumber[i])[0];
-							texies[i].y = (float)layerUV->GetDirectArray().GetAt(vecMesh_[meshCnt].vecUvIndexNumber[i])[1];
+						int lPolygonsCount = mesh->GetPolygonCount();
+						// 頂点バッファのループ
+						for(unsigned int i = 0; i < vecMesh_[meshCnt].nNumVertex; i++)
+						{
+							UINT UVIndex = 0;
+							// ポリゴンごとのループ
+							for(int j = 0; j < lPolygonsCount; j++)
+							{
+								// ポリゴン数を取得
+								int lPolygonSize = mesh->GetPolygonSize(j);
+								// １ポリゴン内の頂点ごとのループ
+								for(int k = 0; k < lPolygonSize; k++)
+								{
+									// インデックスが同じなので処理対象
+									if(i == mesh->GetPolygonVertex(j, k))
+									{
+										// インデックスバッファからインデックスを取得する
+										int lUVIndex = layerUV->GetIndexArray().GetAt(UVIndex);
 
+										// 取得したインデックスから UV を取得する
+										FbxVector2 lVec2 = layerUV->GetDirectArray().GetAt(lUVIndex);
+
+										// UV値セット
+
+										vecMesh_[meshCnt].vecVd[i].tex.x = (float)layerUV->GetDirectArray().GetAt(lUVIndex)[0];
+										vecMesh_[meshCnt].vecVd[i].tex.y = 1.0f - (float)layerUV->GetDirectArray().GetAt(lUVIndex)[1];
+									}
+									UVIndex++;
+								}
+							}
 						}
+						//for(int i = 0; i < nNumUv; i++)
+						//{
+						//	texies[i].x = (float)layerUV->GetDirectArray().GetAt(i)[0];
+						//	texies[i].y = (float)layerUV->GetDirectArray().GetAt(i)[1];
+						//}
+						//// インデックスから取得
+						//for(unsigned int i = 0; i < vecMesh_[meshCnt].nNumIndexUv; ++i) {
+						//	vecMesh_[meshCnt].vecUvIndexNumber[i] = layerUV->GetIndexArray().GetAt(i);
+						//	vecMesh_[meshCnt].vecTexIndex[i].x = (float)layerUV->GetDirectArray().GetAt(vecMesh_[meshCnt].vecUvIndexNumber[i])[0];
+						//	vecMesh_[meshCnt].vecTexIndex[i].y = (float)layerUV->GetDirectArray().GetAt(vecMesh_[meshCnt].vecUvIndexNumber[i])[1];
+
+						//}
+						//for(unsigned int i = 0; i < vecMesh_[meshCnt].nNumIndexUv; ++i)
+						//{
+						//	vecMesh_[meshCnt].vecVd[vecMesh_[meshCnt].vecIndexNumber[i]].tex.x = max(0.0f, min(1.0f, vecMesh_[meshCnt].vecTexIndex[i].x));
+						//	vecMesh_[meshCnt].vecVd[vecMesh_[meshCnt].vecIndexNumber[i]].tex.y = max(0.0f, min(1.0f, 1.0f - vecMesh_[meshCnt].vecTexIndex[i].y));
+						//}
 					}
 				}
 
-				for(unsigned int i = 0; i < vecMesh_[meshCnt].nNumIndexUv; ++i)
-				{
-					vecMesh_[meshCnt].vecVd[vecMesh_[meshCnt].vecIndexNumber[i]].tex.x = max(0.0f, min(1.0f, texies[i].x));
-					vecMesh_[meshCnt].vecVd[vecMesh_[meshCnt].vecIndexNumber[i]].tex.y = max(0.0f, min(1.0f, 1.0f - texies[i].y));
-				}
 			}
 
 			src = NULL;

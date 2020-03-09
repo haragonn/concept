@@ -5,13 +5,15 @@
 #ifndef INCLUDE_IDEA_IDEAUTILITY_H
 #define INCLUDE_IDEA_IDEAUTILITY_H
 
-#if _DEBUG
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <tchar.h>
 #include <stdlib.h>
 #include <crtdbg.h>
+#include <string>
+#include <locale>
 
+#if _DEBUG
 #define _CRTDBG_MAP_ALLOC
 #define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
 #define SetDebugMessage(str,...){ TCHAR c[1024];_stprintf_s(c,(sizeof(c)/sizeof(c[0])),_T(str),__VA_ARGS__);OutputDebugString(c); }
@@ -25,7 +27,6 @@
 #define Assert(exp)
 #endif
 
-#include <string>
 
 template <typename T>
 inline void SafeDelete(T*& p)
@@ -88,4 +89,40 @@ inline void AddDirectoryPath(std::string& fileName, std::string& src)
 		fileName = src.substr(0, n + 1) + fileName;
 	}
 }
+
+inline std::string WStringToString(std::wstring wstring)
+{
+	setlocale(LC_ALL, "Japanese");
+
+	int bufferSize = WideCharToMultiByte(CP_OEMCP, 0, wstring.c_str(), -1, (char*)NULL, 0, NULL, NULL);
+
+	CHAR* pMultiByte = new CHAR[bufferSize];
+
+	WideCharToMultiByte(CP_OEMCP, 0, wstring.c_str(), -1, pMultiByte, bufferSize, NULL, NULL);
+
+	std::string res(pMultiByte, pMultiByte + bufferSize - 1);
+
+	SafeDeleteArray(pMultiByte);
+
+	return res;
+}
+
+inline std::wstring StringToWString(std::string string)
+{
+	setlocale(LC_ALL, "Japanese");
+
+	int bufferSize = MultiByteToWideChar(CP_ACP, 0, string.c_str(), -1, (wchar_t*)NULL, 0);
+
+	wchar_t* pUCS2 = new wchar_t[bufferSize];
+
+	MultiByteToWideChar(CP_ACP, 0, string.c_str(), -1, pUCS2, bufferSize);
+
+	std::wstring res(pUCS2, pUCS2 + bufferSize - 1);
+
+	SafeDeleteArray(pUCS2);
+
+	return res;
+}
+
+
 #endif	// #ifndef INCLUDE_IDEA_IDEAUTILITY_H

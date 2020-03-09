@@ -1,4 +1,5 @@
 #include "concept/eidos/h/Mesh/FbxModel.h"
+#include "concept/eidos/h/Mesh/PmxModel.h"
 #include "BreadBoard3.h"
 
 class BreadBoard3::Impl{
@@ -9,8 +10,11 @@ public:
 
 	WrapCamera wcmr_;
 
+	Sprite sprBG_;
+	Texture texBG_;
+
 	PmdModel pmSakuya_;
-	FbxModel fm_;
+	PmxModel fm_;
 
 	int time_;
 };
@@ -34,11 +38,15 @@ void BreadBoard3::Init()
 
 	im.fnt_.Init(30);
 
-	im.wcmr_.Init(DegreeToRadian(65.5f), S_W / S_H, 0.0001f, 10000.0f, 4.0f);
+	im.wcmr_.Init(DegreeToRadian(65.5f), S_W / S_H, 0.1f, 1000.0f, 10.0f);
 
-	im.fm_.LoadFbxMeshFromFile("model/PronamaChan.fbx");
+	im.sprBG_.Init(C_W, C_H, S_W, S_W);
 
-	im.fm_.Init(0.0f, -2.0f, 0.0f);
+	im.texBG_.LoadImageFromFile("data/TEXTURE/grid04.bmp");
+
+	im.fm_.LoadPmxMeshFromFile("model/初音/コロン式  初音ミクV3_Re_rev.1.2(スパッツ).pmx");
+
+	im.fm_.Init(0.0f, -14.0f, 0.0f);
 
 	im.wcmr_.AddObject(im.fm_);
 
@@ -76,8 +84,11 @@ void BreadBoard3::Draw()
 {
 	BreadBoard3::Impl& im = *pImpl_;
 
+	im.sprBG_.DrawDelimitedTexture(im.texBG_, 0.0f, 0.0f, 10.0f, 10.0f);
+
 	im.wcmr_.DrawObject();
 
+	/*
 	// 経過時間
 	int hour = im.time_ / 60 / 60 / 60 % 60;
 	int min = im.time_ / 60 / 60 % 60;
@@ -109,4 +120,5 @@ void BreadBoard3::Draw()
 	im.fnt_.DrawFormatText(0.0f, 30.0f * 20, "RY:%0.3f", im.ctr_.GetRAxis().y);
 	im.fnt_.DrawFormatText(0.0f, 30.0f * 21, "LT:%0.3f", im.ctr_.GetLTrigger());
 	im.fnt_.DrawFormatText(0.0f, 30.0f * 22, "RT:%0.3f", im.ctr_.GetRTrigger());
+	*/
 }
