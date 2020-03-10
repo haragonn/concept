@@ -208,8 +208,6 @@ private:
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
-	SetLeakCheckFlag();	// メモリリークチェックのフラグをオンに
-
 	// 2重起動の防止
 	HANDLE hMutex = CreateMutex(NULL, TRUE, GAME_TITLE);
 	if(GetLastError() == ERROR_ALREADY_EXISTS){

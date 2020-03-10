@@ -245,7 +245,7 @@ void PmdModel::UnLoad()
 	boneSize_ = 0;
 	vector<PmdBone>().swap(vecPmdBone_);
 
-	map<std::string, Bone>().swap(mapBone_);
+	map<std::string, VmdBone>().swap(mapBone_);
 
 	vector<Matrix4x4>().swap(vecBoneMatrix_);
 

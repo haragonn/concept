@@ -36,6 +36,15 @@ PmxModel::PmxModel() :
 	pIndexBuffer_(nullptr),
 	bStorage_(false)
 {
+	vector<BlendVertexData>().swap(vecVertex_);
+	vector<unsigned short>().swap(vecIndex_);
+	vector<Texture*>().swap(vecTexPtr_);
+
+	vector<PMXModelData::Vertex>().swap(pmxData_.vertices);
+	vector<PMXModelData::Surface>().swap(pmxData_.surfaces);
+	vector<string>().swap(pmxData_.texturePaths);
+	vector<PMXModelData::Material>().swap(pmxData_.materials);
+	vector<PMXModelData::Bone>().swap(pmxData_.bones);
 }
 
 
@@ -51,7 +60,7 @@ bool PmxModel::LoadPmxMeshFromFile(const char* pFileName)
 	GraphicManager& gm = GraphicManager::Instance();
 	if(!gm.GetContextPtr()){ return false; }
 
-	ifstream ifs(pFileName, ios::binary | std::ios::in);
+	ifstream ifs(pFileName, ios::binary | ios::in);
 	if(!ifs.is_open()){ return false; }
 
 	string filePath = pFileName;
@@ -59,8 +68,8 @@ bool PmxModel::LoadPmxMeshFromFile(const char* pFileName)
 	string folderPath{ filePath.begin(), filePath.begin() + filePath.rfind('/') + 1 };
 
 	// ヘッダー -------------------------------
-	std::array<byte, 4> pmxHeader{};
-	constexpr std::array<byte, 4> PMX_MAGIC_NUMBER{ 0x50, 0x4d, 0x58, 0x20 };
+	array<byte, 4> pmxHeader{};
+	constexpr array<byte, 4> PMX_MAGIC_NUMBER{ 0x50, 0x4d, 0x58, 0x20 };
 	enum HeaderDataIndex
 	{
 		ENCODING_FORMAT,
@@ -94,7 +103,7 @@ bool PmxModel::LoadPmxMeshFromFile(const char* pFileName)
 		return false;
 	}
 
-	std::array<byte, 8> hederData{};
+	array<byte, 8> hederData{};
 	for(int i = 0; i < hederDataLength; i++){
 		hederData[i] = ifs.get();
 	}
@@ -215,13 +224,13 @@ bool PmxModel::LoadPmxMeshFromFile(const char* pFileName)
 	pmxData_.texturePaths.resize(numOfTexture);
 
 	// 標準出力にユニコード出力する
-	std::wstring texturePath{};
+	wstring texturePath{};
 	for(int i = 0; i < numOfTexture; i++){
 		GetPMXStringUTF16(ifs, texturePath);
 		string t = WStringToString(texturePath);
 		string s = folderPath;
 		AddDirectoryPath(t, s);
-		pmxData_.texturePaths[i] = StringToWString(t);
+		pmxData_.texturePaths[i] = t;
 		Texture* pTex = new Texture;
 		pTex->LoadImageFromFile(t.c_str());
 		vecTexPtr_.push_back(pTex);
@@ -281,13 +290,19 @@ bool PmxModel::LoadPmxMeshFromFile(const char* pFileName)
 	int numOfBone{};
 	ifs.read(reinterpret_cast<char*>(&numOfBone), 4);
 
+	boneSize_ = numOfBone;
+
 	pmxData_.bones.resize(numOfBone);
+
 	int ikLinkSize = 0;
 	unsigned char angleLim = 0;
 
 	for(int i = 0; i < numOfBone; i++)
 	{
-		GetPMXStringUTF16(ifs, pmxData_.bones[i].name);
+		wstring buf;
+		GetPMXStringUTF16(ifs, buf);
+		pmxData_.bones[i].name = WStringToString(buf);
+
 		ifs.read(reinterpret_cast<char*>(&arrayLength), 4);
 		pmxData_.bones[i].nameEnglish.resize(arrayLength);
 		for(unsigned j = 0; j < arrayLength; ++j){
@@ -364,6 +379,7 @@ bool PmxModel::LoadPmxMeshFromFile(const char* pFileName)
 	ifs.close();
 
 	vecVertex_.resize(vertexSize_);
+
 	for(unsigned int i = 0; i < vertexSize_; ++i){
 		vecVertex_[i].pos.x = pmxData_.vertices[i].position.x;
 		vecVertex_[i].pos.y = pmxData_.vertices[i].position.y;
@@ -376,10 +392,7 @@ bool PmxModel::LoadPmxMeshFromFile(const char* pFileName)
 		vecVertex_[i].tex.x = pmxData_.vertices[i].uv.x;
 		vecVertex_[i].tex.y = pmxData_.vertices[i].uv.y;
 
-		vecVertex_[i].col.r = 1.0f;
-		vecVertex_[i].col.g = 1.0f;
-		vecVertex_[i].col.b = 1.0f;
-		vecVertex_[i].col.a = 1.0f;
+		vecVertex_[i].col = ideaColor::WHITE;
 
 		vecVertex_[i].boneIndex[0] = pmxData_.vertices[i].weight.born1;
 		vecVertex_[i].boneIndex[1] = pmxData_.vertices[i].weight.born2;
@@ -397,11 +410,29 @@ bool PmxModel::LoadPmxMeshFromFile(const char* pFileName)
 		vecIndex_[i] = pmxData_.surfaces[i].vertexIndex;
 	}
 
-	vecMaterial_.resize(materialSize_);
 
-	for(unsigned int i = 0; i < materialSize_; ++i){
-		vecMaterial_[i].faceCount = pmxData_.materials[i].vertexNum;
+	// ボーン情報格納
+	vector<string> vecBoneName(boneSize_);
+
+	for(unsigned int i = 0; i < boneSize_; ++i){
+		auto& pd = pmxData_.bones[i];
+		vecBoneName[i] = pd.name;
+		auto& node = mapBone_[pd.name];
+		node.index = i;
+		node.pos = pd.position;
 	}
+
+	for(auto& pd : pmxData_.bones){
+		if(pd.parentIndex >= boneSize_ || pd.parentIndex == PMXModelData::NO_DATA_FLAG){
+			continue;
+		}
+		auto parentName = vecBoneName[pd.parentIndex];
+		mapBone_[parentName].vecChildrenPtr.emplace_back(&mapBone_[pd.name]);
+	}
+
+	vecBoneMatrix_.resize(boneSize_);
+
+	fill(vecBoneMatrix_.begin(), vecBoneMatrix_.end(), Matrix4x4::Identity());
 
 	texPtrSize_ = vecTexPtr_.size();
 
@@ -466,17 +497,21 @@ void PmxModel::UnLoad()
 	vector<BlendVertexData>().swap(vecVertex_);
 
 	indexSize_ = 0;
-	vector<WORD>().swap(vecIndex_);
+	vector<unsigned short>().swap(vecIndex_);
 
 	boneSize_ = 0;
-	vector<PmdBone>().swap(vecPmdBone_);
 
-	map<std::string, Bone>().swap(mapBone_);
+	vector<PMXModelData::Vertex>().swap(pmxData_.vertices);
+	vector<PMXModelData::Surface>().swap(pmxData_.surfaces);
+	vector<string>().swap(pmxData_.texturePaths);
+	vector<PMXModelData::Material>().swap(pmxData_.materials);
+	vector<PMXModelData::Bone>().swap(pmxData_.bones);
+
+	map<string, VmdBone>().swap(mapBone_);
 
 	vector<Matrix4x4>().swap(vecBoneMatrix_);
 
 	materialSize_ = 0;
-	vector<PmdMaterial>().swap(vecMaterial_);
 
 	texPtrSize_ = 0;
 	vector<Texture*>().swap(vecTexPtr_);
@@ -537,7 +572,7 @@ void PmxModel::Draw(Camera* pCamera)
 		gm.GetContextPtr()->VSSetConstantBuffers(cb_slot, 1, cb);
 	}
 
-	//定数バッファ(pmd)
+	//定数バッファ(vmd)
 	{
 		ConstBufferBoneWorld cbuff;
 		ZeroMemory(&cbuff, sizeof(cbuff));
@@ -555,6 +590,7 @@ void PmxModel::Draw(Camera* pCamera)
 
 		for(unsigned int i = 0; i < vecBoneMatrix_.size() && i < 512; ++i){
 			XMMATRIX mat;
+
 			for(int j = 0; j < 4; ++j){
 				for(int k = 0; k < 4; ++k){
 					mat.r[j].m128_f32[k] = vecBoneMatrix_[i].r[j][k];
@@ -589,7 +625,7 @@ void PmxModel::Draw(Camera* pCamera)
 	gm.GetContextPtr()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// ラスタライザステート
-	//gm.GetContextPtr()->RSSetState(gm.GetDefaultRasterizerStatePtr());
+	gm.GetContextPtr()->RSSetState(gm.GetDefaultRasterizerStatePtr());
 
 	// デプスステンシルステート
 	gm.GetContextPtr()->OMSetDepthStencilState(gm.GetDefaultDepthStatePtr(), 0);
@@ -614,9 +650,11 @@ void PmxModel::Draw(Camera* pCamera)
 	// マテリアル毎に描画
 	if(materialSize_ <= 1){
 		ID3D11ShaderResourceView* pTexView = nullptr;
-		if(texPtrSize_ > 0){
+
+		if(texPtrSize_ > 0 && pmxData_.materials[0].colorMapTextureIndex != PMXModelData::NO_DATA_FLAG){
 			pTexView = vecTexPtr_[0]->GetTextureViewPtr();
 		}
+
 		if(pTexView){
 			gm.GetContextPtr()->PSSetShaderResources(0, 1, &pTexView);
 			gm.GetContextPtr()->PSSetShader(om.GetPixelShederTexturePtr(), NULL, 0);
@@ -627,11 +665,14 @@ void PmxModel::Draw(Camera* pCamera)
 		gm.GetContextPtr()->DrawIndexed(indexSize_, 0, 0);
 	} else{
 		unsigned long strat = 0U;
+
 		for(unsigned int i = 0; i < materialSize_; ++i){
 			ID3D11ShaderResourceView* pTexView = nullptr;
-			if(pmxData_.materials[i].colorMapTextureIndex != PMXModelData::NO_DATA_FLAG){
+
+			if(texPtrSize_ > 0 && pmxData_.materials[i].colorMapTextureIndex != PMXModelData::NO_DATA_FLAG){
 				pTexView = vecTexPtr_[pmxData_.materials[i].colorMapTextureIndex]->GetTextureViewPtr();
 			}
+
 			if(pTexView){
 				gm.GetContextPtr()->PSSetShaderResources(0, 1, &pTexView);
 				gm.GetContextPtr()->PSSetShader(om.GetPixelShederTexturePtr(), NULL, 0);
@@ -639,9 +680,9 @@ void PmxModel::Draw(Camera* pCamera)
 				gm.GetContextPtr()->PSSetShader(om.GetPixelShederDefaultPtr(), NULL, 0);
 			}
 
-			gm.GetContextPtr()->DrawIndexed(vecMaterial_[i].faceCount, strat, 0);
+			gm.GetContextPtr()->DrawIndexed(pmxData_.materials[i].vertexNum, strat, 0);
 
-			strat += vecMaterial_[i].faceCount;
+			strat += pmxData_.materials[i].vertexNum;
 		}
 	}
 }

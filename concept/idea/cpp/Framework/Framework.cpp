@@ -60,10 +60,10 @@ Framework::Framework() :
 	bChangeDispRequest_(false),
 	bChangeDispReady_(true),
 	targetFps_(60U),
-	fps_(60U),
+	fps_(60.0f),
 	bFpsShow_(false),
-	frameSkipMax_(0),
-	frameSkipCount_(0),
+	frameSkipMax_(0U),
+	frameSkipCount_(0U),
 	bStorage_(false),
 	hMainLoopThread_(nullptr){}
 
@@ -77,6 +77,8 @@ Framework::Framework() :
 //------------------------------------------------------------------------------
 bool Framework::Init(HINSTANCE hInst, int nCmdShow, UINT width, UINT height, bool bWindowed, UINT fps, UINT frameSkipMax, bool bNetwork, const char* pClassName)
 {
+	SetLeakCheckFlag();	// メモリリークチェックのフラグをオンに
+
 	if(bReady_){ return false; }
 
 	// 引数を反映
@@ -193,7 +195,7 @@ void Framework::UnInit()
 	if(hMainLoopThread_){
 		// メインループスレッドの終了を待つ
 #ifdef _DEBUG
-		// デバッグなら3分たったらで殺しちゃえ
+		// デバッグなら3分たったら殺しちゃえ
 		if(WaitForSingleObject(hMainLoopThread_, 3 * 60 * 1000) == WAIT_TIMEOUT){
 			MessageBox(hWnd_, "MainLoopThreadが終了しません。強制終了します。", NULL, NULL);
 			TerminateThread(hMainLoopThread_, FALSE);
@@ -266,7 +268,7 @@ void Framework::MainLoop()
 			tmrFps.SetStartTime();
 		}
 
-		if(tmr.GetHighPrecisionElapsed() > frameTime* (frameCount + 1) || NetworkManager::Instance().GetSkipFlag()){	// 目標の時間がたったら
+		if(tmr.GetHighPrecisionElapsed() > frameTime * (frameCount + 1) || NetworkManager::Instance().GetSkipFlag()){	// 目標の時間がたったら
 			// 入力
 			InputManager::Instance().UpdateAll();
 
@@ -277,7 +279,7 @@ void Framework::MainLoop()
 			Actor2DManager::Instance().WriteDownPosition();
 
 			// 描画
-			if((frameSkipMax_ <= frameSkipCount_ || !NetworkManager::Instance().GetSkipFlag())){
+			if(frameSkipMax_ <= frameSkipCount_ || !NetworkManager::Instance().GetSkipFlag()){
 				if(gm.BeginScene()){
 					gm.EndMask();	// マスクのクリーン
 					sq.Draw();		// シーケンスの描画
@@ -359,7 +361,7 @@ void Framework::Run(Scene* pInitScene)
 				CloseHandle(hMainLoopThread_);
 				hMainLoopThread_ = nullptr;
 				break;
-			}else{ Sleep(30); }		
+			}else{ Sleep(10); }		
 		}
 		else{ break; }
 	}
@@ -429,6 +431,18 @@ void Framework::ChangeDisplayMode()
 }
 
 //------------------------------------------------------------------------------
+// ウィンドウが閉じられた時
+// 引数　：なし
+// 戻り値：メッセージ処理の結果
+//------------------------------------------------------------------------------
+LRESULT Framework::OnClose()
+{
+	DestroyWindow(hWnd_);
+
+	return 0;
+}
+
+//------------------------------------------------------------------------------
 // ウィンドウが破棄される時
 // 引数　：なし
 // 戻り値：メッセージ処理の結果
@@ -438,18 +452,6 @@ LRESULT Framework::OnDestroy()
 	UnInit();
 
 	PostQuitMessage(0);	// 終了メッセージを送る
-
-	return 0;
-}
-
-//------------------------------------------------------------------------------
-// ウィンドウが閉じられた時
-// 引数　：なし
-// 戻り値：メッセージ処理の結果
-//------------------------------------------------------------------------------
-LRESULT Framework::OnClose()
-{
-	DestroyWindow(hWnd_);
 
 	return 0;
 }
@@ -472,7 +474,8 @@ LRESULT Framework::OnKeyDown(){
 				SendMessage(hWnd_, WM_CLOSE, 0, 0);	// 終了
 			}
 		}
-		else{	// フルスクリーン時
+		else if(!bChangeDispRequest_){
+			// フルスクリーン時
 			bChangeDispRequest_ = true;	// ウィンドウモードの切り替え
 		}
 
@@ -493,7 +496,9 @@ LRESULT Framework::OnSysKeyDown()
 	// Alt+エンターキーが押されたらウィンドウモードの切り替え
 	if(wp_ != VK_RETURN){ return DefaultProc(); }
 
-	if(!NetworkManager::Instance().IsConnect()){ bChangeDispRequest_ = true; }
+	if(!NetworkManager::Instance().IsConnect() && !bChangeDispRequest_){
+		bChangeDispRequest_ = true;
+	}
 
 	return 0;
 }

@@ -43,7 +43,7 @@ private:
 	UINT height_;				// スクリーンの高さ
 	bool bWindowed_;			// ウィンドウモード
 
-	std::atomic<bool> bReady_;			// 実行準備
+	std::atomic<bool> bReady_;			// 実行準備完了
 	std::atomic<Scene*> pInitScene_;	// 初期シーン
 	bool bExit_;						// 終了フラグ
 
@@ -64,15 +64,16 @@ private:
 	HANDLE hMainLoopThread_;	// メインループスレッドのハンドル
 
 	friend DWORD WINAPI MainLoopThread(void* vp);	// メインループスレッド
-	void MainLoop();			// メインループ
-	void ChangeDisplayMode();	// ウィンドウモードの切り替え
+	inline void MainLoop();				// メインループ
+
+	inline void ChangeDisplayMode();	// ウィンドウモードの切り替え
 
 	// メッセージ処理
-	LRESULT OnDestroy();	// ウィンドウが破棄される時
-	LRESULT OnClose();		// ウィンドウが閉じられた時
-	LRESULT OnKeyDown();	// キーが入力された時
-	LRESULT OnSysKeyDown();	// システムキーが入力された時
-	LRESULT OnSetCursor();	// ウィンドウ内でマウスカーソルが動いた時
+	LRESULT OnClose()override;		// ウィンドウが閉じられた時
+	LRESULT OnDestroy()override;	// ウィンドウが破棄される時
+	LRESULT OnKeyDown()override;	// キーが入力された時
+	LRESULT OnSysKeyDown()override;	// システムキーが入力された時
+	LRESULT OnSetCursor()override;	// ウィンドウ内でマウスカーソルが動いた時
 
 	Framework();			// コンストラクタ
 	~Framework(){}			// デストラクタ

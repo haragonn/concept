@@ -7,13 +7,16 @@
 #include "../../../idea/h/Utility/Timer.h"
 #include "../../../idea/h/Utility/ideaMath.h"
 #include "../../../idea/h/Utility/ideaUtility.h"
-#include "../../../eidos/h/Mesh/PmdModel.h"
 #include <string>
 #include <vector>
 #include <unordered_map>
 #include <list>
 
 #pragma pack(push,1)
+
+class PmdModel;
+class PmxModel;
+struct VmdBone;
 
 // VMDÇÃÉwÉbÉ_Å[
 struct VmdHeader 
@@ -55,14 +58,17 @@ class VmdMotion{
 public:
 	VmdMotion();
 	~VmdMotion();
-	bool LoadVmdMotionFromFile(const char* pFileName, PmdModel & mdl, bool bLoop = false);
+	bool LoadVmdMotionFromFile(const char* pFileName, PmdModel& mdl, bool bLoop = false);
+	bool LoadVmdMotionFromFile(const char* pFileName, PmxModel& mdl, bool bLoop = false);
 	void UpdatePmd(float speed);
+	void UpdatePmx(float speed);
 	void Reset();
 	bool IsFinish()const{ return bFinish_; }
 	void UnLoad();
 
 private:
-	PmdModel* pModl_;
+	PmdModel* pPmd_;
+	PmxModel* pPmx_;
 	unsigned long motionSize;
 	std::vector<VmdMotionData> vecVmdMotion_;
 	std::unordered_map <std::string, std::vector<KeyFrame>> umapMotionData_;
@@ -73,7 +79,8 @@ private:
 	bool bLoop_;
 	bool bFinish_;
 
-	void RecursiveMatrixMultiply(Bone* node, const Matrix4x4& mat);
+	void RecursiveMatrixMultiply(VmdBone* node, const Matrix4x4& mat);
+	void XRecursiveMatrixMultiply(VmdBone* node, const Matrix4x4& mat);
 };
 
 #endif	// #ifndef INCLUDE_EIDOS_VMDMOTION_H

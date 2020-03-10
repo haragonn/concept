@@ -12,31 +12,23 @@
 #include <vector>
 #include <map>
 #include <string>
-#define WIN32_LEAN_AND_MEAN
-#include <d3d11.h>
-#include <DirectXMath.h>
-
-using namespace std;
-using namespace DirectX;
-
 
 struct ID3D11Buffer;
 
 // PMXのモデルデータ型
-struct PMXModelData
-{
+struct PMXModelData{
 	static constexpr int NO_DATA_FLAG = -1;
 
 	struct Vertex
 	{
 		// 頂点座標
-		XMFLOAT3 position;
+		Vector3D position;
 		// 法線
-		XMFLOAT3 normal;
+		Vector3D normal;
 		// UV座標
-		XMFLOAT2 uv;
+		Vector2D uv;
 		// 追加UV座標
-		std::vector<XMFLOAT4> additionalUV;
+		std::vector<Vector4D> additionalUV;
 
 		// ボーンウェイト
 		struct Weight
@@ -50,17 +42,20 @@ struct PMXModelData
 			};
 
 			Type type;
+
 			int born1;
 			int	born2;
 			int	born3;
 			int	born4;
+
 			float weight1;
 			float weight2;
 			float weight3;
 			float weight4;
-			XMFLOAT3 c;
-			XMFLOAT3 r0;
-			XMFLOAT3 r1;
+
+			Vector3D c;
+			Vector3D r0;
+			Vector3D r1;
 		} weight;
 
 		// エッジ倍率
@@ -74,10 +69,10 @@ struct PMXModelData
 
 	struct Material
 	{
-		XMFLOAT4 diffuse;
-		XMFLOAT3 specular;
+		Vector4D diffuse;
+		Vector3D specular;
 		float specularity;
-		XMFLOAT3 ambient;
+		Vector3D ambient;
 
 		int colorMapTextureIndex;
 		int toonTextureIndex;
@@ -90,41 +85,54 @@ struct PMXModelData
 	struct Bone
 	{
 		// ボーン名
-		std::wstring name;
+		std::string name;
+
 		// English version
 		std::string nameEnglish;
-		XMFLOAT3 position;
+
+		Vector3D position;
+
 		int parentIndex;
+
 		int transformationLevel;
+
 		unsigned short flag;
-		XMFLOAT3 coordOffset;
+
+		Vector3D coordOffset;
+
 		int childrenIndex;
 		int impartParentIndex;
 		float impartRate;
+
 		// 固定軸方向ベクトル
-		XMFLOAT3 fixedAxis;
+		Vector3D fixedAxis;
+
 		// ローカルのX軸方向ベクトル
-		XMFLOAT3 localAxisX;
+		Vector3D localAxisX;
+
 		// ローカルのZ軸方向ベクトル
-		XMFLOAT3 localAxisZ;
+		Vector3D localAxisZ;
+
 		int externalParentKey;
+
 		int ikTargetIndex;
 		int ikLoopCount;
 		float ikUnitAngle;
+
 		struct IKLink
 		{
 			int index;
 			bool existAngleLimited;
-			XMFLOAT3 limitAngleMin;
-			XMFLOAT3 limitAngleMax;
+			Vector3D limitAngleMin;
+			Vector3D limitAngleMax;
 		};
+
 		std::vector<IKLink> ikLinks;
 	};
 
-
 	std::vector<Vertex> vertices;
 	std::vector<Surface> surfaces;
-	std::vector<std::wstring> texturePaths;
+	std::vector<std::string> texturePaths;
 	std::vector<Material> materials;
 	std::vector<Bone> bones;
 };
@@ -133,8 +141,10 @@ class PmxModel : public Object{
 public:
 	PmxModel();
 	~PmxModel();
+
 	bool LoadPmxMeshFromFile(const char* pFileName);//読み込み
 	bool LoadPmxMeshFromStorage(const char* pFileName);	// ストレージから読み込む
+
 	void UnLoad();
 
 private:
@@ -147,10 +157,8 @@ private:
 	unsigned long vertexSize_;
 	std::vector<unsigned short> vecIndex_;
 	unsigned long indexSize_;
-	std::vector<PmdMaterial> vecMaterial_;
 	unsigned long materialSize_;
-	std::vector<PmdBone> vecPmdBone_;
-	std::map<std::string, Bone> mapBone_;
+	std::map<std::string, VmdBone> mapBone_;
 	std::vector<Matrix4x4> vecBoneMatrix_;
 	unsigned short boneSize_;
 	std::vector<Texture*> vecTexPtr_;

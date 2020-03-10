@@ -14,7 +14,9 @@ public:
 	Texture texBG_;
 
 	PmdModel pmSakuya_;
-	PmxModel fm_;
+	PmxModel pxm_;
+
+	VmdMotion vm_;
 
 	int time_;
 };
@@ -44,11 +46,13 @@ void BreadBoard3::Init()
 
 	im.texBG_.LoadImageFromFile("data/TEXTURE/grid04.bmp");
 
-	im.fm_.LoadPmxMeshFromFile("model/初音/コロン式  初音ミクV3_Re_rev.1.2(スパッツ).pmx");
+	im.pxm_.LoadPmxMeshFromFile("model/初音/Tda式初音ミク・アペンド_Ver1.10.pmx");
 
-	im.fm_.Init(0.0f, -14.0f, 0.0f);
+	im.pxm_.Init(0.0f, -14.0f, 0.0f);
 
-	im.wcmr_.AddObject(im.fm_);
+	im.wcmr_.AddObject(im.pxm_);
+
+	im.vm_.LoadVmdMotionFromFile("motion/02_心臓を押さえる_ミク.vmd", im.pxm_, true);
 
 	im.time_ = 0;
 }
@@ -63,6 +67,8 @@ Scene * BreadBoard3::Update()
 	++im.time_;
 
 	im.ctr_.Update();
+
+	im.vm_.UpdatePmx(1.0f);
 
 	if(!im.wcmr_.IsWrap()){
 		float cameraSpeed = 0.02f;
