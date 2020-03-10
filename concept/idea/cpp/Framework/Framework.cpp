@@ -326,12 +326,12 @@ void Framework::MainLoop()
 //------------------------------------------------------------------------------
 void Framework::Run(Scene* pInitScene)
 {
-	if(!bReady_ || !pInitScene){ return; }	// 準備はいいか,シーンのNULLチェック
-
 	if(bExit_){	// Run()の再呼び出しの処理
 		SafeDelete(pInitScene);
 		return;
 	}
+
+	if(!bReady_ || !pInitScene){ return; }	// 準備はいいか,シーンのNULLチェック
 
 	pInitScene_ = pInitScene;
 

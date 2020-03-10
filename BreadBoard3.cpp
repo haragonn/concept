@@ -52,7 +52,7 @@ void BreadBoard3::Init()
 
 	im.wcmr_.AddObject(im.pxm_);
 
-	im.vm_.LoadVmdMotionFromFile("motion/02_心臓を押さえる_ミク.vmd", im.pxm_, true);
+	im.vm_.LoadVmdMotionFromFile("motion/_待機.vmd", im.pxm_, true);
 
 	im.time_ = 0;
 }

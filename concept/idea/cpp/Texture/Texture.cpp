@@ -11,10 +11,17 @@
 #include "../../h/Archive/ArchiveLoader.h"
 #include "../../h/Storage/StorageManager.h"
 #include "../../h/Utility//ideaUtility.h"
+
 #define WIN32_LEAN_AND_MEAN
-#include "WICTextureLoader.h"
 #include <d3d11.h>
 #include <locale.h>
+#include "DirectXTex.h"
+
+#ifdef _DEBUG
+#pragma comment(lib, "DirectXTex_d.lib")
+#else
+#pragma comment(lib, "DirectXTex.lib")
+#endif
 
 using namespace std;
 using namespace DirectX;
@@ -23,7 +30,6 @@ using namespace DirectX;
 // コンストラクタ
 //------------------------------------------------------------------------------
 Texture::Texture():
-	pTexture_(nullptr),
 	pTextureView_(nullptr),
 	divU_(1.0f),
 	divV_(1.0f),
@@ -38,7 +44,6 @@ Texture::Texture():
 //------------------------------------------------------------------------------
 Texture::~Texture()
 {
-	// 終了処理
 	UnLoad();
 }
 
@@ -50,8 +55,9 @@ Texture::~Texture()
 //------------------------------------------------------------------------------
 bool Texture::LoadImageFromFile(const char* pFileName, unsigned int divX, unsigned int divY)
 {
-	ID3D11Device* pD3DDev = GraphicManager::Instance().GetDevicePtr();
-	if(!pD3DDev || pTexture_){ return false; }	// デバイスがないか既に読み込み済みなら終了
+	auto pD3DDev = GraphicManager::Instance().GetDevicePtr();
+
+	if(!pD3DDev || pTextureView_){ return false; }	// デバイスがないか既に読み込み済みなら終了
 
 	ZeroMemory(fileName_, ArraySize(fileName_));
 	memcpy(fileName_, pFileName, 255);
@@ -60,27 +66,72 @@ bool Texture::LoadImageFromFile(const char* pFileName, unsigned int divX, unsign
 	if(divX > 1){ divU_ = 1.0f / divX; }
 	if(divY > 1){ divV_ = 1.0f / divY; }
 
-	// 画像の読み込み
+	// ファイルパスの変換
 	setlocale(LC_ALL, "japanese");
-	wchar_t pTemp[MAX_PATH];
+	wchar_t tFileNamePtr[MAX_PATH];
 	size_t size;
-	mbstowcs_s(&size, pTemp, MAX_PATH, pFileName, _TRUNCATE);
+	mbstowcs_s(&size, tFileNamePtr, MAX_PATH, pFileName, _TRUNCATE);
 
-	HRESULT hr = CreateWICTextureFromFile(pD3DDev, pTemp, &pTexture_, &pTextureView_);
+	// 拡張子
+	char ms[MAX_PATH];
+	wcstombs_s(&size, ms, MAX_PATH, tFileNamePtr, _TRUNCATE);
 
-	if(FAILED(hr)){
-		pTexture_ = nullptr;
-		pTextureView_ = nullptr;
-		SetDebugMessage("TexturLoadError! [%s] をファイルから読み込めませんでした\n", pFileName);
+	char* extension = strstr(ms, ".");
+	if(!extension){
+		SetDebugMessage("TexturLoadError! [%s] に拡張子が存在しません。\n", pFileName);
+		return false;
+	}
+
+	// 画像の読み込み
+	if(strcmp(extension, ".tga") == 0 || strcmp(extension, ".TGA") == 0) {
+		TexMetadata meta;
+
+		if(FAILED(GetMetadataFromTGAFile(tFileNamePtr, meta))){
+			SetDebugMessage("TexturLoadError! [%s] をファイルから読み込めませんでした。\n", pFileName);
+			return false;
+		}
+
+		std::unique_ptr<ScratchImage> image(new ScratchImage);
+
+		if(FAILED(LoadFromTGAFile(tFileNamePtr, &meta, *image))){
+			SetDebugMessage("TexturLoadError! [%s] をファイルから読み込めませんでした。\n", pFileName);
+			return false;
+		}
+
+		if(FAILED(CreateShaderResourceView(pD3DDev, image->GetImages(), image->GetImageCount(), meta, &pTextureView_))){
+			SetDebugMessage("TexturLoadError! [%s] からリソースビューを作成できませんでした。\n", pFileName);
+			return false;
+		}
+	} else{
+		TexMetadata meta;
+
+		if(FAILED(GetMetadataFromWICFile(tFileNamePtr, 0, meta))){
+			SetDebugMessage("TexturLoadError! [%s] をファイルから読み込めませんでした。\n", pFileName);
+			return false;
+		}
+
+		std::unique_ptr<ScratchImage> image(new ScratchImage);
+
+		if(FAILED(LoadFromWICFile(tFileNamePtr, 0, &meta, *image))){
+			SetDebugMessage("TexturLoadError! [%s] をファイルから読み込めませんでした。\n", pFileName);
+			return false;
+		}
+
+		if(FAILED(CreateShaderResourceView(pD3DDev, image->GetImages(), image->GetImageCount(), meta, &pTextureView_))){
+			pTextureView_ = nullptr;
+			SetDebugMessage("TexturLoadError! [%s] からリソースビューを作成できませんでした。\n", pFileName);
+			return false;
+		}
 	}
 	
-	return SUCCEEDED(hr);
+	return true;
 }
 
 bool Texture::LoadImageFromArchiveFile(const char * pArchiveFileName, const char * pFileName, unsigned int divX, unsigned int divY)
 {
-	ID3D11Device* pD3DDev = GraphicManager::Instance().GetDevicePtr();
-	if(!pD3DDev || pTexture_){ return false; }	// デバイスがないか既に読み込み済みなら終了
+	auto pD3DDev = GraphicManager::Instance().GetDevicePtr();
+
+	if(!pD3DDev || pTextureView_){ return false; }	// デバイスがないか既に読み込み済みなら終了
 
 	ZeroMemory(fileName_, ArraySize(fileName_));
 	memcpy(fileName_, pFileName, 255);
@@ -92,23 +143,62 @@ bool Texture::LoadImageFromArchiveFile(const char * pArchiveFileName, const char
 	// 画像の読み込み
 	ArchiveLoader loader;
 	if(!loader.Load(pArchiveFileName, pFileName)){
-		SetDebugMessage("TexturLoadError! [%s] を [%s] から読み込めませんでした\n", pFileName, pArchiveFileName);
+		SetDebugMessage("ArchiveLoadError! [%s] をファイルから読み込めませんでした\n", pArchiveFileName);
 		return false;
 	}
 
-	setlocale(LC_ALL, "japanese");
-	wchar_t pTemp[MAX_PATH];
-	size_t size;
-	mbstowcs_s(&size, pTemp, MAX_PATH, pFileName, _TRUNCATE);
-	HRESULT hr = CreateWICTextureFromMemory(pD3DDev, &loader.GetData()[0], loader.GetSize(), &pTexture_, &pTextureView_);
-
-	if(FAILED(hr)){
-		pTexture_ = nullptr;
-		pTextureView_ = nullptr;
-		SetDebugMessage("TexturLoadError! [%s] を [%s] から読み込めませんでした\n", pFileName, pArchiveFileName);
+	char ms[MAX_PATH];
+	strcpy_s(ms, pFileName);
+	char* extension = strstr(ms, ".");
+	if(!extension){
+		SetDebugMessage("TexturLoadError! [%s] に拡張子が存在しません。\n", pFileName);
+		return false;
 	}
 
-	return SUCCEEDED(hr);
+	// 画像の読み込み
+	if(strcmp(extension, ".tga") == 0 || strcmp(extension, ".TGA") == 0) {
+		TexMetadata meta;
+
+		if(FAILED(GetMetadataFromTGAMemory(&loader.GetData()[0], loader.GetSize(), meta))){
+			SetDebugMessage("TexturLoadError! [%s] を [%s] から読み込めませんでした。\n", pFileName, pArchiveFileName);
+			return false;
+		}
+
+		std::unique_ptr<ScratchImage> image(new ScratchImage);
+
+		if(FAILED(LoadFromTGAMemory(&loader.GetData()[0], loader.GetSize(), &meta, *image))){
+			SetDebugMessage("TexturLoadError! [%s] を [%s] から読み込めませんでした。\n", pFileName, pArchiveFileName);
+			return false;
+		}
+
+		if(FAILED(CreateShaderResourceView(pD3DDev, image->GetImages(), image->GetImageCount(), meta, &pTextureView_))){
+			pTextureView_ = nullptr;
+			SetDebugMessage("TexturLoadError! [%s] からリソースビューを作成できませんでした。\n", pFileName);
+			return false;
+		}
+	} else{
+		TexMetadata meta;
+
+		if(FAILED(GetMetadataFromWICMemory(&loader.GetData()[0], loader.GetSize(), 0, meta))){
+			SetDebugMessage("TexturLoadError! [%s] を [%s] から読み込めませんでした。\n", pFileName, pArchiveFileName);
+			return false;
+		}
+
+		std::unique_ptr<ScratchImage> image(new ScratchImage);
+
+		if(FAILED(LoadFromWICMemory(&loader.GetData()[0], loader.GetSize(), 0, &meta, *image))){
+			SetDebugMessage("TexturLoadError! [%s] を [%s] から読み込めませんでした。\n", pFileName, pArchiveFileName);
+			return false;
+		}
+
+		if(FAILED(CreateShaderResourceView(pD3DDev, image->GetImages(), image->GetImageCount(), meta, &pTextureView_))){
+			pTextureView_ = nullptr;
+			SetDebugMessage("TexturLoadError! [%s] からリソースビューを作成できませんでした。\n", pFileName);
+			return false;
+		}
+	}
+
+	return true;
 }
 
 //------------------------------------------------------------------------------
@@ -119,7 +209,7 @@ bool Texture::LoadImageFromArchiveFile(const char * pArchiveFileName, const char
 //------------------------------------------------------------------------------
 bool Texture::LoadImageFromStorage(const char* pFileName, unsigned int divX, unsigned int divY)
 {
-	if(pTexture_){ return false; }	// 既に読み込み済みなら終了
+	if(pTextureView_){ return false; }	// 既に読み込み済みなら終了
 
 	ZeroMemory(fileName_, ArraySize(fileName_));
 	memcpy(fileName_, pFileName, 255);
@@ -130,16 +220,15 @@ bool Texture::LoadImageFromStorage(const char* pFileName, unsigned int divX, uns
 
 	// ストレージから画像を読み込む
 	Texture& tex = StorageManager::Instance().GetTexture(pFileName);
-	pTexture_ = tex.pTexture_;
 	pTextureView_ = tex.pTextureView_;
 
-	if(pTexture_ && pTextureView_){ bStorage_ = true; }	// ストレージ使用フラグをオンに
+	if(pTextureView_){ bStorage_ = true; }	// ストレージ使用フラグをオンに
 	else{
-		pTexture_ = nullptr;
 		pTextureView_ = nullptr;
 		SetDebugMessage("TexturLoadError! [%s] をストレージから読み込めませんでした。\n", pFileName);
 		return false;
 	}
+
 	return true;
 }
 
@@ -150,7 +239,7 @@ bool Texture::LoadImageFromStorage(const char* pFileName, unsigned int divX, uns
 //------------------------------------------------------------------------------
 void Texture::UnLoad()
 {
-	if(!pTexture_){ return; }
+	if(!pTextureView_){ return; }
 
 	if(vecTexHolderPtr_.size() > 0){
 		for(auto it = vecTexHolderPtr_.begin(), itEnd = vecTexHolderPtr_.end(); it != itEnd; ++it){
@@ -159,16 +248,16 @@ void Texture::UnLoad()
 			}
 		}
 	}
+	vector<TextureHolder*>().swap(vecTexHolderPtr_);
 
 	if(!bStorage_){
 		SafeRelease(pTextureView_);
-		SafeRelease(pTexture_);
 	}
 
 	ZeroMemory(fileName_, ArraySize(fileName_));
-	pTexture_ = nullptr;
-	pTextureView_ = nullptr;
+
 	divU_ = 1.0f;
 	divV_ = 1.0f;
+
 	bStorage_ = false;
 }
