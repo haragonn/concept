@@ -101,8 +101,6 @@ private:
 
 	ID3D11Device* pD3DDevice_;					// デバイス
 
-	BLEND_STATE blendState_;					// ブレンドステート
-
 	ID3D11DeviceContext* pImmediateContext_;	// コンテキスト
 
 	IDXGISwapChain* pSwapChain_;				// スワップチェイン
@@ -119,6 +117,8 @@ private:
 
 	ID3D11RasterizerState* pRsState_;			// ラスタライザ―ステート
 	ID3D11DepthStencilState* pDsState_;			// デプスステンシルステート
+
+	BLEND_STATE blendState_;					// ブレンドステート
 
 	DXGI_SAMPLE_DESC MSAA_;						// サンプルディスク
 

@@ -37,6 +37,7 @@ private:
 	// 生成の禁止
 	Actor2DManager();
 	~Actor2DManager(){}
+
 	// コピーコンストラクタの禁止
 	Actor2DManager(const Actor2DManager& src){}
 	Actor2DManager& operator=(const Actor2DManager& src){}

@@ -11,7 +11,6 @@
 class Sprite;
 class Texture;
 
-
 class SpriteInstancing{
 public:
 	SpriteInstancing();					// コンストラクタ

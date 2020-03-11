@@ -15,7 +15,7 @@ void ShadowCamera::Init(Vector3D vecLight, float range)
 
 	XMFLOAT4X4 matProj;
 	XMStoreFloat4x4(&matProj, XMMatrixIdentity());
-	XMStoreFloat4x4(&matProj, XMMatrixOrthographicLH(5.0f * range, 5.0f * range, 10.0f, 30.0f));
+	XMStoreFloat4x4(&matProj, XMMatrixOrthographicLH(5.0f * range, 5.0f * range, 25.0f, 100.0f));
 
 	for(int i = 4 - 1; i >= 0; --i){
 		for(int j = 4 - 1; j >= 0; --j){
@@ -24,7 +24,7 @@ void ShadowCamera::Init(Vector3D vecLight, float range)
 	}
 
 	eye_ = vecLight;
-	eye_ = eye_.Normalized() * 20.0f;
+	eye_ = eye_.Normalized() * 50.0f;
 	focus_ = Vector3D(0.0f, 1.0f, 0.0f) - vecLight;
 	upY_ = 1.0f;
 

@@ -129,9 +129,10 @@ public:
 		af_ = 0.0f;
 	}
 
-	void Init2(WrapCamera& cmr)
+	void Init2(WrapCamera& cmr, ShadowCamera& scmr)
 	{
 		cmr.AddObject(omShild_);
+		//scmr.AddObject(cbTarget_);
 	}
 	bool Update(WrapCamera& cmr, Player& player)
 	{

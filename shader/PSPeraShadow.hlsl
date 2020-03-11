@@ -10,6 +10,7 @@ struct VS_OUT
 float4 main(VS_OUT input) : SV_TARGET
 {
 	float dep = depthTex.Sample(mySampler, input.tex);
+	clip(dep);
 
 	return float4(dep, dep, dep, 1.0f);
 }

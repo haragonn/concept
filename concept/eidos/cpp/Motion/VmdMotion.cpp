@@ -1,6 +1,7 @@
 #include "../../h/Motion/VmdMotion.h"
 #include "../../h/Mesh/PmdModel.h"
 #include "../../h/Mesh/PmxModel.h"
+
 #include <fstream>
 #include <algorithm>
 #define WIN32_LEAN_AND_MEAN

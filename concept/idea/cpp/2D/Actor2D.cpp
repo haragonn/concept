@@ -34,6 +34,7 @@ Actor2D::Actor2D() :
 Actor2D::~Actor2D()
 {
 	UnInit();
+
 	Actor2DManager::Instance().UnRegister(this);
 }
 

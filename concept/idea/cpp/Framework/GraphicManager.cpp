@@ -307,8 +307,6 @@ bool GraphicManager::Init(HWND hWnd, UINT width, UINT height, bool bWindowed, UI
 
 	pImmediateContext_->OMSetDepthStencilState(pDsState_, 0);
 
-	//EndMask();
-
 	// ビューポートの設定
 	D3D11_VIEWPORT viewPort = {};
 	viewPort.TopLeftX = 0;
@@ -426,7 +424,7 @@ bool GraphicManager::EndScene()
 
 	DrawPath(0, 1, pDefaultPixelShader_, viewPort);
 
-#endif	// #ifdef _DEBUG
+#endif
 
 	//ウインドウに反映
 	pSwapChain_->Present(1, 0);
@@ -478,7 +476,6 @@ bool GraphicManager::DrawPath(int target, int src, ID3D11PixelShader* pps, D3D11
 
 	return false;
 }
-
 
 bool GraphicManager::DrawShadow(int target, D3D11_VIEWPORT viewPort)
 {

@@ -65,7 +65,7 @@ void BreadBoard::Init()
 	im.wcmr_.SetViewPort(0.0f, 0.0f, S_W, S_H);
 	im.wcmr_.SetRotate(DegreeToRadian(0), DegreeToRadian(10));
 
-	im.scmr_.Init(Vector3D(0.7f, 0.7f, -0.7f), 0.7f);
+	im.scmr_.Init(Vector3D(0.7f, 1.0f, -0.4f), 0.7f);
 
 	im.player_.Init(im.wcmr_, im.scmr_);
 	im.trg_.Init(im.wcmr_, 0.0f, 0.0f);
@@ -80,7 +80,7 @@ void BreadBoard::Init()
 	im.wcmr_.AddObject(im.pm_);
 	im.pm_.SetShadow(im.scmr_);
 
-	im.trg_.Init2(im.wcmr_);
+	im.trg_.Init2(im.wcmr_, im.scmr_);
 	//im.trg2_.Init2(im.wcmr_);
 	im.wll_.Init(im.wcmr_, im.scmr_);
 	im.time_ = 0;

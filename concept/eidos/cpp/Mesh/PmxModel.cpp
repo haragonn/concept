@@ -55,12 +55,12 @@ PmxModel::~PmxModel()
 
 bool PmxModel::LoadPmxMeshFromFile(const char* pFileName)
 {
-	if(pVertexBuffer_ || pIndexBuffer_){ return false; }	// 既に読み込み済みなら終了
+	if(pVertexBuffer_){ return false; }	// 既に読み込み済みなら終了
 
 	GraphicManager& gm = GraphicManager::Instance();
 	if(!gm.GetContextPtr()){ return false; }
 
-	ifstream ifs(pFileName, ios::binary | ios::in);
+	ifstream ifs(pFileName, ios::binary);
 	if(!ifs.is_open()){ return false; }
 
 	string filePath = pFileName;
@@ -68,7 +68,7 @@ bool PmxModel::LoadPmxMeshFromFile(const char* pFileName)
 	string folderPath{ filePath.begin(), filePath.begin() + filePath.rfind('/') + 1 };
 
 	// ヘッダー -------------------------------
-	array<byte, 4> pmxHeader{};
+	array<byte, 4> pmxHeader = {};
 	constexpr array<byte, 4> PMX_MAGIC_NUMBER{ 0x50, 0x4d, 0x58, 0x20 };
 	enum HeaderDataIndex
 	{
@@ -81,7 +81,7 @@ bool PmxModel::LoadPmxMeshFromFile(const char* pFileName)
 		RIGID_BODY_INDEX_SIZE
 	};
 
-	for(int i = 0; i < 4; i++){
+	for(int i = 0; i < 4; ++i){
 		pmxHeader[i] = ifs.get();
 	}
 	if(pmxHeader != PMX_MAGIC_NUMBER){
@@ -90,7 +90,7 @@ bool PmxModel::LoadPmxMeshFromFile(const char* pFileName)
 	}
 
 	// ver2.0以外は非対応
-	float version{};
+	float version = 0.0f;
 	ifs.read(reinterpret_cast<char*>(&version), 4);
 	if(!XMScalarNearEqual(version, 2.0f, g_XMEpsilon.f[0])){
 		ifs.close();
@@ -104,7 +104,7 @@ bool PmxModel::LoadPmxMeshFromFile(const char* pFileName)
 	}
 
 	array<byte, 8> hederData{};
-	for(int i = 0; i < hederDataLength; i++){
+	for(int i = 0; i < hederDataLength; ++i){
 		hederData[i] = ifs.get();
 	}
 
@@ -114,24 +114,24 @@ bool PmxModel::LoadPmxMeshFromFile(const char* pFileName)
 		return false;
 	}
 
-	unsigned arrayLength{};
+	unsigned int arrayLength = 0;
 
-	for(int i = 0; i < 4; i++){
+	for(int i = 0; i < 4; ++i){
 		ifs.read(reinterpret_cast<char*>(&arrayLength), 4);
 
-		for(unsigned j = 0; j < arrayLength; j++){
+		for(unsigned int j = 0; j < arrayLength; ++j){
 			ifs.get();
 		}
 	}
 
 	// 頂点 -----------------------------------
 	using Vertex = PMXModelData::Vertex;
-	int numberOfVertex{};
+	int numberOfVertex = 0;
 	ifs.read(reinterpret_cast<char*>(&numberOfVertex), 4);
 	vertexSize_ = numberOfVertex;
 	pmxData_.vertices.resize(numberOfVertex);
 
-	for(int i = 0; i < numberOfVertex; i++)
+	for(int i = 0; i < numberOfVertex; ++i)
 	{
 		ifs.read(reinterpret_cast<char*>(&pmxData_.vertices[i].position), 12);
 		ifs.read(reinterpret_cast<char*>(&pmxData_.vertices[i].normal), 12);
@@ -204,12 +204,12 @@ bool PmxModel::LoadPmxMeshFromFile(const char* pFileName)
 	}
 
 	// 面  ------------------------------------
-	int numOfSurface{};
+	int numOfSurface = 0;
 	ifs.read(reinterpret_cast<char*>(&numOfSurface), 4);
 	pmxData_.surfaces.resize(numOfSurface);
 	indexSize_ = numOfSurface;
 
-	for(int i = 0; i < numOfSurface; i++){
+	for(int i = 0; i < numOfSurface; ++i){
 		ifs.read(reinterpret_cast<char*>(&pmxData_.surfaces[i].vertexIndex), hederData[VERTEX_INDEX_SIZE]);
 
 		if(pmxData_.surfaces[i].vertexIndex == PMXModelData::NO_DATA_FLAG || pmxData_.surfaces[i].vertexIndex == PMXModelData::NO_DATA_FLAG || pmxData_.surfaces[i].vertexIndex == PMXModelData::NO_DATA_FLAG){
@@ -219,36 +219,41 @@ bool PmxModel::LoadPmxMeshFromFile(const char* pFileName)
 	}
 
 	// テクスチャ -----------------------------
-	int numOfTexture{};
+	int numOfTexture = 0;
 	ifs.read(reinterpret_cast<char*>(&numOfTexture), 4);
+
+	texPtrSize_ = numOfTexture;
+
 	pmxData_.texturePaths.resize(numOfTexture);
 
-	// 標準出力にユニコード出力する
+	// テクスチャ読み込み
 	wstring texturePath{};
-	for(int i = 0; i < numOfTexture; i++){
+	for(int i = 0; i < numOfTexture; ++i){
 		GetPMXStringUTF16(ifs, texturePath);
+
 		string t = WStringToString(texturePath);
 		string s = folderPath;
 		AddDirectoryPath(t, s);
+
 		pmxData_.texturePaths[i] = t;
+
 		Texture* pTex = new Texture;
 		pTex->LoadImageFromFile(t.c_str());
 		vecTexPtr_.push_back(pTex);
 	}
 
 	// マテリアル -----------------------------
-	int numOfMaterial{};
+	int numOfMaterial = 0;
 	ifs.read(reinterpret_cast<char*>(&numOfMaterial), 4);
 
 	materialSize_ = numOfMaterial;
 
 	pmxData_.materials.resize(numOfMaterial);
-	for(int i = 0; i < numOfMaterial; i++){
+
+	for(int i = 0; i < numOfMaterial; ++i){
 		for(int j = 0; j < 2; ++j){
 			ifs.read(reinterpret_cast<char*>(&arrayLength), 4);
-			for(unsigned i = 0; i < arrayLength; i++){
-				ifs.get();
-			}
+			for(unsigned int k = 0; k < arrayLength; ++k){ ifs.get(); }
 		}
 
 		ifs.read(reinterpret_cast<char*>(&pmxData_.materials[i].diffuse), 16);
@@ -258,22 +263,18 @@ bool PmxModel::LoadPmxMeshFromFile(const char* pFileName)
 
 		ifs.get();
 
-		for(int i = 0; i < 16; i++){
-			ifs.get();
-		}
+		for(int j = 0; j < 16; ++j){ ifs.get(); }
 
-		for(int i = 0; i < 4; i++){
-			ifs.get();
-		}
+		for(int j = 0; j < 4; ++j){ ifs.get(); }
 
 		ifs.read(reinterpret_cast<char*>(&pmxData_.materials[i].colorMapTextureIndex), hederData[TEXTURE_INDEX_SIZE]);
-		for(unsigned char i = 0; i < hederData[TEXTURE_INDEX_SIZE]; i++){
-			ifs.get();
-		}
+
+		for(unsigned char j = 0; j < hederData[TEXTURE_INDEX_SIZE]; ++j){ ifs.get(); }
 
 		ifs.get();
 
 		const byte shareToonFlag = ifs.get();
+
 		if(shareToonFlag){
 			ifs.get();
 		} else{
@@ -281,13 +282,14 @@ bool PmxModel::LoadPmxMeshFromFile(const char* pFileName)
 		}
 
 		ifs.read(reinterpret_cast<char*>(&arrayLength), 4);
-		for(unsigned i = 0; i < arrayLength; i++){ ifs.get(); }
+
+		for(unsigned int j = 0; j < arrayLength; ++j){ ifs.get(); }
 
 		ifs.read(reinterpret_cast<char*>(&pmxData_.materials[i].vertexNum), 4);
 	}
 
 	// ボーン ---------------------------------
-	int numOfBone{};
+	int numOfBone = 0;
 	ifs.read(reinterpret_cast<char*>(&numOfBone), 4);
 
 	boneSize_ = numOfBone;
@@ -297,21 +299,22 @@ bool PmxModel::LoadPmxMeshFromFile(const char* pFileName)
 	int ikLinkSize = 0;
 	unsigned char angleLim = 0;
 
-	for(int i = 0; i < numOfBone; i++)
-	{
+	for(int i = 0; i < numOfBone; ++i){
 		wstring buf;
 		GetPMXStringUTF16(ifs, buf);
 		pmxData_.bones[i].name = WStringToString(buf);
 
 		ifs.read(reinterpret_cast<char*>(&arrayLength), 4);
 		pmxData_.bones[i].nameEnglish.resize(arrayLength);
-		for(unsigned j = 0; j < arrayLength; ++j){
+
+		for(unsigned int j = 0; j < arrayLength; ++j){
 			pmxData_.bones[i].nameEnglish[j] = ifs.get();
 		}
 
 		ifs.read(reinterpret_cast<char*>(&pmxData_.bones[i].position), 12);
 
 		ifs.read(reinterpret_cast<char*>(&pmxData_.bones[i].parentIndex), hederData[BONE_INDEX_SIZE]);
+
 		if(numOfBone <= pmxData_.bones[i].parentIndex){
 			pmxData_.bones[i].parentIndex = PMXModelData::NO_DATA_FLAG;
 		}
@@ -320,8 +323,7 @@ bool PmxModel::LoadPmxMeshFromFile(const char* pFileName)
 
 		ifs.read(reinterpret_cast<char*>(&pmxData_.bones[i].flag), 2);
 
-		enum BoneFlagMask
-		{
+		enum BoneFlagMask{
 			ACCESS_POINT = 0x0001,
 			IK = 0x0020,
 			IMPART_TRANSLATION = 0x0100,
@@ -341,32 +343,40 @@ bool PmxModel::LoadPmxMeshFromFile(const char* pFileName)
 			pmxData_.bones[i].childrenIndex = PMXModelData::NO_DATA_FLAG;
 			ifs.read(reinterpret_cast<char*>(&pmxData_.bones[i].coordOffset), 12);
 		}
+
 		if((pmxData_.bones[i].flag & IMPART_TRANSLATION) || (pmxData_.bones[i].flag & IMPART_ROTATION)){
 			ifs.read(reinterpret_cast<char*>(&pmxData_.bones[i].impartParentIndex), hederData[BONE_INDEX_SIZE]);
 			ifs.read(reinterpret_cast<char*>(&pmxData_.bones[i].impartRate), 4);
 		}
+
 		if(pmxData_.bones[i].flag & AXIS_FIXING){
 			ifs.read(reinterpret_cast<char*>(&pmxData_.bones[i].fixedAxis), 12);
 		}
+
 		if(pmxData_.bones[i].flag & LOCAL_AXIS){
 			ifs.read(reinterpret_cast<char*>(&pmxData_.bones[i].localAxisX), 12);
 			ifs.read(reinterpret_cast<char*>(&pmxData_.bones[i].localAxisZ), 12);
 		}
+
 		if(pmxData_.bones[i].flag & EXTERNAL_PARENT_TRANS){
 			ifs.read(reinterpret_cast<char*>(&pmxData_.bones[i].externalParentKey), 4);
 		}
+
 		if(pmxData_.bones[i].flag & IK){
 			ifs.read(reinterpret_cast<char*>(&pmxData_.bones[i].ikTargetIndex), hederData[5]);
 			ifs.read(reinterpret_cast<char*>(&pmxData_.bones[i].ikLoopCount), 4);
 			ifs.read(reinterpret_cast<char*>(&pmxData_.bones[i].ikUnitAngle), 4);
 			ifs.read(reinterpret_cast<char*>(&ikLinkSize), 4);
+
 			pmxData_.bones[i].ikLinks.resize(ikLinkSize);
+
 			for(int j = 0; j < ikLinkSize; ++j){
 				ifs.read(reinterpret_cast<char*>(&pmxData_.bones[i].ikLinks[j].index), hederData[5]);
 				angleLim = ifs.get();
+
 				pmxData_.bones[i].ikLinks[j].existAngleLimited = false;
-				if(angleLim == 1)
-				{
+
+				if(angleLim == 1){
 					ifs.read(reinterpret_cast<char*>(&pmxData_.bones[i].ikLinks[j].limitAngleMin), 12);
 					ifs.read(reinterpret_cast<char*>(&pmxData_.bones[i].ikLinks[j].limitAngleMax), 12);
 					pmxData_.bones[i].ikLinks[j].existAngleLimited = true;
@@ -376,6 +386,7 @@ bool PmxModel::LoadPmxMeshFromFile(const char* pFileName)
 			pmxData_.bones[i].ikTargetIndex = PMXModelData::NO_DATA_FLAG;
 		}
 	}
+
 	ifs.close();
 
 	vecVertex_.resize(vertexSize_);
@@ -410,7 +421,6 @@ bool PmxModel::LoadPmxMeshFromFile(const char* pFileName)
 		vecIndex_[i] = pmxData_.surfaces[i].vertexIndex;
 	}
 
-
 	// ボーン情報格納
 	vector<string> vecBoneName(boneSize_);
 
@@ -433,8 +443,6 @@ bool PmxModel::LoadPmxMeshFromFile(const char* pFileName)
 	vecBoneMatrix_.resize(boneSize_);
 
 	fill(vecBoneMatrix_.begin(), vecBoneMatrix_.end(), Matrix4x4::Identity());
-
-	texPtrSize_ = vecTexPtr_.size();
 
 	{
 		// 頂点バッファを作成
@@ -480,7 +488,9 @@ void PmxModel::UnLoad()
 {
 	if(!bStorage_){
 		SafeRelease(pIndexBuffer_);
+
 		SafeRelease(pVertexBuffer_);
+
 		for(auto it = vecTexPtr_.begin(); it != vecTexPtr_.end(); ++it){
 			if(*it){
 				(*it)->UnLoad();
@@ -488,6 +498,7 @@ void PmxModel::UnLoad()
 			SafeDelete((*it));
 		}
 	}
+
 	bStorage_ = false;
 
 	pVertexBuffer_ = nullptr;
@@ -652,7 +663,7 @@ void PmxModel::Draw(Camera* pCamera)
 		ID3D11ShaderResourceView* pTexView = nullptr;
 
 		if(texPtrSize_ > 0 && pmxData_.materials[0].colorMapTextureIndex != PMXModelData::NO_DATA_FLAG){
-			pTexView = vecTexPtr_[0]->GetTextureViewPtr();
+			pTexView = vecTexPtr_[pmxData_.materials[0].colorMapTextureIndex]->GetTextureViewPtr();
 		}
 
 		if(pTexView){
@@ -664,7 +675,7 @@ void PmxModel::Draw(Camera* pCamera)
 
 		gm.GetContextPtr()->DrawIndexed(indexSize_, 0, 0);
 	} else{
-		unsigned long strat = 0U;
+		unsigned long strat = 0;
 
 		for(unsigned int i = 0; i < materialSize_; ++i){
 			ID3D11ShaderResourceView* pTexView = nullptr;

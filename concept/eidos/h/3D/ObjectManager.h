@@ -7,7 +7,6 @@
 #include <directxmath.h>
 
 //頂点データ構造体
-#pragma pack(push,1)
 struct VertexData3D
 {
 	DirectX::XMFLOAT3 pos;
@@ -40,8 +39,6 @@ struct ConstBufferBoneWorld
 {
 	DirectX::XMFLOAT4X4 boneWorld[512];
 };
-
-#pragma pack(pop)
 
 class ObjectManager{
 public:

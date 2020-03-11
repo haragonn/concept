@@ -21,6 +21,7 @@ public:
 	// 初期化
 	virtual void Init(Vector3D pos);
 	virtual void Init(float posX, float posY, float posZ);
+
 	// 終了
 	virtual void UnInit();
 
@@ -72,8 +73,6 @@ public:
 	float GetColorB()const{ return color_.b; }
 	float GetColorA()const{ return color_.a; }
 
-	//DirectX::XMFLOAT4X4* GetWorldMatrixPtr()const{ return pMatWorld_; }
-
 	// 球の接触判定
 	bool CheckHitSphere(Actor3D& target);
 
@@ -96,12 +95,10 @@ protected:
 		Vector3D e;
 	}obb_;
 
-	Matrix4x4 world_;
-
-	//DirectX::XMFLOAT4X4* pMatWorld_;	// ワールドマトリクス
+	Matrix4x4 world_;	// ワールドマトリクス
 
 private:
-	// ワールド的陸の更新
+	// ワールドマトリクスの更新
 	inline void UpdateWorldMatrix();
 };
 

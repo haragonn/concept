@@ -32,6 +32,7 @@ public:
 	void SetDividedTexture(Texture& tex, int uNum, int vNum);
 	void SetDelimitedTexture(Texture& tex, float u, float v, float width, float height);
 	void ExclusionTexture();
+
 	void SetShadow(ShadowCamera& scmr);
 
 private:

@@ -46,7 +46,7 @@ void BreadBoard3::Init()
 
 	im.texBG_.LoadImageFromFile("data/TEXTURE/grid04.bmp");
 
-	im.pxm_.LoadPmxMeshFromFile("model/初音/Tda式初音ミク・アペンド_Ver1.10.pmx");
+	im.pxm_.LoadPmxMeshFromFile("model/初音/コロン式  初音ミクV3_Re_rev.1.2(ノーマル).pmx");
 
 	im.pxm_.Init(0.0f, -14.0f, 0.0f);
 

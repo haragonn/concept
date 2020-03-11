@@ -12,14 +12,15 @@
 #include <unordered_map>
 #include <list>
 
-#pragma pack(push,1)
 
 class PmdModel;
 class PmxModel;
 struct VmdBone;
 
+#pragma pack(push,1)
+
 // VMDのヘッダー
-struct VmdHeader 
+struct VmdHeader
 {
 	char vmdHeader[30];		//"Vocaloid Motion Data 0002"
 	char vmdModelName[20];  // カメラの場合:"カメラ・照明"
@@ -28,31 +29,23 @@ struct VmdHeader
 //モーション
 struct VmdMotionData
 {
-	char boneName[15];					//ボーン名
-	unsigned long frameNo;				//フレーム番号
-	float location[3];					// 移動量
-	Quaternion quaternion;					// 回転量 (モデルローカル座標系
+	char boneName[15];			//ボーン名
+	unsigned long frameNo;		//フレーム番号
+	float location[3];			// 移動量
+	Quaternion quaternion;		// 回転量 (モデルローカル座標系
 	unsigned char bezier[64];	// 補完
 };
 
 // 表情データ
 struct VmdSkin
-{ 
-	char skinName[15]; // 表情名
-	unsigned long flameNo; // フレーム番号
-	float weight; // 表情の設定値(表情スライダーの値)
+{
+	char skinName[15];		// 表情名
+	unsigned long flameNo;	// フレーム番号
+	float weight;			// 表情の設定値(表情スライダーの値)
 };
 
 #pragma pack(pop)
 
-struct KeyFrame{
-	unsigned int frameNo;
-	Quaternion quaternion;
-	Vector2D p1;
-	Vector2D p2;
-	KeyFrame(unsigned int no, Quaternion q, Vector2D ip1, Vector2D ip2)
-		: frameNo(no), quaternion(q), p1(ip1), p2(ip2){}
-};
 
 class VmdMotion{
 public:
@@ -67,6 +60,15 @@ public:
 	void UnLoad();
 
 private:
+	struct KeyFrame{
+		unsigned int frameNo;
+		Quaternion quaternion;
+		Vector2D p1;
+		Vector2D p2;
+		KeyFrame(unsigned int no, Quaternion q, Vector2D ip1, Vector2D ip2)
+			: frameNo(no), quaternion(q), p1(ip1), p2(ip2){}
+	};
+
 	PmdModel* pPmd_;
 	PmxModel* pPmx_;
 	unsigned long motionSize;

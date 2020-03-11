@@ -25,7 +25,9 @@ class Billboard : public Object, public TextureHolder{
 public:
 	Billboard() : bYBillboard_(false){}
 	~Billboard(){}
+
 	void SetYBillboardFlag(bool flag){ bYBillboard_ = flag; }
+
 	void SetTexture(Texture& tex);
 	void SetDividedTexture(Texture& tex, int uNum, int vNum);
 	void ExclusionTexture();
