@@ -662,7 +662,7 @@ void PmxModel::Draw(Camera* pCamera)
 	if(materialSize_ <= 1){
 		ID3D11ShaderResourceView* pTexView = nullptr;
 
-		if(texPtrSize_ > 0 && pmxData_.materials[0].colorMapTextureIndex != PMXModelData::NO_DATA_FLAG){
+		if(texPtrSize_ > 0 && pmxData_.materials[0].colorMapTextureIndex != 255){
 			pTexView = vecTexPtr_[pmxData_.materials[0].colorMapTextureIndex]->GetTextureViewPtr();
 		}
 
@@ -680,7 +680,7 @@ void PmxModel::Draw(Camera* pCamera)
 		for(unsigned int i = 0; i < materialSize_; ++i){
 			ID3D11ShaderResourceView* pTexView = nullptr;
 
-			if(texPtrSize_ > 0 && pmxData_.materials[i].colorMapTextureIndex != PMXModelData::NO_DATA_FLAG){
+			if(texPtrSize_ > 0 && pmxData_.materials[i].colorMapTextureIndex != 255){
 				pTexView = vecTexPtr_[pmxData_.materials[i].colorMapTextureIndex]->GetTextureViewPtr();
 			}
 

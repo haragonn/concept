@@ -7,8 +7,7 @@ using namespace DirectX;
 
 Quaternion Lerp::Linear(Quaternion & q1, Quaternion & q2, float t)
 {
-	if(t > 1.0f){ t = 1.0f; }
-	if(t < 0.0f){ t = 0.0f; }
+	t = Clamp(t, 0.0f, 1.0f);
 
 	XMVECTOR v1 = XMVectorSet(q1.x, q1.y, q1.z, q1.w);
 	XMVECTOR v2 = XMVectorSet(q2.x, q2.y, q2.z, q2.w);
@@ -26,6 +25,8 @@ Quaternion Lerp::Linear(Quaternion & q1, Quaternion & q2, float t)
 
 Quaternion Lerp::EaseIn(Quaternion & q1, Quaternion & q2, float t)
 {
+	t = Clamp(t, 0.0f, 1.0f);
+
 	t *= t;
 
 	return Linear(q1, q2, t);
@@ -33,6 +34,8 @@ Quaternion Lerp::EaseIn(Quaternion & q1, Quaternion & q2, float t)
 
 Quaternion Lerp::EaseOut(Quaternion & q1, Quaternion & q2, float t)
 {
+	t = Clamp(t, 0.0f, 1.0f);
+
 	t = t * (2.0f - t);
 
 	return Linear(q1, q2, t);
@@ -40,6 +43,8 @@ Quaternion Lerp::EaseOut(Quaternion & q1, Quaternion & q2, float t)
 
 Quaternion Lerp::EaseInEaseOut(Quaternion & q1, Quaternion & q2, float t)
 {
+	t = Clamp(t, 0.0f, 1.0f);
+
 	t = t * t * (3.0f - 2.0f * t);
 
 	return Linear(q1, q2, t);

@@ -59,8 +59,8 @@ public:
 		cmr.AddObject(pmSakuya_);
 		scmr.AddObject(pmSakuya_);
 
-		vmSakuyaMove_.LoadVmdMotionFromFile("motion/•à‚­.vmd", pmSakuya_, true);
-		vmSakuyaStay_.LoadVmdMotionFromFile("motion/_‘Ò‹@.vmd", pmSakuya_, true);
+		vmSakuyaMove_.LoadVmdMotionFromFile("motion/•à‚­.vmd");
+		vmSakuyaStay_.LoadVmdMotionFromFile("motion/_‘Ò‹@.vmd");
 
 		cbSakuya_.Init(0.0f, 3.0f, -20.0f);
 		cbSakuya_.SetScale(0.5f, 0.5f, 0.5f);
@@ -210,15 +210,15 @@ public:
 
 		if(backAccel_ > 0.0f){
 			vmSakuyaStay_.Reset();
-			vmSakuyaStay_.UpdatePmd(0.0f);
+			vmSakuyaStay_.UpdateVmd(pmSakuya_, false, 0.0f);
 		}else if(set && !dash){
 			vmSakuyaStay_.Reset();
-			vmSakuyaStay_.UpdatePmd(0.0f);
+			vmSakuyaStay_.UpdateVmd(pmSakuya_, false, 0.0f);
 		}else if(move.Normalized().LengthSquare() > 0.001f){
-			vmSakuyaMove_.UpdatePmd(moveSpeed_ * 10.0f);
+			vmSakuyaMove_.UpdateVmd(pmSakuya_, true, moveSpeed_ * 10.0f);
 			vmSakuyaStay_.Reset();
 		} else{
-			vmSakuyaStay_.UpdatePmd(1.0f);
+			vmSakuyaStay_.UpdateVmd(pmSakuya_, true, 1.0f);
 			vmSakuyaMove_.Reset();
 		}
 

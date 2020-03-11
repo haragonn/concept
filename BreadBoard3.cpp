@@ -40,19 +40,19 @@ void BreadBoard3::Init()
 
 	im.fnt_.Init(30);
 
-	im.wcmr_.Init(DegreeToRadian(65.5f), S_W / S_H, 0.1f, 1000.0f, 10.0f);
+	im.wcmr_.Init(DegreeToRadian(65.5f), S_W / S_H, 0.1f, 1000.0f, 12.0f);
 
 	im.sprBG_.Init(C_W, C_H, S_W, S_W);
 
 	im.texBG_.LoadImageFromFile("data/TEXTURE/grid04.bmp");
 
-	im.pxm_.LoadPmxMeshFromFile("model/初音/コロン式  初音ミクV3_Re_rev.1.2(ノーマル).pmx");
+	im.pxm_.LoadPmxMeshFromFile("model/sakuya/十六夜咲夜Ver2.10_Type-S(ダンス_上着A_膝丈スカート_パンプス).pmx");
 
-	im.pxm_.Init(0.0f, -14.0f, 0.0f);
+	im.pxm_.Init(0.0f, -15.0f, 0.0f);
 
 	im.wcmr_.AddObject(im.pxm_);
 
-	im.vm_.LoadVmdMotionFromFile("motion/_待機.vmd", im.pxm_, true);
+	im.vm_.LoadVmdMotionFromFile("motion/_待機.vmd");
 
 	im.time_ = 0;
 }
@@ -68,7 +68,7 @@ Scene * BreadBoard3::Update()
 
 	im.ctr_.Update();
 
-	im.vm_.UpdatePmx(1.0f);
+	im.vm_.UpdateVmd(im.pxm_, true, 3.0f);
 
 	if(!im.wcmr_.IsWrap()){
 		float cameraSpeed = 0.02f;
@@ -94,7 +94,7 @@ void BreadBoard3::Draw()
 
 	im.wcmr_.DrawObject();
 
-	/*
+	
 	// 経過時間
 	int hour = im.time_ / 60 / 60 / 60 % 60;
 	int min = im.time_ / 60 / 60 % 60;
@@ -102,7 +102,7 @@ void BreadBoard3::Draw()
 	int ssec = im.time_ % 100;
 
 	im.fnt_.DrawFormatText(0.0f, 0.0f, "%02d:%02d:%02d:%02d", hour, min, sec, ssec);
-
+	/*
 	// 入力
 	im.fnt_.DrawFormatText(0.0f, 30.0f *  1, "↑:%04d", im.ctr_.GetUp());
 	im.fnt_.DrawFormatText(0.0f, 30.0f *  2, "↓:%04d", im.ctr_.GetDown());

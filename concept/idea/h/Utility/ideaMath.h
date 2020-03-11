@@ -5,8 +5,9 @@
 
 #include <math.h>
 
+// 定数群
 namespace ideaMath{
-	constexpr float PI = 3.141592654f;		// π
+	constexpr float PI = 3.141592654f;			// π
 	constexpr float ROOT2 = 1.414213562f;		// √2
 	constexpr float ROOT3 = 1.732050807f;		// √3
 	constexpr float ROOT4 = 2.000000000f;		// √4
@@ -19,6 +20,93 @@ namespace ideaMath{
 	constexpr float EPSILON = 1.192092896e-07f;	// floatの誤差
 }
 
+// 値を比較し大きい方の値を返す
+template <typename T>
+inline T Max(T a, T b)
+{
+	return (a > b) ? a : b;
+}
+
+// 値を比較し小さい方の値を返す
+template <typename T>
+inline T Min(T a, T b)
+{
+	return (a < b) ? a : b;
+}
+
+// 値を指定された範囲内に収める
+template <typename T>
+inline T Clamp(T val, T min, T max)
+{
+	return Max(min, Min(max, val));
+}
+
+// 値の符号を返す
+template <typename T>
+inline T Sign(T val)
+{
+	return (val < T(0)) ? T(-1) : T(1);
+}
+
+// 値の絶対値を返す
+template <typename T>
+inline T Abs(T val)
+{
+	return val * Sign(val);
+}
+
+// Degree角からRadian角へ変換
+inline constexpr float DegreeToRadian(float dig)
+{
+	return dig / 180.0f * ideaMath::PI;
+}
+
+// Radian角からDegree角へ変換
+inline constexpr float RadianToDegree(float rad)
+{
+	return rad / ideaMath::PI * 180.0f;
+}
+
+// 秒からフレームへ変換
+inline constexpr unsigned int SecondToFrame(unsigned int sec, unsigned int fps = 60U)
+{
+	return sec * fps;
+}
+
+// 分からフレームへ変換
+inline constexpr unsigned int MinuteToFrame(unsigned int min, unsigned int fps = 60U)
+{
+	return SecondToFrame(min * 60U);
+}
+
+// 時間からフレームへ変換
+inline constexpr unsigned int HourToFrame(unsigned int hour, unsigned int fps = 60U)
+{
+	return MinuteToFrame(hour * 60U);
+}
+
+// フレームから秒へ変換
+inline constexpr unsigned int FrameToSecond(unsigned int frame, unsigned int fps = 60U)
+{
+	Assert(fps);
+	return frame / SecondToFrame(1U, fps);
+}
+
+// フレームから分へ変換
+inline constexpr unsigned int FrameToMinute(unsigned int frame, unsigned int fps = 60U)
+{
+	Assert(fps);
+	return frame / MinuteToFrame(1U, fps);
+}
+
+// フレームから時間へ変換
+inline constexpr unsigned int FrameToHour(unsigned int frame, unsigned int fps = 60U)
+{
+	Assert(fps);
+	return frame / HourToFrame(1U, fps);
+}
+
+// 2次元ベクトル
 struct Vector2D{
 	union{
 		struct{
@@ -172,6 +260,32 @@ struct Vector2D{
 	}
 };
 
+// ベジェ補間
+inline float Bezier(float x, Vector2D p1, Vector2D p2, unsigned int n)
+{
+	if(p1.x == p1.y && p2.x == p2.y){ return x; }
+
+	const float k0 = 1.0f + 3.0f * p1.x - 3.0f * p2.x;
+	const float k1 = 3.0f * p2.x - 6.0f * p1.x;
+	const float k2 = 3.0f * p1.x;
+
+	float t = x;
+
+	for(unsigned int i = 0U; i < n; ++i){
+		float ft = k0 * t * t * t + k1 * t * t + k2 * t - x;
+
+		if(abs(ft) < 0.000001f){ break; }
+
+		t -= ft * 0.5f;
+	}
+
+	float r = 1.0f - t;
+
+	return t * t * t + 3.0f * t * t * r * p2.y + 3.0f * t * r * r * p1.y;
+}
+
+
+// 3次元ベクトル
 struct Vector3D{
 	union{
 		struct{
@@ -339,6 +453,8 @@ struct Vector3D{
 	}
 };
 
+
+// 4次元ベクトル
 struct Vector4D{
 	union{
 		struct{
@@ -489,6 +605,8 @@ struct Vector4D{
 	}
 };
 
+
+// 四元数
 struct Quaternion{
 	union{
 		struct{
@@ -676,7 +794,9 @@ struct Quaternion{
 	}
 };
 
+// 4x4行列
 struct Matrix4x4{
+#pragma pack(push,1)
 	union{
 		struct
 		{
@@ -688,8 +808,11 @@ struct Matrix4x4{
 
 		float r[4][4];
 	};
+#pragma pack(pop)
 
 	Matrix4x4() : m00(1.0f), m01(0.0f), m02(0.0f), m03(0.0f), m10(0.0f), m11(1.0f), m12(0.0f), m13(0.0f), m20(0.0f), m21(0.0f), m22(1.0f), m23(0.0f), m30(0.0f), m31(0.0f), m32(0.0f), m33(1.0f){}
+
+	Matrix4x4(float _m00, float _m01, float _m02, float _m03, float _m10, float _m11, float _m12, float _m13, float _m20, float _m21, float _m22, float _m23, float _m30, float _m31, float _m32, float _m33) : m00(_m00), m01(_m01), m02(_m02), m03(_m03), m10(_m10), m11(_m11), m12(_m12), m13(_m13), m20(_m20), m21(_m21), m22(_m22), m23(_m23), m30(_m30), m31(_m31), m32(_m32), m33(_m33){}
 
 	Matrix4x4& operator=(const Matrix4x4& m)
 	{
@@ -803,7 +926,6 @@ struct Matrix4x4{
 		for(int i = 4 - 1; i >= 0; --i){
 			for(int j = 4 - 1; j >= 0; --j){
 				res.r[i][j] = 0.0f;
-
 				for(int k = 0; k < 4; ++k){
 					res.r[i][j] += this->r[i][k] * m.r[k][j];
 				}
@@ -979,35 +1101,32 @@ struct Matrix4x4{
 	}
 };
 
+// 補間
 struct Lerp{
 	static inline float Linear(float p1, float p2, float t)
 	{
-		if(t > 1.0f){ t = 1.0f; }
-		if(t < 0.0f){ t = 0.0f; }
+		t = Clamp(t, 0.0f, 1.0f);
 
 		return p1 * (1.0f - t) + p2 * t;
 	}
 
 	static inline Vector2D Linear(Vector2D& v1, Vector2D& v2, float t)
 	{
-		if(t > 1.0f){ t = 1.0f; }
-		if(t < 0.0f){ t = 0.0f; }
+		t = Clamp(t, 0.0f, 1.0f);
 
 		return v1 * (1.0f - t) + v2 * t;
 	}
 
 	static inline Vector3D Linear(Vector3D& v1, Vector3D& v2, float t)
 	{
-		if(t > 1.0f){ t = 1.0f; }
-		if(t < 0.0f){ t = 0.0f; }
+		t = Clamp(t, 0.0f, 1.0f);
 
 		return v1 * (1.0f - t) + v2 * t;
 	}
 
 	static inline Vector4D Linear(Vector4D& v1, Vector4D& v2, float t)
 	{
-		if(t > 1.0f){ t = 1.0f; }
-		if(t < 0.0f){ t = 0.0f; }
+		t = Clamp(t, 0.0f, 1.0f);
 
 		return v1 * (1.0f - t) + v2 * t;
 	}
@@ -1016,8 +1135,7 @@ struct Lerp{
 
 	static inline float EaseIn(float p1, float p2, float t)
 	{
-		if(t > 1.0f){ t = 1.0f; }
-		if(t < 0.0f){ t = 0.0f; }
+		t = Clamp(t, 0.0f, 1.0f);
 
 		t *= t;
 
@@ -1026,8 +1144,7 @@ struct Lerp{
 
 	static inline Vector2D EaseIn(Vector2D& v1, Vector2D& v2, float t)
 	{
-		if(t > 1.0f){ t = 1.0f; }
-		if(t < 0.0f){ t = 0.0f; }
+		t = Clamp(t, 0.0f, 1.0f);
 
 		t *= t;
 
@@ -1036,8 +1153,7 @@ struct Lerp{
 
 	static inline Vector3D EaseIn(Vector3D& v1, Vector3D& v2, float t)
 	{
-		if(t > 1.0f){ t = 1.0f; }
-		if(t < 0.0f){ t = 0.0f; }
+		t = Clamp(t, 0.0f, 1.0f);
 
 		t *= t;
 
@@ -1046,8 +1162,7 @@ struct Lerp{
 
 	static inline Vector4D EaseIn(Vector4D& v1, Vector4D& v2, float t)
 	{
-		if(t > 1.0f){ t = 1.0f; }
-		if(t < 0.0f){ t = 0.0f; }
+		t = Clamp(t, 0.0f, 1.0f);
 
 		t *= t;
 
@@ -1058,8 +1173,7 @@ struct Lerp{
 
 	static inline float EaseOut(float p1, float p2, float t)
 	{
-		if(t > 1.0f){ t = 1.0f; }
-		if(t < 0.0f){ t = 0.0f; }
+		t = Clamp(t, 0.0f, 1.0f);
 
 		t = t * (2.0f - t);
 
@@ -1068,8 +1182,7 @@ struct Lerp{
 
 	static inline Vector2D EaseOut(Vector2D& v1, Vector2D& v2, float t)
 	{
-		if(t > 1.0f){ t = 1.0f; }
-		if(t < 0.0f){ t = 0.0f; }
+		t = Clamp(t, 0.0f, 1.0f);
 
 		t = t * (2.0f - t);
 
@@ -1078,8 +1191,7 @@ struct Lerp{
 
 	static inline Vector3D EaseOut(Vector3D& v1, Vector3D& v2, float t)
 	{
-		if(t > 1.0f){ t = 1.0f; }
-		if(t < 0.0f){ t = 0.0f; }
+		t = Clamp(t, 0.0f, 1.0f);
 
 		t = t * (2.0f - t);
 
@@ -1088,8 +1200,7 @@ struct Lerp{
 
 	static inline Vector4D EaseOut(Vector4D& v1, Vector4D& v2, float t)
 	{
-		if(t > 1.0f){ t = 1.0f; }
-		if(t < 0.0f){ t = 0.0f; }
+		t = Clamp(t, 0.0f, 1.0f);
 
 		t = t * (2.0f - t);
 
@@ -1100,8 +1211,7 @@ struct Lerp{
 
 	static inline float EaseInEaseOut(float p1, float p2, float t)
 	{
-		if(t > 1.0f){ t = 1.0f; }
-		if(t < 0.0f){ t = 0.0f; }
+		t = Clamp(t, 0.0f, 1.0f);
 
 		t = t * t * (3.0f - 2.0f * t);
 
@@ -1110,8 +1220,7 @@ struct Lerp{
 
 	static inline Vector2D EaseInEaseOut(Vector2D& v1, Vector2D& v2, float t)
 	{
-		if(t > 1.0f){ t = 1.0f; }
-		if(t < 0.0f){ t = 0.0f; }
+		t = Clamp(t, 0.0f, 1.0f);
 
 		t = t * t * (3.0f - 2.0f * t);
 
@@ -1120,8 +1229,7 @@ struct Lerp{
 
 	static inline Vector3D EaseInEaseOut(Vector3D& v1, Vector3D& v2, float t)
 	{
-		if(t > 1.0f){ t = 1.0f; }
-		if(t < 0.0f){ t = 0.0f; }
+		t = Clamp(t, 0.0f, 1.0f);
 
 		t = t * t * (3.0f - 2.0f * t);
 
@@ -1130,8 +1238,7 @@ struct Lerp{
 
 	static inline Vector4D EaseInEaseOut(Vector4D& v1, Vector4D& v2, float t)
 	{
-		if(t > 1.0f){ t = 1.0f; }
-		if(t < 0.0f){ t = 0.0f; }
+		t = Clamp(t, 0.0f, 1.0f);
 
 		t = t * t * (3.0f - 2.0f * t);
 
@@ -1140,80 +1247,5 @@ struct Lerp{
 
 	static Quaternion EaseInEaseOut(Quaternion& q1, Quaternion& q2, float t);
 };
-
-// Degree角からRadian角へ変換
-inline constexpr float DegreeToRadian(float dig)
-{
-	return dig / 180.0f * ideaMath::PI;
-}
-
-// Radian角からDegree角へ変換
-inline constexpr float RadianToDegree(float rad)
-{
-	return rad / ideaMath::PI * 180.0f;
-}
-
-// 秒からフレームへ変換
-inline constexpr unsigned int SecondToFrame(unsigned int sec, unsigned int fps = 60U)
-{
-	return sec * fps;
-}
-
-// 分からフレームへ変換
-inline constexpr unsigned int MinuteToFrame(unsigned int min, unsigned int fps = 60U)
-{
-	return SecondToFrame(min * 60U);
-}
-
-// 時間からフレームへ変換
-inline constexpr unsigned int HourToFrame(unsigned int hour, unsigned int fps = 60U)
-{
-	return MinuteToFrame(hour * 60U);
-}
-
-// フレームから秒へ変換
-inline constexpr unsigned int FrameToSecond(unsigned int frame, unsigned int fps = 60U)
-{
-	Assert(fps);
-	return frame / SecondToFrame(1U, fps);
-}
-
-// フレームから分へ変換
-inline constexpr unsigned int FrameToMinute(unsigned int frame, unsigned int fps = 60U)
-{
-	Assert(fps);
-	return frame / MinuteToFrame(1U, fps);
-}
-
-// フレームから時間へ変換
-inline constexpr unsigned int FrameToHour(unsigned int frame, unsigned int fps = 60U)
-{
-	Assert(fps);
-	return frame / HourToFrame(1U, fps);
-}
-
-// ベジェ補間
-inline float Bezier(float x, Vector2D p1, Vector2D p2, unsigned int n)
-{
-	if(p1.x == p1.y && p2.x == p2.y){ return x; }
-
-	const float k0 = 1.0f + 3.0f * p1.x - 3.0f * p2.x;
-	const float k1 = 3.0f * p2.x - 6.0f * p1.x;
-	const float k2 = 3.0f * p1.x;
-
-	float t = x;
-
-	for(unsigned int i = 0U; i < n; ++i){
-		float ft = k0 * t * t * t + k1 * t * t + k2 * t - x;
-
-		if(abs(ft) < 0.000001f){ break; }
-
-		t -= ft * 0.5f;
-	}
-
-	float r = 1.0f - t;
-
-	return t * t * t + 3.0f * t * t * r * p2.y + 3.0f * t * r * r * p1.y;
-}
 
 #endif	// #ifndef INCLUDE_IDEA_IDEAMATH_H

@@ -10,6 +10,7 @@
 #include "../../h/2D/SpriteManager.h"
 #include "../../h/2D/SpriteInstancing.h"
 #include "../../h/Texture/Texture.h"
+#include "../../h/Utility/ideaType.h"
 #include "../../h/Utility/ideaMath.h"
 
 //------------------------------------------------------------------------------
@@ -73,10 +74,10 @@ void Sprite::DrawRect(int blend)
 	// 頂点情報
 	VertexData2D vd[SpriteManager::RECT_VERTEX_NUM];
 
-	vd[0] = { XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(color_.r, color_.g, color_.b, color_.a), XMFLOAT2(0.0f, 0.0f) };
-	vd[1] = { XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(color_.r, color_.g, color_.b, color_.a), XMFLOAT2(1.0f, 0.0f) };
-	vd[2] = { XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(color_.r, color_.g, color_.b, color_.a), XMFLOAT2(0.0f, 1.0f) };
-	vd[3] = { XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(color_.r, color_.g, color_.b, color_.a), XMFLOAT2(1.0f, 1.0f) };
+	vd[0] = { Vector3D(0.0f, 0.0f, 0.0f), color_, Vector2D(0.0f, 0.0f) };
+	vd[1] = { Vector3D(0.0f, 0.0f, 0.0f), color_, Vector2D(1.0f, 0.0f) };
+	vd[2] = { Vector3D(0.0f, 0.0f, 0.0f), color_, Vector2D(0.0f, 1.0f) };
+	vd[3] = { Vector3D(0.0f, 0.0f, 0.0f), color_, Vector2D(1.0f, 1.0f) };
 
 	// 頂点情報の計算
 	float x, y, axisX, axisY;
@@ -183,19 +184,13 @@ void Sprite::DrawCircle(float ratio, int blend)
 	VertexData2D vd[SpriteManager::CIRCLE_VERTEX_NUM] = {};
 	vd[0].pos.x = pos_.x;
 	vd[0].pos.y = pos_.y;
-	vd[0].color.x = color_.r;
-	vd[0].color.y = color_.g;
-	vd[0].color.z = color_.b;
-	vd[0].color.w = color_.a;
+	vd[0].color = color_;
 
 	// 頂点情報の計算
 	for(int i = 1; i < SpriteManager::CIRCLE_VERTEX_NUM; ++i){
 		vd[i].pos.x = pos_.x + max(halfWidth, halfHeight) * -sinf(ideaMath::PI * 2.0f - rad_ - ideaMath::PI * 2.0f / (SpriteManager::CIRCLE_VERTEX_NUM - 2) * (i - 1));
 		vd[i].pos.y = pos_.y + max(halfWidth, halfHeight) * -cosf(ideaMath::PI * 2.0f - rad_ - ideaMath::PI * 2.0f / (SpriteManager::CIRCLE_VERTEX_NUM - 2) * (i - 1));
-		vd[i].color.x = color_.r;
-		vd[i].color.y = color_.g;
-		vd[i].color.z = color_.b;
-		vd[i].color.w = color_.a;
+		vd[i].color = color_;
 	}
 
 	// 頂点バッファ書き込み
@@ -290,19 +285,14 @@ void Sprite::DrawPhoton(float ratio, int blend)
 	VertexData2D vd[SpriteManager::CIRCLE_VERTEX_NUM] = {};
 	vd[0].pos.x = pos_.x;
 	vd[0].pos.y = pos_.y;
-	vd[0].color.x = color_.r;
-	vd[0].color.y = color_.g;
-	vd[0].color.z = color_.b;
-	vd[0].color.w = color_.a;
+	vd[0].color = color_;
 
 	// 頂点情報の計算
 	for(int i = 1; i < SpriteManager::CIRCLE_VERTEX_NUM; ++i){
 		vd[i].pos.x = pos_.x + max(halfWidth, halfHeight) * -sinf(ideaMath::PI * 2.0f - rad_ - ideaMath::PI * 2.0f / (SpriteManager::CIRCLE_VERTEX_NUM - 2) * (i - 1));
 		vd[i].pos.y = pos_.y + max(halfWidth, halfHeight) * -cosf(ideaMath::PI * 2.0f - rad_ - ideaMath::PI * 2.0f / (SpriteManager::CIRCLE_VERTEX_NUM - 2) * (i - 1));
-		vd[i].color.x = color_.r;
-		vd[i].color.y = color_.g;
-		vd[i].color.z = color_.b;
-		vd[i].color.w = 0.0f;
+		vd[i].color = color_;
+		vd[i].color.a = 0.0f;
 	}
 
 	// バッファ書き込み
@@ -390,10 +380,10 @@ void Sprite::DrawTexture(const Texture& tex, int blend)
 
 	// 頂点情報
 	VertexData2D vd[SpriteManager::RECT_VERTEX_NUM];
-	vd[0] = { XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(color_.r, color_.g, color_.b, color_.a), XMFLOAT2(0.0f, 0.0f) };
-	vd[1] = { XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(color_.r, color_.g, color_.b, color_.a), XMFLOAT2(1.0f, 0.0f) };
-	vd[2] = { XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(color_.r, color_.g, color_.b, color_.a), XMFLOAT2(0.0f, 1.0f) };
-	vd[3] = { XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(color_.r, color_.g, color_.b, color_.a), XMFLOAT2(1.0f, 1.0f) };
+	vd[0] = { Vector3D(0.0f, 0.0f, 0.0f), color_, Vector2D(0.0f, 0.0f) };
+	vd[1] = { Vector3D(0.0f, 0.0f, 0.0f), color_, Vector2D(1.0f, 0.0f) };
+	vd[2] = { Vector3D(0.0f, 0.0f, 0.0f), color_, Vector2D(0.0f, 1.0f) };
+	vd[3] = { Vector3D(0.0f, 0.0f, 0.0f), color_, Vector2D(1.0f, 1.0f) };
 
 	// 頂点情報の計算
 	float x, y, axisX, axisY;
@@ -508,10 +498,10 @@ void Sprite::DrawDividedTexture(const Texture& tex, int uNum, int vNum, int blen
 
 	// 頂点情報
 	VertexData2D vd[SpriteManager::RECT_VERTEX_NUM];
-	vd[0] = { XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(color_.r, color_.g, color_.b, color_.a), XMFLOAT2(0.0f, 0.0f) };
-	vd[1] = { XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(color_.r, color_.g, color_.b, color_.a), XMFLOAT2(1.0f, 0.0f) };
-	vd[2] = { XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(color_.r, color_.g, color_.b, color_.a), XMFLOAT2(0.0f, 1.0f) };
-	vd[3] = { XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(color_.r, color_.g, color_.b, color_.a), XMFLOAT2(1.0f, 1.0f) };
+	vd[0] = { Vector3D(0.0f, 0.0f, 0.0f), color_, Vector2D(0.0f, 0.0f) };
+	vd[1] = { Vector3D(0.0f, 0.0f, 0.0f), color_, Vector2D(1.0f, 0.0f) };
+	vd[2] = { Vector3D(0.0f, 0.0f, 0.0f), color_, Vector2D(0.0f, 1.0f) };
+	vd[3] = { Vector3D(0.0f, 0.0f, 0.0f), color_, Vector2D(1.0f, 1.0f) };
 
 	// 頂点情報の計算
 	float x, y, axisX, axisY;
@@ -631,10 +621,10 @@ void Sprite::DrawDelimitedTexture(const Texture& tex, float u, float v, float wi
 
 	// 頂点情報
 	VertexData2D vd[SpriteManager::RECT_VERTEX_NUM];
-	vd[0] = { XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(color_.r, color_.g, color_.b, color_.a), XMFLOAT2(0.0f, 0.0f) };
-	vd[1] = { XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(color_.r, color_.g, color_.b, color_.a), XMFLOAT2(1.0f, 0.0f) };
-	vd[2] = { XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(color_.r, color_.g, color_.b, color_.a), XMFLOAT2(0.0f, 1.0f) };
-	vd[3] = { XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(color_.r, color_.g, color_.b, color_.a), XMFLOAT2(1.0f, 1.0f) };
+	vd[0] = { Vector3D(0.0f, 0.0f, 0.0f), color_, Vector2D(0.0f, 0.0f) };
+	vd[1] = { Vector3D(0.0f, 0.0f, 0.0f), color_, Vector2D(1.0f, 0.0f) };
+	vd[2] = { Vector3D(0.0f, 0.0f, 0.0f), color_, Vector2D(0.0f, 1.0f) };
+	vd[3] = { Vector3D(0.0f, 0.0f, 0.0f), color_, Vector2D(1.0f, 1.0f) };
 
 	// 頂点情報の計算
 	float x, y, axisX, axisY;

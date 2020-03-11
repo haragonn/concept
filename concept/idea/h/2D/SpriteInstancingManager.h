@@ -5,11 +5,6 @@
 #include <d3d11.h>
 #include <directxmath.h>
 
-struct PerInstanceData
-{
-	DirectX::XMFLOAT4 pos;
-};
-
 class SpriteInstancingManager{
 public:
 	static const int INSTANCE_MAX = 65536;

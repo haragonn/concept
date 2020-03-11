@@ -1,6 +1,7 @@
 #include "../../h/2D/SpriteManager.h"
 #include "../../h/Framework/GraphicManager.h"
 #include "../../h/Archive/ArchiveLoader.h"
+#include "../../h/Utility/ideaType.h"
 #include "../../h/Utility/ideaUtility.h"
 #include <stdio.h>
 
@@ -12,6 +13,7 @@ namespace{
 }
 
 using namespace DirectX;
+
 
 SpriteManager::SpriteManager() :
 	pVertexShader_(nullptr),

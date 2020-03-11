@@ -1,7 +1,9 @@
 #include "../../h/Font/Font.h"
 #include "../../h/Framework/GraphicManager.h"
 #include "../../h/2D/SpriteManager.h"
+#include "../../h/Utility/ideaType.h"
 #include "../../h/Utility/ideaUtility.h"
+
 #define WIN32_LEAN_AND_MEAN
 #include <d3d11.h>
 #include <locale.h>
@@ -149,10 +151,10 @@ void Font::DrawFormatText(float posX, float posY, const char * pFormat, ...)
 		if(pTd->pTextureView){
 			// 頂点情報
 			VertexData2D vd[SpriteManager::RECT_VERTEX_NUM];
-			vd[0] = { XMFLOAT3(posX + ofsX, posY, 0.0f), XMFLOAT4(color_.r, color_.g, color_.b, color_.a), XMFLOAT2(0.0f, 0.0f) };
-			vd[1] = { XMFLOAT3(posX + ofsX + pTd->fontWidth, posY, 0.0f), XMFLOAT4(color_.r, color_.g, color_.b, color_.a), XMFLOAT2(1.0f, 0.0f) };
-			vd[2] = { XMFLOAT3(posX + ofsX, posY + pTd->fontHeight, 0.0f), XMFLOAT4(color_.r, color_.g, color_.b, color_.a), XMFLOAT2(0.0f, 1.0f) };
-			vd[3] = { XMFLOAT3(posX + ofsX + pTd->fontWidth, posY + pTd->fontHeight, 0.0f), XMFLOAT4(color_.r, color_.g, color_.b, color_.a), XMFLOAT2(1.0f, 1.0f) };
+			vd[0] = { Vector3D(posX + ofsX, posY, 0.0f), color_, Vector2D(0.0f, 0.0f) };
+			vd[1] = { Vector3D(posX + ofsX + pTd->fontWidth, posY, 0.0f), color_, Vector2D(1.0f, 0.0f) };
+			vd[2] = { Vector3D(posX + ofsX, posY + pTd->fontHeight, 0.0f), color_, Vector2D(0.0f, 1.0f) };
+			vd[3] = { Vector3D(posX + ofsX + pTd->fontWidth, posY + pTd->fontHeight, 0.0f), color_, Vector2D(1.0f, 1.0f) };
 
 			// バッファ書き込み
 			D3D11_MAPPED_SUBRESOURCE msr;

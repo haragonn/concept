@@ -3,23 +3,10 @@
 
 #include "../../../idea/h/Shader/Shader.h"
 
-#define WIN32_LEAN_AND_MEAN
-#include <d3d11.h>
-#include <directxmath.h>
-
-//頂点データ構造体
-struct VertexData2D
-{
-	DirectX::XMFLOAT3 pos;
-	DirectX::XMFLOAT4 color;
-	DirectX::XMFLOAT2 tex;
-};
-
-//シェーダ定数バッファ
-struct ConstBuffer2D
-{
-	DirectX::XMFLOAT4X4 proj;
-};
+struct ID3D11Buffer;
+struct ID3D11VertexShader;
+struct ID3D11ShaderResourceView;
+struct ID3D11InputLayout;
 
 class SpriteManager{
 public:

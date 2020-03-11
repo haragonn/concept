@@ -51,13 +51,17 @@ class VmdMotion{
 public:
 	VmdMotion();
 	~VmdMotion();
-	bool LoadVmdMotionFromFile(const char* pFileName, PmdModel& mdl, bool bLoop = false);
-	bool LoadVmdMotionFromFile(const char* pFileName, PmxModel& mdl, bool bLoop = false);
-	void UpdatePmd(float speed);
-	void UpdatePmx(float speed);
-	void Reset();
-	bool IsFinish()const{ return bFinish_; }
+	bool LoadVmdMotionFromFile(const char* pFileName);
+
 	void UnLoad();
+
+	void UpdateVmd(PmdModel& pmd, bool loop = true, float speed = 1.0f);
+	void UpdateVmd(PmxModel& pmx, bool loop = true, float speed = 1.0f);
+
+	void Reset();
+
+	bool IsFinish()const{ return bFinish_; }
+
 
 private:
 	struct KeyFrame{
@@ -69,20 +73,19 @@ private:
 			: frameNo(no), quaternion(q), p1(ip1), p2(ip2){}
 	};
 
-	PmdModel* pPmd_;
-	PmxModel* pPmx_;
 	unsigned long motionSize;
 	std::vector<VmdMotionData> vecVmdMotion_;
 	std::unordered_map <std::string, std::vector<KeyFrame>> umapMotionData_;
 
 	float elapsedTime_;
+
 	unsigned long frameMax_;
 	unsigned long gapFrame_;
-	bool bLoop_;
+
 	bool bFinish_;
 
-	void RecursiveMatrixMultiply(VmdBone* node, const Matrix4x4& mat);
-	void XRecursiveMatrixMultiply(VmdBone* node, const Matrix4x4& mat);
+	void RecursiveMatrixMultiply(PmdModel& pmd, VmdBone* node, const Matrix4x4& mat);
+	void RecursiveMatrixMultiply(PmxModel& pmx, VmdBone* node, const Matrix4x4& mat);
 };
 
 #endif	// #ifndef INCLUDE_EIDOS_VMDMOTION_H

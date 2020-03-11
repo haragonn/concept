@@ -82,8 +82,8 @@ void BreadBoard2::Init()
 	im.pln_.SetTexture(im.texBG_);
 	im.pln_.SetShadow(im.scmr_);
 
-	im.vm_.LoadVmdMotionFromFile("motion/•à‚­.vmd", im.pmSakuya_, true);
-	im.vm2_.LoadVmdMotionFromFile("motion/_‘Ò‹@.vmd", im.pmSakuya_);
+	im.vm_.LoadVmdMotionFromFile("motion/•à‚­.vmd");
+	im.vm2_.LoadVmdMotionFromFile("motion/_‘Ò‹@.vmd");
 
 	im.fnt_.Init(40);
 	im.time_ = 0;
@@ -102,9 +102,9 @@ Scene * BreadBoard2::Update()
 	im.ctr_.Update();
 
 	if(im.ctr_.GetButton(PadButton::A)){
-		im.vm_.UpdatePmd(1.0f);
+		im.vm_.UpdateVmd(im.pmSakuya_, true);
 	} else{
-		im.vm2_.UpdatePmd(1.0f);
+		im.vm2_.UpdateVmd(im.pmSakuya_, true);
 	}
 
 	//im.pmSakuya_.MoveRotate(0.0f, 0.01f, 0.0f);
