@@ -10,6 +10,7 @@ Author	:	Keigo Hara
 #include <DirectXMath.h>
 #include "../../h/3D/Billboard.h"
 #include "../../h/3D/ObjectManager.h"
+#include "../../h/Utility/eidosType.h"
 #include "../../h/Environment/Camera.h"
 #include "../../../idea/h/Framework/GraphicManager.h"
 #include "../../../idea/h/Texture/Texture.h"
@@ -111,7 +112,7 @@ inline void Billboard::DrawBillboard(Camera * pCamera, int blend)
 	ID3D11Buffer* pVBuf = om.GetCubeVertexBufferPtr();
 
 	// 頂点バッファのセット
-	UINT stride = sizeof(VertexData3D);
+	UINT stride = sizeof(MeshVertexData);
 	UINT offset = 0;
 	gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVBuf, &stride, &offset);
 
@@ -209,22 +210,22 @@ inline void Billboard::DrawTextureBillboard(Camera * pCamera, const Texture & te
 	ID3D11Buffer* cb[1] = { om.GetConstBufferPtr() };
 	gm.GetContextPtr()->VSSetConstantBuffers(cb_slot, 1, cb);
 
-	VertexData3D vertexList[]{
-	{ { -0.5f,  0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 0.0f } },
-	{ {  0.5f,  0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 0.0f } },
-	{ { -0.5f, -0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 1.0f } },
-	{ {  0.5f, -0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 1.0f } }
+	MeshVertexData vertexList[]{
+	{ { -0.5f,  0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, color_, { 0.0f, 0.0f } },
+	{ {  0.5f,  0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, color_, { 1.0f, 0.0f } },
+	{ { -0.5f, -0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, color_, { 0.0f, 1.0f } },
+	{ {  0.5f, -0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, color_, { 1.0f, 1.0f } }
 	};
 
 	// バッファ書き込み
 	ID3D11Buffer* pVBuf = om.GetBillboardVertexBufferPtr();
 	D3D11_MAPPED_SUBRESOURCE msr;
 	gm.GetContextPtr()->Map(pVBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
-	memcpy(msr.pData, vertexList, sizeof(VertexData3D) * 4);
+	memcpy(msr.pData, vertexList, sizeof(MeshVertexData) * 4);
 	gm.GetContextPtr()->Unmap(pVBuf, 0);
 
 	// 頂点バッファのセット
-	UINT stride = sizeof(VertexData3D);
+	UINT stride = sizeof(MeshVertexData);
 	UINT offset = 0;
 	gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVBuf, &stride, &offset);
 
@@ -338,22 +339,22 @@ inline void Billboard::DrawDividedTextureBillboard(Camera * pCamera, const Textu
 	float v1 = tex.GetDivV() * vNum;
 	float v2 = tex.GetDivV() * (vNum + 1);
 
-	VertexData3D vertexList[]{
-	{ { -0.5f,  0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v1 } },
-	{ {  0.5f,  0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v1 } },
-	{ { -0.5f, -0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v2 } },
-	{ {  0.5f, -0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v2 } }
+	MeshVertexData vertexList[]{
+	{ { -0.5f,  0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, color_, { u1, v1 } },
+	{ {  0.5f,  0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, color_, { u2, v1 } },
+	{ { -0.5f, -0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, color_, { u1, v2 } },
+	{ {  0.5f, -0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, color_, { u2, v2 } }
 	};
 
 	// バッファ書き込み
 	ID3D11Buffer* pVBuf = om.GetBillboardVertexBufferPtr();
 	D3D11_MAPPED_SUBRESOURCE msr;
 	gm.GetContextPtr()->Map(pVBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
-	memcpy(msr.pData, vertexList, sizeof(VertexData3D) * 4);
+	memcpy(msr.pData, vertexList, sizeof(MeshVertexData) * 4);
 	gm.GetContextPtr()->Unmap(pVBuf, 0);
 
 	// 頂点バッファのセット
-	UINT stride = sizeof(VertexData3D);
+	UINT stride = sizeof(MeshVertexData);
 	UINT offset = 0;
 	gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVBuf, &stride, &offset);
 

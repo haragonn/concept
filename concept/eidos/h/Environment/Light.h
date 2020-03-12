@@ -5,8 +5,10 @@
 
 class Light{
 public:
-	static void SetLight(Vector3D axis);
-	static void SetLight(float axisX, float axisY, float axisZ);
+	static void SetLight(Vector3D direction);
+	static void SetLight(float directionX, float directionY, float directionZ);
+
+	static Vector3D GetLightDirection();
 };
 
 #endif	// #ifndef INCLUDE_EIDOS_LIGHT_H

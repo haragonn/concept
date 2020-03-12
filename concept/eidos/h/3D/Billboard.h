@@ -35,7 +35,9 @@ public:
 private:
 	int uNum_;
 	int vNum_;
+
 	bool bDivided_;
+
 	bool bYBillboard_;
 
 	void Draw(Camera* pCamera)override;

@@ -38,11 +38,15 @@ public:
 private:
 	int uNum_;
 	int vNum_;
-	bool bDivided_;
+
 
 	Vector2D uv_;
+
 	Vector2D size_;
+
+	bool bDivided_;
 	bool bDelimited_;
+
 	ShadowCamera* pScmr_;
 
 	void Draw(Camera* pCamera)override;

@@ -9,7 +9,9 @@
 #include "../../h/Sound/SoundManager.h"
 #include "../../h/Archive/ArchiveLoader.h"
 #include "../../h/Storage/StorageManager.h"
+#include "../../h/Utility//ideaMath.h"
 #include "../../h/Utility//ideaUtility.h"
+
 #include <XAudio2.h>
 
 //------------------------------------------------------------------------------
@@ -24,7 +26,7 @@ HRESULT ReadChunkData(HANDLE hFile, void* pBuffer, DWORD dwBuffersize, DWORD dwB
 Sound::Sound() :
 	pSourceVoice_(nullptr),
 	pDataAudio_(nullptr),
-	audioSize_(0),
+	audioSize_(0U),
 	bPlay_(false),
 	bLoop_(false),
 	bStorage_(false),
@@ -41,6 +43,7 @@ Sound::Sound() :
 Sound::~Sound()
 {
 	UnLoad();	// 終了処理
+
 	SoundManager::Instance().UnRegister(this);
 }
 
@@ -53,7 +56,6 @@ bool Sound::LoadWaveFromFile(const char* pFileName)
 {
 	if(pSourceVoice_){ return false; }	//既に読み込み済みなら終了
 
-	HRESULT hr;					// 成否
 	HANDLE hFile;				// ファイルハンドル
 	DWORD dwChunkSize = 0;		// チャンクサイズ
 	DWORD dwChunkPosition = 0;	// チャンクの位置
@@ -71,14 +73,13 @@ bool Sound::LoadWaveFromFile(const char* pFileName)
 		SetDebugMessage("WaveLoadError! [%s] をファイルから読み込めませんでした\n", pFileName);
 		return false;
 	}
+
 	// WAVEファイルのチェック
-	hr = CheckChunk(hFile, 'FFIR', &dwChunkSize, &dwChunkPosition);
-	if(FAILED(hr)){
+	if(FAILED(CheckChunk(hFile, 'FFIR', &dwChunkSize, &dwChunkPosition))){
 		SetDebugMessage("WaveLoadError! [%s] をファイルから読み込めませんでした\n", pFileName);
 		return false;
 	}
-	hr = ReadChunkData(hFile, &dwFileType, sizeof(DWORD), dwChunkPosition);
-	if(FAILED(hr)){
+	if(FAILED(ReadChunkData(hFile, &dwFileType, sizeof(DWORD), dwChunkPosition))){
 		SetDebugMessage("WaveLoadError! [%s] をファイルから読み込めませんでした\n", pFileName);
 		return false;
 	}
@@ -86,40 +87,42 @@ bool Sound::LoadWaveFromFile(const char* pFileName)
 		SetDebugMessage("WaveLoadError! [%s] をファイルから読み込めませんでした\n", pFileName);
 		return false;
 	}
+
 	// フォーマットチェック
-	hr = CheckChunk(hFile, ' tmf', &dwChunkSize, &dwChunkPosition);
-	if(FAILED(hr)){
+	if(FAILED(CheckChunk(hFile, ' tmf', &dwChunkSize, &dwChunkPosition))){
 		SetDebugMessage("WaveLoadError! [%s] をファイルから読み込めませんでした\n", pFileName);
 		return false;
 	}
-	hr = ReadChunkData(hFile, &wfx, dwChunkSize, dwChunkPosition);
-	if(FAILED(hr)){
+	if(FAILED(ReadChunkData(hFile, &wfx, dwChunkSize, dwChunkPosition))){
 		SetDebugMessage("WaveLoadError! [%s] をファイルから読み込めませんでした\n", pFileName);
 		return false;
 	}
+
 	// オーディオデータ読み込み
-	hr = CheckChunk(hFile, 'atad', &audioSize_, &dwChunkPosition);
-	if(FAILED(hr)){
+	if(FAILED(CheckChunk(hFile, 'atad', &audioSize_, &dwChunkPosition))){
 		SetDebugMessage("WaveLoadError! [%s] をファイルから読み込めませんでした\n", pFileName);
 		return false;
 	}
 	pDataAudio_ = (BYTE*)malloc(audioSize_);
-	hr = ReadChunkData(hFile, pDataAudio_, audioSize_, dwChunkPosition);
-	if(FAILED(hr)){
+	if(FAILED(ReadChunkData(hFile, pDataAudio_, audioSize_, dwChunkPosition))){
 		SetDebugMessage("WaveLoadError! [%s] をファイルから読み込めませんでした\n", pFileName);
 		return false;
 	}
+
 	// ソースボイスの生成
 	if(!SoundManager::Instance().CreateSourceVoice(&pSourceVoice_, &(wfx.Format))){
 		SetDebugMessage("WaveLoadError! [%s] をファイルから読み込めませんでした\n", pFileName);
 		return false;
 	}
+
 	// バッファの値設定
 	buffer.AudioBytes	= audioSize_;
 	buffer.pAudioData	= pDataAudio_;
 	buffer.Flags		= XAUDIO2_END_OF_STREAM;
+
 	// オーディオバッファの登録
 	pSourceVoice_->SubmitSourceBuffer(&buffer);
+
 	// オーディオバッファの削除
 	pSourceVoice_->FlushSourceBuffers();
 
@@ -133,6 +136,7 @@ bool Sound::LoadWaveFromArchiveFile(const char * pArchiveFileName, const char * 
 	if(pSourceVoice_){ return false; }	//既に読み込み済みなら終了
 
 	ArchiveLoader loader;
+
 	if(!loader.Load(pArchiveFileName, pFileName)){
 		SetDebugMessage("WaveLoadError! [%s] を [%s] から読み込めませんでした\n", pFileName, pArchiveFileName);
 		return false;
@@ -145,12 +149,14 @@ bool Sound::LoadWaveFromArchiveFile(const char * pArchiveFileName, const char * 
 	char tmpT[] = ".t";
 	char tempFileName[256] = "idea_";
 	char tmpDot[] = ".";
+
 	strcat_s(tempFileName, tempFileData);
 	strcat_s(tempFileName, tempFileNum);
 	strcat_s(tempFileName, tmpDot);
 	strcat_s(tempFileName, tmpT);
 	strcat_s(tempFileName, tmpM);
 	strcat_s(tempFileName, tmpP);
+
 	{
 		FILE* fp;
 		if(fopen_s(&fp, tempFileName, "wb") != 0){ return false; }
@@ -165,15 +171,18 @@ bool Sound::LoadWaveFromArchiveFile(const char * pArchiveFileName, const char * 
 
 	LoadWaveFromFile(tempFileName);
 
-	FILE* fp;
-	if(fopen_s(&fp, tempFileName, "wb") != 0){ return false; }
+	{
+		FILE* fp;
+		if(fopen_s(&fp, tempFileName, "wb") != 0){ return false; }
 
-	if(fp == NULL) {
-		return false;
-	} else {
-		fwrite("", 1, sizeof(BYTE), fp);
+		if(fp == NULL) {
+			return false;
+		} else {
+			fwrite("", 1, sizeof(BYTE), fp);
+		}
+
+		fclose(fp);
 	}
-	fclose(fp);
 
 	DeleteFileA(tempFileName);
 
@@ -191,6 +200,7 @@ bool Sound::LoadWaveFromStorage(const char* pFileName)
 	
 	// ストレージから情報を読み込む
 	Sound& Snd = StorageManager::Instance().GetSound(pFileName);
+
 	pSourceVoice_ = Snd.pSourceVoice_;
 	pDataAudio_ = Snd.pDataAudio_;
 	audioSize_ = Snd.audioSize_;
@@ -214,11 +224,14 @@ bool Sound::LoadWaveFromStorage(const char* pFileName)
 void Sound::UnLoad()
 {
 	if(!pSourceVoice_){ return; }
+
 	Stop();	// 再生を止める
+
 	if(!bStorage_){	// ストレージから読み込んだものの破棄はストレージに任せる
 		pSourceVoice_->DestroyVoice();
 		if(pDataAudio_){ free(pDataAudio_); }
 	}
+
 	pSourceVoice_ = nullptr;
 	pDataAudio_ = nullptr;
 	audioSize_ = 0;
@@ -242,7 +255,8 @@ void Sound::Play(bool bLoop, bool bCueing, UINT32 begin)
 	if(bCueing){ Cueing(); }	// 頭出し
 
 	if(!IsPlaying()){
-		XAUDIO2_BUFFER buffer = {0};	// バッファ
+		XAUDIO2_BUFFER buffer = {};	// バッファ
+
 		// バッファの値設定
 		buffer.AudioBytes	= audioSize_;
 		buffer.pAudioData	= pDataAudio_;
@@ -271,6 +285,7 @@ void Sound::Stop()
 	// 一時停止
 	if(IsPlaying()){
 		pSourceVoice_->Stop(0);
+
 		bPlay_ = false;
 	}
 }
@@ -288,6 +303,7 @@ void Sound::Cueing()
 	if(IsPlaying()){
 		Stop();
 	}
+
 	// オーディオバッファの削除
 	pSourceVoice_->FlushSourceBuffers();
 }
@@ -301,8 +317,7 @@ void Sound::SetVolume(float volume)
 {
 	if(!pSourceVoice_){ return; }	// ソースボイスが存在しなければ終了
 
-	//if(volume > 1.0f){ volume = 1.0f; }	// 音割れするので1倍以上は認めない
-	if(volume < 0.0f){ volume = 0.0f; }
+	volume = Max(0.0f, volume);
 
 	pSourceVoice_->SetVolume(volume);	// 音量の設定
 }
@@ -379,6 +394,7 @@ HRESULT CheckChunk(HANDLE hFile, DWORD format, DWORD* pChunkSize, DWORD* pChunkD
 		}
 
 		dwOffset += sizeof(DWORD) * 2;
+
 		if(dwChunkType == format){
 			*pChunkSize			= dwChunkDataSize;
 			*pChunkDataPosition = dwOffset;

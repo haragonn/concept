@@ -4,6 +4,7 @@
 #include "../../h/Mesh/PlaneMesh.h"
 #include "../../../idea/h/Framework/GraphicManager.h"
 #include "../../h/3D/ObjectManager.h"
+#include "../../h/Utility/eidosType.h"
 #include "../../h/Environment/Camera.h"
 #include "../../h/Environment/ShadowCamera.h"
 #include "../../../idea/h/Utility/ideaMath.h"
@@ -38,7 +39,7 @@ bool PlaneMesh::Create(float centerX, float centerZ, float widthX, float widthZ,
 	HRESULT hr;
 	// 頂点バッファ
 	{
-		std::vector<VertexData3D> vertexList;
+		std::vector<MeshVertexData> vertexList;
 		vertexList.resize((uNum_ + 1) * (vNum_ + 1));
 		int cnt = 0;
 		for(unsigned int j = 0; j < vNum_ + 1; ++j){
@@ -57,7 +58,7 @@ bool PlaneMesh::Create(float centerX, float centerZ, float widthX, float widthZ,
 
 		D3D11_BUFFER_DESC bd;
 		ZeroMemory(&bd, sizeof(bd));
-		bd.ByteWidth = sizeof(VertexData3D) * (uNum_ + 1) * (vNum_ + 1);
+		bd.ByteWidth = sizeof(MeshVertexData) * (uNum_ + 1) * (vNum_ + 1);
 		bd.Usage = D3D11_USAGE_DYNAMIC;
 		bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -214,7 +215,7 @@ inline void PlaneMesh::DrawPlain(Camera * pCamera, int blend)
 	gm.GetContextPtr()->VSSetConstantBuffers(cb_slot, 1, cb);
 
 	// 頂点バッファのセット
-	UINT stride = sizeof(VertexData3D);
+	UINT stride = sizeof(MeshVertexData);
 	UINT offset = 0;
 	gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVertexBuffer_, &stride, &offset);
 
@@ -331,7 +332,7 @@ inline void PlaneMesh::DrawPlainShadow(Camera* pCamera, int blend)
 	gm.GetContextPtr()->VSSetConstantBuffers(cb_slot, 1, cb);
 
 	// 頂点バッファのセット
-	UINT stride = sizeof(VertexData3D);
+	UINT stride = sizeof(MeshVertexData);
 	UINT offset = 0;
 	gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVertexBuffer_, &stride, &offset);
 
@@ -444,7 +445,7 @@ inline void PlaneMesh::DrawTexturePlain(Camera * pCamera, const Texture & tex, i
 	gm.GetContextPtr()->VSSetConstantBuffers(cb_slot, 1, cb);
 
 	// 頂点バッファのセット
-	UINT stride = sizeof(VertexData3D);
+	UINT stride = sizeof(MeshVertexData);
 	UINT offset = 0;
 	gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVertexBuffer_, &stride, &offset);
 
@@ -571,7 +572,7 @@ inline void PlaneMesh::DrawTexturePlainShadow(Camera* pCamera, const Texture& te
 	gm.GetContextPtr()->VSSetConstantBuffers(cb_slot, 1, cb);
 
 	// 頂点バッファのセット
-	UINT stride = sizeof(VertexData3D);
+	UINT stride = sizeof(MeshVertexData);
 	UINT offset = 0;
 	gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVertexBuffer_, &stride, &offset);
 

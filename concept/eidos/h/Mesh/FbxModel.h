@@ -6,98 +6,59 @@
 //------------------------------------------------------------------------------
 #include <fbxsdk.h>
 #include <vector>
-#include "../../../idea/h/Texture/Texture.h"
-#include "../../../idea/h/Utility/ideaMath.h"
 #include "../../../eidos/h/3D/Object.h"
 #include "../../../eidos/h/3D/ObjectManager.h"
-#include "../../../eidos//h/Mesh/ObjModel.h"
+#include "../../../eidos/h/Utility/eidosType.h"
+#include "../../../idea/h/Texture/Texture.h"
+#include "../../../idea/h/Utility/ideaMath.h"
 
-class FbxMeshHolder;
-//class FbxManager;
-//class FbxScene;
-//class FbxMesh;
 struct ID3D11ShaderResourceView;
 struct ID3D11Buffer;
-//
-//マテリアル構造体
-struct Material
-{
-	char* pMaterialName;
-	Color color;
-	const char* pFileName;
-	Texture* pTexture;
-};
-//
-//struct ObjSubset
-//{
-//	unsigned int materialIndex;
-//	unsigned int faceStart;
-//	unsigned int faceCount;
-//};
-//頂点構造体
-struct FbxMeshData
-{
-	char* pTextureFileName;
-	Texture* pTexture;
-	unsigned int nNumPolygon;
-	unsigned int nNumIndex;
-	unsigned int nNumVertex;
-	unsigned int nNumUv;
-	unsigned int nNumIndexUv;
-	std::vector<VertexData3D> vecVd;
-	std::vector<Vector2D> vecTexIndex;
-	std::vector<unsigned short> vecIndexNumber;
-	std::vector<int> vecUvIndexNumber;
-	Color color;
-};
 
 class FbxModel : public Object{
 public:
 	FbxModel();
 	~FbxModel();
+
 	bool LoadFbxMeshFromFile(const char* pFileName);//読み込み
 	bool LoadFbxMeshFromArchiveFile(const char* pArchiveFileName, const char* pFileName);//読み込み
 	//bool LoadFbxMeshFromStorage(const char* pFileName);	// ストレージから読み込む
+
 	void UnLoad();
-	ID3D11Buffer* GetVertexBufferPtr()const{ return pVertexBuffer_; }
-	ID3D11Buffer* GetIndexBufferPtr()const{ return pIndexBuffer_; }
-	unsigned int GetVertexSize()const{ return vertexSize_; };
-	ObjSubset* GetSubsetPtr(){ return &vecSubset_[0]; }
-	unsigned int GetSubsetSize()const{ return subsetSize_; };
-	Texture** GetTexturePtrPtr(){ return &vecTexPtr_[0]; }
-	unsigned int GetTexturePtrSize()const{ return texPtrSize_; };
 
 private:
 	FbxManager* pFbxManager_;
 	FbxScene* pFbxScene_;
 	FbxMesh* pFbxMesh_;
+
 	ID3D11Buffer* pVertexBuffer_;//頂点バッファ
 	ID3D11Buffer* pIndexBuffer_;//インデックスバッファ
+
 	std::vector<ID3D11Buffer*> vecVertexBufferPtr_;
 	std::vector<ID3D11Buffer*> vecIndexBufferPtr_;
 
 	std::vector<MeshVertexData> vecVertex_;
-	std::vector<FbxMeshData> vecMesh_;
-	std::vector<Material> vecMaterial_;
-	std::vector<ObjSubset> vecSubset_;
-	//std::vector<ObjMaterial> vecMaterial_;
-	std::vector<unsigned short> vecIndex_;
 	unsigned int vertexSize_;
+
+	std::vector<unsigned short> vecIndex_;
 	unsigned int indexSize_;
-	unsigned int subsetSize_;
+
+	std::vector<FbxMeshData> vecMesh_;
+	unsigned int meshSize_;
+
+	std::vector<FbxMaterial> vecMaterial_;
 	unsigned int materialSize_;
-	unsigned int texPtrSize_;
-	unsigned int m_nNumMesh;
+
 	std::vector<Texture*> vecTexPtr_;
+	unsigned int texPtrSize_;
+
 	bool bStorage_;		// ストレージ使用フラグ
 
 	void SetupNode(FbxNode* pNode, std::string parentName, int faceStart, const char * pFileName);
 
 	void Draw(Camera* pCamera)override;//描画
-	//bool LoadMaterialFromFile(const char* pFileName);//マテリアルファイル読み込み
-	//bool LoadMaterialFromArchiveFile(const char* pArchiveFileName, const char* pFileName);//マテリアルファイル読み込み
 
-																						  // コピーコンストラクタの禁止
+	// コピーコンストラクタの禁止
 	FbxModel(const FbxModel& src){}
 	FbxModel& operator=(const FbxModel& src){}
 };

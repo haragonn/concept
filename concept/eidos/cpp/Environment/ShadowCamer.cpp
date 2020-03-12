@@ -50,13 +50,13 @@ void ShadowCamera::DrawObject()
 	gm.GetContextPtr()->OMSetRenderTargets(1, &pathShadow, gm.GetDepthStencilViewPtr());
 	gm.Draw3D();
 
-	bShadowDraow_ = true;
+	bShadowDraw_ = true;
 
 	for(auto it = begin(vecObjPtr_), itEnd = end(vecObjPtr_); it != itEnd; ++it){
 			(*it)->Draw(this);
 	}
 
-	bShadowDraow_ = false;
+	bShadowDraw_ = false;
 
 	//gm.EndMask();
 

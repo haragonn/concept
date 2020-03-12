@@ -8,6 +8,7 @@
 #include "../../h/Sound/SoundManager.h"
 #include "../../h/Sound/Sound.h"
 #include "../../h/Utility/ideaUtility.h"
+
 #pragma comment(lib, "xaudio2.lib")
 
 //------------------------------------------------------------------------------
@@ -28,24 +29,22 @@ SoundManager::SoundManager() :
 //------------------------------------------------------------------------------
 bool SoundManager::Init()
 {
-	HREFTYPE hr;
 	// COMライブラリの初期化
-	hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
-	if(FAILED(hr)){
+	if(FAILED(CoInitializeEx(NULL, COINIT_MULTITHREADED))){
 		bCom_ = false;
 		return false;
 	}
 	bCom_ = true;
+
 	// XAudio2オブジェクトの作成
-	hr = XAudio2Create(&pXAudio2_, 0);
-	if(FAILED(hr)){
+	if(FAILED(XAudio2Create(&pXAudio2_, 0))){
 		CoUninitialize();
 		bCom_ = false;
 		return false;
 	}
+
 	// マスターボイスの作成
-	hr = pXAudio2_->CreateMasteringVoice(&pMasteringVoice_);
-	if(FAILED(hr)){
+	if(FAILED(pXAudio2_->CreateMasteringVoice(&pMasteringVoice_))){
 		if(pXAudio2_){
 			pXAudio2_->Release();
 			pXAudio2_ = nullptr;
@@ -97,11 +96,8 @@ bool SoundManager::CreateSourceVoice(IXAudio2SourceVoice** ppSourceVoice, WAVEFO
 {
 	if(!pXAudio2_){ return false; }	// 初期化されていなければ失敗
 
-	HREFTYPE hr;
-	
 	// ソースボスの生成
-	hr = pXAudio2_->CreateSourceVoice(ppSourceVoice, pSourceFormat);
-	if(FAILED(hr)){ return false; }
+	if(FAILED(pXAudio2_->CreateSourceVoice(ppSourceVoice, pSourceFormat))){ return false; }
 
 	return true;
 }
@@ -109,18 +105,22 @@ bool SoundManager::CreateSourceVoice(IXAudio2SourceVoice** ppSourceVoice, WAVEFO
 void SoundManager::Register(Sound * pSound)
 {
 	if(!pSound || pSound->bRegistered_){ return; }	// NULLチェック,登録済みチェック
+
 	if(!pListBegin_){ pListBegin_ = pSound; }	// 先頭がなければ先頭に
 	else{
 		pListEnd_->pNext_ = pSound;	// 現在の最後尾の次のポインタとする
 		pSound->pPrev_ = pListEnd_;	// 前のポインタに現在の最後尾を入れる
 	}
+
 	pListEnd_ = pSound;				// 最後尾とする
+
 	pSound->bRegistered_ = true;	// 登録済みに
 }
 
 void SoundManager::UnRegister(Sound * pSound)
 {
 	if(!pSound || !pSound->bRegistered_){ return; }	// NULLチェック,削除済みチェック
+
 	if(pSound == pListBegin_){	// 先頭のポインタならば
 		pListBegin_ = pSound->pNext_;	// 次のポインタを先頭とする
 		if(pSound->pNext_){ pSound->pNext_->pPrev_ = nullptr; }	// 次のポインタが存在するならばそのポインタの前のポインタをNULLとする
@@ -131,5 +131,6 @@ void SoundManager::UnRegister(Sound * pSound)
 		pSound->pPrev_->pNext_ = pSound->pNext_;	// 前のポインタの次のポインタを更新する
 		if(pSound->pNext_){ pSound->pNext_->pPrev_ = pSound->pPrev_; }	// 次のポインタが存在するならばそのポインタの前のポインタを更新する
 	}
+
 	pSound->bRegistered_ = false;	// 削除済みに
 }

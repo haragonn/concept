@@ -30,15 +30,13 @@ FbxModel::FbxModel() :
 	pIndexBuffer_(nullptr),
 	vertexSize_(0),
 	indexSize_(0),
-	subsetSize_(0),
 	materialSize_(0),
 	texPtrSize_(0),
-	m_nNumMesh(0),
+	meshSize_(0),
 	bStorage_(false)
 {
 	vector<MeshVertexData>().swap(vecVertex_);
-	vector<ObjSubset>().swap(vecSubset_);
-	vector<Material>().swap(vecMaterial_);
+	vector<FbxMaterial>().swap(vecMaterial_);
 	vector<WORD>().swap(vecIndex_);
 	vector<Texture*>().swap(vecTexPtr_);
 }
@@ -221,13 +219,13 @@ bool FbxModel::LoadFbxMeshFromFile(const char * pFileName)
 	//------------------------------------
 
 	FbxMesh* mesh;
-	m_nNumMesh = pFbxScene_->GetSrcObjectCount<FbxMesh>();
+	meshSize_ = pFbxScene_->GetSrcObjectCount<FbxMesh>();
 	int nNumMaterial = pFbxScene_->GetMaterialCount();
 
-	vecMesh_.resize(m_nNumMesh);
+	vecMesh_.resize(meshSize_);
 	vecMaterial_.resize(nNumMaterial);
 
-	for(unsigned int i = 0; i < m_nNumMesh; i++)
+	for(unsigned int i = 0; i < meshSize_; i++)
 	{
 		vecMesh_[i].pTexture = nullptr;
 	}
@@ -356,7 +354,7 @@ bool FbxModel::LoadFbxMeshFromFile(const char * pFileName)
 	//------------------------------------
 	//メッシュ
 	//------------------------------------
-	for(unsigned int meshCnt = 0; meshCnt < m_nNumMesh; meshCnt++)
+	for(unsigned int meshCnt = 0; meshCnt < meshSize_; meshCnt++)
 	{
 		mesh = pFbxScene_->GetSrcObject<FbxMesh>(meshCnt);
 		if(mesh != NULL)
@@ -382,10 +380,10 @@ bool FbxModel::LoadFbxMeshFromFile(const char * pFileName)
 				vecMesh_[meshCnt].vecVd[i].pos.x = (float)src[i][0];
 				vecMesh_[meshCnt].vecVd[i].pos.y = (float)src[i][1];
 				vecMesh_[meshCnt].vecVd[i].pos.z = (float)src[i][2];
-				vecMesh_[meshCnt].vecVd[i].color.x = 1.0f;
-				vecMesh_[meshCnt].vecVd[i].color.y = 1.0f;
-				vecMesh_[meshCnt].vecVd[i].color.z = 1.0f;
-				vecMesh_[meshCnt].vecVd[i].color.w = 1.0f;
+				vecMesh_[meshCnt].vecVd[i].color.r = 1.0f;
+				vecMesh_[meshCnt].vecVd[i].color.g = 1.0f;
+				vecMesh_[meshCnt].vecVd[i].color.b = 1.0f;
+				vecMesh_[meshCnt].vecVd[i].color.a = 1.0f;
 			}
 
 			vecMesh_[meshCnt].nNumIndex = mesh->GetPolygonVertexCount();//ポリゴン頂点インデックス
@@ -733,18 +731,17 @@ bool FbxModel::LoadFbxMeshFromFile(const char * pFileName)
 	// サイズの格納
 	vertexSize_ = vecVertex_.size();
 	indexSize_ = vecIndex_.size();
-	subsetSize_ = vecSubset_.size();
 	texPtrSize_ = vecTexPtr_.size();
 
-	vecVertexBufferPtr_.resize(m_nNumMesh);
-	vecIndexBufferPtr_.resize(m_nNumMesh);
+	vecVertexBufferPtr_.resize(meshSize_);
+	vecIndexBufferPtr_.resize(meshSize_);
 
-	for(unsigned int meshCnt = 0; meshCnt < m_nNumMesh; meshCnt++)
+	for(unsigned int meshCnt = 0; meshCnt < meshSize_; meshCnt++)
 	{
 		{
 			// 頂点バッファを作成
 			D3D11_BUFFER_DESC bd;
-			bd.ByteWidth = sizeof(VertexData3D) * vecMesh_[meshCnt].nNumVertex;
+			bd.ByteWidth = sizeof(MeshVertexData) * vecMesh_[meshCnt].nNumVertex;
 			bd.Usage = D3D11_USAGE_DYNAMIC;
 			bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 			bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -850,7 +847,7 @@ void FbxModel::UnLoad()
 		for(auto it = vecTexPtr_.begin(); it != vecTexPtr_.end(); ++it){
 			SafeDelete((*it));
 		}
-		for(unsigned int meshCnt = 0; meshCnt < m_nNumMesh; meshCnt++)
+		for(unsigned int meshCnt = 0; meshCnt < meshSize_; meshCnt++)
 		{
 			SafeRelease(vecIndexBufferPtr_[meshCnt]);
 			SafeRelease(vecVertexBufferPtr_[meshCnt]);
@@ -861,13 +858,11 @@ void FbxModel::UnLoad()
 	pIndexBuffer_ = nullptr;
 	vertexSize_ = 0;
 	indexSize_ = 0;
-	subsetSize_ = 0;
 	materialSize_ = 0;
 	texPtrSize_ = 0;
 	bStorage_ = false;
 	vector<MeshVertexData>().swap(vecVertex_);
-	vector<ObjSubset>().swap(vecSubset_);
-	vector<Material>().swap(vecMaterial_);
+	vector<FbxMaterial>().swap(vecMaterial_);
 	vector<WORD>().swap(vecIndex_);
 	vector<Texture*>().swap(vecTexPtr_);
 }
@@ -963,11 +958,11 @@ void FbxModel::Draw(Camera * pCamera)
 	viewPort.MaxDepth = pCamera->GetViewPort().maxDepth;
 	gm.GetContextPtr()->RSSetViewports(1, &viewPort);
 
-	for(unsigned int meshCnt = 0; meshCnt < m_nNumMesh; meshCnt++)
+	for(unsigned int meshCnt = 0; meshCnt < meshSize_; meshCnt++)
 	{
 		//バーテックスバッファをセット
 		ID3D11Buffer* pVBuf = vecVertexBufferPtr_[meshCnt];
-		UINT stride = sizeof(VertexData3D);
+		UINT stride = sizeof(MeshVertexData);
 		UINT offset = 0;
 		gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVBuf, &stride, &offset);///
 

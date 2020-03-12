@@ -14,6 +14,7 @@ public:
 		static eidosStorageManager s_Instance;
 		return s_Instance;
 	}
+
 	bool LoadObjMeshFromFile(const char* pFileName);	// 画像の読み込み
 	bool LoadObjMeshFromArchiveFile(const char* pArchiveFileName, const char* pFileName);	// アーカイブファイルから画像を読み込む
 	ObjModel& GetObjModel(const char* pFileName);	// 画像の取得

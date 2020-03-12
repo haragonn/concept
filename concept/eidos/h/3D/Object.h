@@ -12,15 +12,6 @@
 #include "../Environment/Camera.h"
 #include <vector>
 
-// 頂点構造体
-struct MeshVertexData
-{
-	Vector3D pos;
-	Vector3D nor;
-	Color color;
-	Vector2D tex;
-};
-
 //------------------------------------------------------------------------------
 // クラス名　：Object
 // クラス概要：Actor3Dを継承したクラス,カメラに映るものの基底クラス

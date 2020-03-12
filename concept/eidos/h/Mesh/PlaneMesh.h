@@ -18,10 +18,14 @@ class PlaneMesh : public Object, public TextureHolder{
 public:
 	PlaneMesh();
 	~PlaneMesh(){ Release(); }
+
 	bool Create(float centerX, float centerZ,float widthX, float z, unsigned int uNum = 1U, unsigned int vNum = 1U);
+
 	void Release();
+
 	void SetTexture(Texture& tex);
 	void ExclusionTexture();
+
 	void SetShadow(ShadowCamera& scmr);
 
 private:

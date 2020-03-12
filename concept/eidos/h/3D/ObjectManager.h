@@ -2,43 +2,10 @@
 #define INCLUDE_EIDOS_OBJECTMANAGER_H
 
 #include "../../../idea/h/Shader/Shader.h"
+
 #define WIN32_LEAN_AND_MEAN
 #include <d3d11.h>
 #include <directxmath.h>
-
-//頂点データ構造体
-struct VertexData3D
-{
-	DirectX::XMFLOAT3 pos;
-	DirectX::XMFLOAT3 nor;
-	DirectX::XMFLOAT4 color;
-	DirectX::XMFLOAT2 tex;
-};
-
-struct ConstBuffer3D
-{
-	DirectX::XMFLOAT4X4 world;
-	DirectX::XMFLOAT4X4 view;
-	DirectX::XMFLOAT4X4 proj;
-	DirectX::XMFLOAT4 color;
-	DirectX::XMFLOAT4 light;
-};
-
-struct ConstBuffer3DShadow
-{
-	DirectX::XMFLOAT4X4 world;
-	DirectX::XMFLOAT4X4 view;
-	DirectX::XMFLOAT4X4 proj;
-	DirectX::XMFLOAT4 color;
-	DirectX::XMFLOAT4 light;
-	DirectX::XMFLOAT4X4 lightView;
-	DirectX::XMFLOAT4X4 lightProj;
-};
-
-struct ConstBufferBoneWorld
-{
-	DirectX::XMFLOAT4X4 boneWorld[512];
-};
 
 class ObjectManager{
 public:
@@ -50,25 +17,33 @@ public:
 		static ObjectManager s_Instance;
 		return s_Instance;
 	}
+
 	bool Init();
 	void UnInit();
+
 	ID3D11VertexShader* GetVertexShederPtr()const{ return pVertexShader_; }
 	ID3D11VertexShader* GetShadowVertexShederPtr()const{ return pShadowVertexShader_; }
 	ID3D11VertexShader* GetPmdVertexShederPtr()const{ return pPmdVertexShader_; }
+
 	ID3D11InputLayout* GetInputLayoutPtr()const{ return pVertexLayout_; }
 	ID3D11InputLayout* GetShadowInputLayoutPtr()const{ return pShadowVertexLayout_; }
 	ID3D11InputLayout* GetPmdInputLayoutPtr()const{ return pPmdVertexLayout_; }
+
 	ID3D11PixelShader* GetPixelShederDefaultPtr()const{ return pixelShaderDefault_.GetPixelShaderPtr(); }
 	ID3D11PixelShader* GetPixelShaderShadowPtr()const{ return pixelShaderShadow_.GetPixelShaderPtr(); }
 	ID3D11PixelShader* GetPixelShederTexturePtr()const{ return pixelShaderTexture_.GetPixelShaderPtr(); }
 	ID3D11PixelShader* GetPixelShaderTextureShadowPtr()const{ return pixelShaderTextureShadow_.GetPixelShaderPtr(); }
+
 	ID3D11Buffer* GetCubeVertexBufferPtr(){ return pCubeVertexBuffer_; }
 	ID3D11Buffer* GetCubeIndexBufferPtr(){ return pCubeIndexBuffer_; }
+
 	ID3D11Buffer* GetBillboardVertexBufferPtr(){ return pBillboardVertexBuffer_; }
 	ID3D11Buffer* GetBillboardIndexBufferPtr(){ return pBillboardIndexBuffer_; }
+
 	ID3D11Buffer* GetConstBufferPtr()const{ return pConstBuffer_; }
 	ID3D11Buffer* GetShadowConstBufferPtr()const{ return pShadowConstBuffer_; }
 	ID3D11Buffer* GetPmdConstBufferPtr()const{ return pPmdConstBuffer_; }
+
 	void SetLight(float axisX, float axisY, float axisZ);
 	DirectX::XMVECTOR& GetLight(){ return light_; }
 

@@ -1,4 +1,5 @@
 #include "../../h/3D/ObjectManager.h"
+#include "../../h/Utility/eidosType.h"
 #include "../../../idea/h/Framework/GraphicManager.h"
 #include "../../../idea//h/Shader/Shader.h"
 #include "../../../idea/h/Archive/ArchiveLoader.h"
@@ -276,42 +277,42 @@ bool ObjectManager::Init()
 
 	// 頂点バッファ
 	{
-		VertexData3D cubeVertexList[]{
-		{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.0f, 0.0f } },
-		{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 1.0f, 0.0f } },
-		{ { -0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.0f, 1.0f } },
-		{ {  0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 1.0f, 1.0f } },
+		MeshVertexData cubeVertexList[]{
+		{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, ideaColor::WHITE, { 0.0f, 0.0f } },
+		{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, ideaColor::WHITE, { 1.0f, 0.0f } },
+		{ { -0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, ideaColor::WHITE, { 0.0f, 1.0f } },
+		{ {  0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, ideaColor::WHITE, { 1.0f, 1.0f } },
 
-		{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 1.0f, 0.0f } },
-		{ { -0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 1.0f, 1.0f } },
-		{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.0f, 0.0f } },
-		{ {  0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.0f, 1.0f } },
+		{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, ideaColor::WHITE, { 1.0f, 0.0f } },
+		{ { -0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, ideaColor::WHITE, { 1.0f, 1.0f } },
+		{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, ideaColor::WHITE, { 0.0f, 0.0f } },
+		{ {  0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, ideaColor::WHITE, { 0.0f, 1.0f } },
 
-		{ { -0.5f,  0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.0f, 0.0f } },
-		{ { -0.5f,  0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 1.0f, 0.0f } },
-		{ { -0.5f, -0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.0f, 1.0f } },
-		{ { -0.5f, -0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 1.0f, 1.0f } },
+		{ { -0.5f,  0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, ideaColor::WHITE, { 0.0f, 0.0f } },
+		{ { -0.5f,  0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, ideaColor::WHITE, { 1.0f, 0.0f } },
+		{ { -0.5f, -0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, ideaColor::WHITE, { 0.0f, 1.0f } },
+		{ { -0.5f, -0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, ideaColor::WHITE, { 1.0f, 1.0f } },
 
-		{ {  0.5f,  0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 1.0f, 0.0f } },
-		{ {  0.5f, -0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 1.0f, 1.0f } },
-		{ {  0.5f,  0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.0f, 0.0f } },
-		{ {  0.5f, -0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.0f, 1.0f } },
+		{ {  0.5f,  0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, ideaColor::WHITE, { 1.0f, 0.0f } },
+		{ {  0.5f, -0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, ideaColor::WHITE, { 1.0f, 1.0f } },
+		{ {  0.5f,  0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, ideaColor::WHITE, { 0.0f, 0.0f } },
+		{ {  0.5f, -0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, ideaColor::WHITE, { 0.0f, 1.0f } },
 
-		{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.0f, 0.0f } },
-		{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 1.0f, 0.0f } },
-		{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.0f, 1.0f } },
-		{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 1.0f, 1.0f } },
+		{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, ideaColor::WHITE, { 0.0f, 0.0f } },
+		{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, ideaColor::WHITE, { 1.0f, 0.0f } },
+		{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, ideaColor::WHITE, { 0.0f, 1.0f } },
+		{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, ideaColor::WHITE, { 1.0f, 1.0f } },
 
-		{ { -0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 1.0f, 0.0f } },
-		{ { -0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 1.0f, 1.0f } },
-		{ {  0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.0f, 0.0f } },
-		{ {  0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.0f, 1.0f } },
+		{ { -0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, ideaColor::WHITE, { 1.0f, 0.0f } },
+		{ { -0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, ideaColor::WHITE, { 1.0f, 1.0f } },
+		{ {  0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, ideaColor::WHITE, { 0.0f, 0.0f } },
+		{ {  0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, ideaColor::WHITE, { 0.0f, 1.0f } },
 		};
 
 
 		D3D11_BUFFER_DESC bd;
 		ZeroMemory(&bd, sizeof(bd));
-		bd.ByteWidth = sizeof(VertexData3D) * CUBE_VERTEX_NUM;
+		bd.ByteWidth = sizeof(MeshVertexData) * CUBE_VERTEX_NUM;
 		bd.Usage = D3D11_USAGE_DYNAMIC;
 		bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -358,16 +359,16 @@ bool ObjectManager::Init()
 
 	// 頂点バッファ
 	{
-		VertexData3D billboardVertexList[]{
-		{ { -0.5f,  0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.0f, 0.0f } },
-		{ {  0.5f,  0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 1.0f, 0.0f } },
-		{ { -0.5f, -0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.0f, 1.0f } },
-		{ {  0.5f, -0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, {1.0f, 1.0f, 1.0f, 1.0f}, { 1.0f, 1.0f } }
+		MeshVertexData billboardVertexList[]{
+		{ { -0.5f,  0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, ideaColor::WHITE, { 0.0f, 0.0f } },
+		{ {  0.5f,  0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, ideaColor::WHITE, { 1.0f, 0.0f } },
+		{ { -0.5f, -0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, ideaColor::WHITE, { 0.0f, 1.0f } },
+		{ {  0.5f, -0.5f, -0.5f }, {  1.0f,  1.0f, 1.0f }, ideaColor::WHITE, { 1.0f, 1.0f } }
 		};
 
 		D3D11_BUFFER_DESC bd;
 		ZeroMemory(&bd, sizeof(bd));
-		bd.ByteWidth = sizeof(VertexData3D) * 4;
+		bd.ByteWidth = sizeof(MeshVertexData) * 4;
 		bd.Usage = D3D11_USAGE_DYNAMIC;
 		bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;

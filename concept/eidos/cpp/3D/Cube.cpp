@@ -10,6 +10,7 @@ Author	:	Keigo Hara
 #include <DirectXMath.h>
 #include "../../h/3D/Cube.h"
 #include "../../h/3D/ObjectManager.h"
+#include "../../h/Utility/eidosType.h"
 #include "../../h/Environment/Camera.h"
 #include "../../h/Environment/ShadowCamera.h"
 #include "../../../idea/h/Framework/GraphicManager.h"
@@ -152,7 +153,7 @@ void Cube::DrawCube(Camera* pCamera, int blend)
 	ID3D11Buffer* pVBuf = om.GetCubeVertexBufferPtr();
 
 	// 頂点バッファのセット
-	UINT stride = sizeof(VertexData3D);
+	UINT stride = sizeof(MeshVertexData);
 	UINT offset = 0;
 	gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVBuf, &stride, &offset);
 
@@ -273,7 +274,7 @@ inline void Cube::DrawShadowCube(Camera* pCamera, int blend)
 	ID3D11Buffer* pVBuf = om.GetCubeVertexBufferPtr();
 
 	// 頂点バッファのセット
-	UINT stride = sizeof(VertexData3D);
+	UINT stride = sizeof(MeshVertexData);
 	UINT offset = 0;
 	gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVBuf, &stride, &offset);
 
@@ -387,47 +388,47 @@ void Cube::DrawTextureCube(Camera* pCamera, const Texture & tex, int blend)
 	ID3D11Buffer* cb[1] = { om.GetConstBufferPtr() };
 	gm.GetContextPtr()->VSSetConstantBuffers(cb_slot, 1, cb);
 
-	VertexData3D vertexList[]{
-	{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 0.0f } },
-	{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 0.0f } },
-	{ { -0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 1.0f } },
-	{ {  0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 1.0f } },
+	MeshVertexData vertexList[]{
+	{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, color_, { 0.0f, 0.0f } },
+	{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, color_, { 1.0f, 0.0f } },
+	{ { -0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, color_, { 0.0f, 1.0f } },
+	{ {  0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, color_, { 1.0f, 1.0f } },
 
-	{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 0.0f } },
-	{ { -0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 1.0f } },
-	{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 0.0f } },
-	{ {  0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 1.0f } },
+	{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, color_, { 1.0f, 0.0f } },
+	{ { -0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, color_, { 1.0f, 1.0f } },
+	{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, color_, { 0.0f, 0.0f } },
+	{ {  0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, color_, { 0.0f, 1.0f } },
 
-	{ { -0.5f,  0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 0.0f } },
-	{ { -0.5f,  0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 0.0f } },
-	{ { -0.5f, -0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 1.0f } },
-	{ { -0.5f, -0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 1.0f } },
+	{ { -0.5f,  0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, color_, { 0.0f, 0.0f } },
+	{ { -0.5f,  0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, color_, { 1.0f, 0.0f } },
+	{ { -0.5f, -0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, color_, { 0.0f, 1.0f } },
+	{ { -0.5f, -0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, color_, { 1.0f, 1.0f } },
 
-	{ {  0.5f,  0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 0.0f } },
-	{ {  0.5f, -0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 1.0f } },
-	{ {  0.5f,  0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 0.0f } },
-	{ {  0.5f, -0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 1.0f } },
+	{ {  0.5f,  0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, color_, { 1.0f, 0.0f } },
+	{ {  0.5f, -0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, color_, { 1.0f, 1.0f } },
+	{ {  0.5f,  0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, color_, { 0.0f, 0.0f } },
+	{ {  0.5f, -0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, color_, { 0.0f, 1.0f } },
 
-	{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 0.0f } },
-	{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 0.0f } },
-	{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 1.0f } },
-	{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 1.0f } },
+	{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, color_, { 0.0f, 0.0f } },
+	{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, color_, { 1.0f, 0.0f } },
+	{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, color_, { 0.0f, 1.0f } },
+	{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, color_, { 1.0f, 1.0f } },
 
-	{ { -0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 0.0f } },
-	{ { -0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 1.0f } },
-	{ {  0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 0.0f } },
-	{ {  0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 1.0f } },
+	{ { -0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, color_, { 1.0f, 0.0f } },
+	{ { -0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, color_, { 1.0f, 1.0f } },
+	{ {  0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, color_, { 0.0f, 0.0f } },
+	{ {  0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, color_, { 0.0f, 1.0f } },
 	};
 
 	// バッファ書き込み
 	ID3D11Buffer* pVBuf = om.GetCubeVertexBufferPtr();
 	D3D11_MAPPED_SUBRESOURCE msr;
 	gm.GetContextPtr()->Map(pVBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
-	memcpy(msr.pData, vertexList, sizeof(VertexData3D) * ObjectManager::CUBE_VERTEX_NUM);
+	memcpy(msr.pData, vertexList, sizeof(MeshVertexData) * ObjectManager::CUBE_VERTEX_NUM);
 	gm.GetContextPtr()->Unmap(pVBuf, 0);
 
 	// 頂点バッファのセット
-	UINT stride = sizeof(VertexData3D);
+	UINT stride = sizeof(MeshVertexData);
 	UINT offset = 0;
 	gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVBuf, &stride, &offset);
 
@@ -554,47 +555,47 @@ inline void Cube::DrawTextureShadowCube(Camera* pCamera, const Texture& tex, int
 	ID3D11Buffer* cb[1] = { om.GetShadowConstBufferPtr() };
 	gm.GetContextPtr()->VSSetConstantBuffers(cb_slot, 1, cb);
 
-	VertexData3D vertexList[]{
-	{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 0.0f } },
-	{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 0.0f } },
-	{ { -0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 1.0f } },
-	{ {  0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 1.0f } },
+	MeshVertexData vertexList[]{
+	{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, color_, { 0.0f, 0.0f } },
+	{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, color_, { 1.0f, 0.0f } },
+	{ { -0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, color_, { 0.0f, 1.0f } },
+	{ {  0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, color_, { 1.0f, 1.0f } },
 
-	{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 0.0f } },
-	{ { -0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 1.0f } },
-	{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 0.0f } },
-	{ {  0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 1.0f } },
+	{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, color_, { 1.0f, 0.0f } },
+	{ { -0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, color_, { 1.0f, 1.0f } },
+	{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, color_, { 0.0f, 0.0f } },
+	{ {  0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, color_, { 0.0f, 1.0f } },
 
-	{ { -0.5f,  0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 0.0f } },
-	{ { -0.5f,  0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 0.0f } },
-	{ { -0.5f, -0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 1.0f } },
-	{ { -0.5f, -0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 1.0f } },
+	{ { -0.5f,  0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, color_, { 0.0f, 0.0f } },
+	{ { -0.5f,  0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, color_, { 1.0f, 0.0f } },
+	{ { -0.5f, -0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, color_, { 0.0f, 1.0f } },
+	{ { -0.5f, -0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, color_, { 1.0f, 1.0f } },
 
-	{ {  0.5f,  0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 0.0f } },
-	{ {  0.5f, -0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 1.0f } },
-	{ {  0.5f,  0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 0.0f } },
-	{ {  0.5f, -0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 1.0f } },
+	{ {  0.5f,  0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, color_, { 1.0f, 0.0f } },
+	{ {  0.5f, -0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, color_, { 1.0f, 1.0f } },
+	{ {  0.5f,  0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, color_, { 0.0f, 0.0f } },
+	{ {  0.5f, -0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, color_, { 0.0f, 1.0f } },
 
-	{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 0.0f } },
-	{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 0.0f } },
-	{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 1.0f } },
-	{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 1.0f } },
+	{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, color_, { 0.0f, 0.0f } },
+	{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, color_, { 1.0f, 0.0f } },
+	{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, color_, { 0.0f, 1.0f } },
+	{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, color_, { 1.0f, 1.0f } },
 
-	{ { -0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 0.0f } },
-	{ { -0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 1.0f, 1.0f } },
-	{ {  0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 0.0f } },
-	{ {  0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { 0.0f, 1.0f } },
+	{ { -0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, color_, { 1.0f, 0.0f } },
+	{ { -0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, color_, { 1.0f, 1.0f } },
+	{ {  0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, color_, { 0.0f, 0.0f } },
+	{ {  0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, color_, { 0.0f, 1.0f } },
 	};
 
 	// バッファ書き込み
 	ID3D11Buffer* pVBuf = om.GetCubeVertexBufferPtr();
 	D3D11_MAPPED_SUBRESOURCE msr;
 	gm.GetContextPtr()->Map(pVBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
-	memcpy(msr.pData, vertexList, sizeof(VertexData3D) * ObjectManager::CUBE_VERTEX_NUM);
+	memcpy(msr.pData, vertexList, sizeof(MeshVertexData) * ObjectManager::CUBE_VERTEX_NUM);
 	gm.GetContextPtr()->Unmap(pVBuf, 0);
 
 	// 頂点バッファのセット
-	UINT stride = sizeof(VertexData3D);
+	UINT stride = sizeof(MeshVertexData);
 	UINT offset = 0;
 	gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVBuf, &stride, &offset);
 
@@ -724,47 +725,47 @@ void Cube::DrawDividedTextureCube(Camera* pCamera, const Texture & tex, int uNum
 	float v1 = tex.GetDivV() * vNum;
 	float v2 = tex.GetDivV() * (vNum + 1);
 
-	VertexData3D vertexList[]{
-	{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v1 } },
-	{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v1 } },
-	{ { -0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v2 } },
-	{ {  0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v2 } },
+	MeshVertexData vertexList[]{
+	{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, color_, { u1, v1 } },
+	{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, color_, { u2, v1 } },
+	{ { -0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, color_, { u1, v2 } },
+	{ {  0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, color_, { u2, v2 } },
 
-	{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v1 } },
-	{ { -0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v2 } },
-	{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v1 } },
-	{ {  0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v2 } },
+	{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, color_, { u2, v1 } },
+	{ { -0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, color_, { u2, v2 } },
+	{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, color_, { u1, v1 } },
+	{ {  0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, color_, { u1, v2 } },
 
-	{ { -0.5f,  0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v1 } },
-	{ { -0.5f,  0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v1 } },
-	{ { -0.5f, -0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v2 } },
-	{ { -0.5f, -0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v2 } },
+	{ { -0.5f,  0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, color_, { u1, v1 } },
+	{ { -0.5f,  0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, color_, { u2, v1 } },
+	{ { -0.5f, -0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, color_, { u1, v2 } },
+	{ { -0.5f, -0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, color_, { u2, v2 } },
 
-	{ {  0.5f,  0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v1 } },
-	{ {  0.5f, -0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v2 } },
-	{ {  0.5f,  0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v1 } },
-	{ {  0.5f, -0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v2 } },
+	{ {  0.5f,  0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, color_, { u2, v1 } },
+	{ {  0.5f, -0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, color_, { u2, v2 } },
+	{ {  0.5f,  0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, color_, { u1, v1 } },
+	{ {  0.5f, -0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, color_, { u1, v2 } },
 
-	{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v1 } },
-	{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v1 } },
-	{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v2 } },
-	{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v2 } },
+	{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, color_, { u1, v1 } },
+	{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, color_, { u2, v1 } },
+	{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, color_, { u1, v2 } },
+	{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, color_, { u2, v2 } },
 
-	{ { -0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v1 } },
-	{ { -0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v2 } },
-	{ {  0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v1 } },
-	{ {  0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v2 } },
+	{ { -0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, color_, { u2, v1 } },
+	{ { -0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, color_, { u2, v2 } },
+	{ {  0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, color_, { u1, v1 } },
+	{ {  0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, color_, { u1, v2 } },
 	};
 
 	// バッファ書き込み
 	ID3D11Buffer* pVBuf = om.GetCubeVertexBufferPtr();
 	D3D11_MAPPED_SUBRESOURCE msr;
 	gm.GetContextPtr()->Map(pVBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
-	memcpy(msr.pData, vertexList, sizeof(VertexData3D) * ObjectManager::CUBE_VERTEX_NUM);
+	memcpy(msr.pData, vertexList, sizeof(MeshVertexData) * ObjectManager::CUBE_VERTEX_NUM);
 	gm.GetContextPtr()->Unmap(pVBuf, 0);
 
 	// 頂点バッファのセット
-	UINT stride = sizeof(VertexData3D);
+	UINT stride = sizeof(MeshVertexData);
 	UINT offset = 0;
 	gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVBuf, &stride, &offset);
 
@@ -897,47 +898,47 @@ inline void Cube::DrawDividedTextureShadowCube(Camera* pCamera, const Texture& t
 	float v1 = tex.GetDivV() * vNum;
 	float v2 = tex.GetDivV() * (vNum + 1);
 
-	VertexData3D vertexList[]{
-	{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v1 } },
-	{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v1 } },
-	{ { -0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v2 } },
-	{ {  0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v2 } },
+	MeshVertexData vertexList[]{
+	{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, color_, { u1, v1 } },
+	{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, color_, { u2, v1 } },
+	{ { -0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, color_, { u1, v2 } },
+	{ {  0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, color_, { u2, v2 } },
 
-	{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v1 } },
-	{ { -0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v2 } },
-	{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v1 } },
-	{ {  0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v2 } },
+	{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, color_, { u2, v1 } },
+	{ { -0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, color_, { u2, v2 } },
+	{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, color_, { u1, v1 } },
+	{ {  0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, color_, { u1, v2 } },
 
-	{ { -0.5f,  0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v1 } },
-	{ { -0.5f,  0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v1 } },
-	{ { -0.5f, -0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v2 } },
-	{ { -0.5f, -0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v2 } },
+	{ { -0.5f,  0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, color_, { u1, v1 } },
+	{ { -0.5f,  0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, color_, { u2, v1 } },
+	{ { -0.5f, -0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, color_, { u1, v2 } },
+	{ { -0.5f, -0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, color_, { u2, v2 } },
 
-	{ {  0.5f,  0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v1 } },
-	{ {  0.5f, -0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v2 } },
-	{ {  0.5f,  0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v1 } },
-	{ {  0.5f, -0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v2 } },
+	{ {  0.5f,  0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, color_, { u2, v1 } },
+	{ {  0.5f, -0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, color_, { u2, v2 } },
+	{ {  0.5f,  0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, color_, { u1, v1 } },
+	{ {  0.5f, -0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, color_, { u1, v2 } },
 
-	{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v1 } },
-	{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v1 } },
-	{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v2 } },
-	{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v2 } },
+	{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, color_, { u1, v1 } },
+	{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, color_, { u2, v1 } },
+	{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, color_, { u1, v2 } },
+	{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, color_, { u2, v2 } },
 
-	{ { -0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v1 } },
-	{ { -0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v2 } },
-	{ {  0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v1 } },
-	{ {  0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v2 } },
+	{ { -0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, color_, { u2, v1 } },
+	{ { -0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, color_, { u2, v2 } },
+	{ {  0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, color_, { u1, v1 } },
+	{ {  0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, color_, { u1, v2 } },
 	};
 
 	// バッファ書き込み
 	ID3D11Buffer* pVBuf = om.GetCubeVertexBufferPtr();
 	D3D11_MAPPED_SUBRESOURCE msr;
 	gm.GetContextPtr()->Map(pVBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
-	memcpy(msr.pData, vertexList, sizeof(VertexData3D) * ObjectManager::CUBE_VERTEX_NUM);
+	memcpy(msr.pData, vertexList, sizeof(MeshVertexData) * ObjectManager::CUBE_VERTEX_NUM);
 	gm.GetContextPtr()->Unmap(pVBuf, 0);
 
 	// 頂点バッファのセット
-	UINT stride = sizeof(VertexData3D);
+	UINT stride = sizeof(MeshVertexData);
 	UINT offset = 0;
 	gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVBuf, &stride, &offset);
 
@@ -1067,47 +1068,47 @@ inline void Cube::DrawDelimitedTextureCube(Camera * pCamera, const Texture & tex
 	float v1 = v;
 	float v2 = v + height;
 
-	VertexData3D vertexList[]{
-	{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v1 } },
-	{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v1 } },
-	{ { -0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v2 } },
-	{ {  0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v2 } },
+	MeshVertexData vertexList[]{
+	{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, color_, { u1, v1 } },
+	{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, color_, { u2, v1 } },
+	{ { -0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, color_, { u1, v2 } },
+	{ {  0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, color_, { u2, v2 } },
 
-	{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v1 } },
-	{ { -0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v2 } },
-	{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v1 } },
-	{ {  0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v2 } },
+	{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, color_, { u2, v1 } },
+	{ { -0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, color_, { u2, v2 } },
+	{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, color_, { u1, v1 } },
+	{ {  0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, color_, { u1, v2 } },
 
-	{ { -0.5f,  0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v1 } },
-	{ { -0.5f,  0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v1 } },
-	{ { -0.5f, -0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v2 } },
-	{ { -0.5f, -0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v2 } },
+	{ { -0.5f,  0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, color_, { u1, v1 } },
+	{ { -0.5f,  0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, color_, { u2, v1 } },
+	{ { -0.5f, -0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, color_, { u1, v2 } },
+	{ { -0.5f, -0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, color_, { u2, v2 } },
 
-	{ {  0.5f,  0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v1 } },
-	{ {  0.5f, -0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v2 } },
-	{ {  0.5f,  0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v1 } },
-	{ {  0.5f, -0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v2 } },
+	{ {  0.5f,  0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, color_, { u2, v1 } },
+	{ {  0.5f, -0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, color_, { u2, v2 } },
+	{ {  0.5f,  0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, color_, { u1, v1 } },
+	{ {  0.5f, -0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, color_, { u1, v2 } },
 
-	{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v1 } },
-	{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v1 } },
-	{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v2 } },
-	{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v2 } },
+	{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, color_, { u1, v1 } },
+	{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, color_, { u2, v1 } },
+	{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, color_, { u1, v2 } },
+	{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, color_, { u2, v2 } },
 
-	{ { -0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v1 } },
-	{ { -0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v2 } },
-	{ {  0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v1 } },
-	{ {  0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v2 } },
+	{ { -0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, color_, { u2, v1 } },
+	{ { -0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, color_, { u2, v2 } },
+	{ {  0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, color_, { u1, v1 } },
+	{ {  0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, color_, { u1, v2 } },
 	};
 
 	// バッファ書き込み
 	ID3D11Buffer* pVBuf = om.GetCubeVertexBufferPtr();
 	D3D11_MAPPED_SUBRESOURCE msr;
 	gm.GetContextPtr()->Map(pVBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
-	memcpy(msr.pData, vertexList, sizeof(VertexData3D) * ObjectManager::CUBE_VERTEX_NUM);
+	memcpy(msr.pData, vertexList, sizeof(MeshVertexData) * ObjectManager::CUBE_VERTEX_NUM);
 	gm.GetContextPtr()->Unmap(pVBuf, 0);
 
 	// 頂点バッファのセット
-	UINT stride = sizeof(VertexData3D);
+	UINT stride = sizeof(MeshVertexData);
 	UINT offset = 0;
 	gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVBuf, &stride, &offset);
 
@@ -1240,47 +1241,47 @@ inline void Cube::DrawDelimitedTextureShadowCube(Camera* pCamera, const Texture&
 	float v1 = v;
 	float v2 = v + height;
 
-	VertexData3D vertexList[]{
-	{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v1 } },
-	{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v1 } },
-	{ { -0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v2 } },
-	{ {  0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v2 } },
+	MeshVertexData vertexList[]{
+	{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, color_, { u1, v1 } },
+	{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, color_, { u2, v1 } },
+	{ { -0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, color_, { u1, v2 } },
+	{ {  0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, color_, { u2, v2 } },
 
-	{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v1 } },
-	{ { -0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v2 } },
-	{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v1 } },
-	{ {  0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v2 } },
+	{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, color_, { u2, v1 } },
+	{ { -0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, color_, { u2, v2 } },
+	{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, color_, { u1, v1 } },
+	{ {  0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, color_, { u1, v2 } },
 
-	{ { -0.5f,  0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v1 } },
-	{ { -0.5f,  0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v1 } },
-	{ { -0.5f, -0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v2 } },
-	{ { -0.5f, -0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v2 } },
+	{ { -0.5f,  0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, color_, { u1, v1 } },
+	{ { -0.5f,  0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, color_, { u2, v1 } },
+	{ { -0.5f, -0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, color_, { u1, v2 } },
+	{ { -0.5f, -0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, color_, { u2, v2 } },
 
-	{ {  0.5f,  0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v1 } },
-	{ {  0.5f, -0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v2 } },
-	{ {  0.5f,  0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v1 } },
-	{ {  0.5f, -0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v2 } },
+	{ {  0.5f,  0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, color_, { u2, v1 } },
+	{ {  0.5f, -0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, color_, { u2, v2 } },
+	{ {  0.5f,  0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, color_, { u1, v1 } },
+	{ {  0.5f, -0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, color_, { u1, v2 } },
 
-	{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v1 } },
-	{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v1 } },
-	{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v2 } },
-	{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v2 } },
+	{ { -0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, color_, { u1, v1 } },
+	{ {  0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, color_, { u2, v1 } },
+	{ { -0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, color_, { u1, v2 } },
+	{ {  0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, color_, { u2, v2 } },
 
-	{ { -0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v1 } },
-	{ { -0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u2, v2 } },
-	{ {  0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v1 } },
-	{ {  0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, {1.0f, 1.0f, 1.0f, color_.a}, { u1, v2 } },
+	{ { -0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, color_, { u2, v1 } },
+	{ { -0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, color_, { u2, v2 } },
+	{ {  0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, color_, { u1, v1 } },
+	{ {  0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, color_, { u1, v2 } },
 	};
 
 	// バッファ書き込み
 	ID3D11Buffer* pVBuf = om.GetCubeVertexBufferPtr();
 	D3D11_MAPPED_SUBRESOURCE msr;
 	gm.GetContextPtr()->Map(pVBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
-	memcpy(msr.pData, vertexList, sizeof(VertexData3D) * ObjectManager::CUBE_VERTEX_NUM);
+	memcpy(msr.pData, vertexList, sizeof(MeshVertexData) * ObjectManager::CUBE_VERTEX_NUM);
 	gm.GetContextPtr()->Unmap(pVBuf, 0);
 
 	// 頂点バッファのセット
-	UINT stride = sizeof(VertexData3D);
+	UINT stride = sizeof(MeshVertexData);
 	UINT offset = 0;
 	gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVBuf, &stride, &offset);
 

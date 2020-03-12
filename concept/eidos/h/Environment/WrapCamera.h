@@ -13,11 +13,13 @@ public:
 
 	void SetPos(Vector3D pos){}
 	void SetPos(float posX, float posY, float posZ){}
+
 	void MovePos(Vector3D axis){}
 	void MovePos(float posX, float posY, float posZ){}
 
 	void SetFocus(Vector3D pos);
 	void SetFocus(float posX, float posY, float posZ);
+
 	void MoveFocus(Vector3D axis);
 	void MoveFocus(float axisX, float axisY, float axisZ);
 
