@@ -98,8 +98,7 @@ protected:
 	Matrix4x4 world_;	// ワールドマトリクス
 
 private:
-	// ワールドマトリクスの更新
-	inline void UpdateWorldMatrix();
+	inline void UpdateWorldMatrix();	// ワールドマトリクスの更新
 };
 
 #endif	// #ifndef INCLUDE_EIDOS_ACTOR3D_H

@@ -1,12 +1,15 @@
 #include "../../h/eidosStorage/eidosStorageManager.h"
 #include "../../h/Mesh/ObjModel.h"
 #include "../../h/Mesh/PmdModel.h"
+#include "../../h/Mesh/PmxModel.h"
 #include "../../../idea/h/Utility/ideaUtility.h"
 
 using namespace std;
 
+// 静的メンバの実体
 ObjModel eidosStorageManager::s_NullObjModel_;
 PmdModel eidosStorageManager::s_NullPmdModel_;
+PmxModel eidosStorageManager::s_NullPmxModel_;
 
 eidosStorageManager::eidosStorageManager()
 	: bUnLoadAll_(false)
@@ -16,6 +19,9 @@ eidosStorageManager::eidosStorageManager()
 
 	unordered_map<const char*, PmdModel*>().swap(umPmdModelPtr_);
 	vector<const char*>().swap(vecUnLoadPmdModelList_);
+
+	unordered_map<const char*, PmxModel*>().swap(umPmxModelPtr_);
+	vector<const char*>().swap(vecUnLoadPmxModelList_);
 }
 
 bool eidosStorageManager::LoadObjMeshFromFile(const char * pFileName)
@@ -196,6 +202,96 @@ void eidosStorageManager::UnLoadPmdModel()
 	vector<const char*>().swap(vecUnLoadPmdModelList_);
 }
 
+//.pmx
+bool eidosStorageManager::LoadPmxMeshFromFile(const char* pFileName)
+{
+	if(HasKeyPmxModel(pFileName)){ return false; }	// 既にキーが登録されていれば終了
+
+	PmxModel* pMesh = new PmxModel;
+	bool bRes = pMesh->LoadPmxMeshFromFile(pFileName);
+
+	if(bRes){
+		umPmxModelPtr_.insert(pair<const char*, PmxModel*>{ pFileName, pMesh });
+	} else{
+		SafeDelete(pMesh);
+	}
+
+	return bRes;
+}
+
+//bool eidosStorageManager::LoadPmxMeshFromArchiveFile(const char * pArchiveFileName, const char * pFileName)
+//{
+//	if(HasKeyPmxMesh(pFileName)){ return false; }	// 既にキーが登録されていれば終了
+//
+//	PmdModel* pMesh = new PmxModel;
+//	bool bRes = pMesh->LoadPmxMeshFromArchiveFile(pArchiveFileName, pFileName);
+//
+//	if(bRes){
+//		umPmxMeshPtr_.insert(pair<const char*, PmxModel*>{ pFileName, pMesh });
+//	} else{
+//		SafeDelete(pMesh);
+//	}
+//
+//	return bRes;
+//}
+
+PmxModel& eidosStorageManager::GetPmxModel(const char* pFileName)
+{
+	if(!HasKeyPmxModel(pFileName)
+		|| !umPmxModelPtr_.size()){
+		SetDebugMessage("PmxMeshLoadError! [%s] はストレージに存在しません。ファイルから読み込みます。\n", pFileName);
+
+		if(!LoadPmxMeshFromFile(pFileName)){ return s_NullPmxModel_; }
+	}
+
+	return *umPmxModelPtr_[pFileName];	// テクスチャーインターフェイスのポインターを返す
+}
+
+bool eidosStorageManager::HasKeyPmxModel(const char* pFileName)
+{
+	if(!umPmxModelPtr_.size()){ return false; }
+
+	return (umPmxModelPtr_.find(pFileName) != umPmxModelPtr_.end());	// 検索
+}
+
+void eidosStorageManager::SetUnLoadPmxModelRequest(const char* pFileName)
+{
+	auto it = vecUnLoadPmxModelList_.begin();
+	auto itEnd = vecUnLoadPmxModelList_.end();
+
+	for(; it != itEnd; ++it){
+		if(*it == pFileName){
+			return;
+		}
+	}
+
+	vecUnLoadPmxModelList_.push_back(pFileName);
+}
+
+void eidosStorageManager::UnLoadPmxModel()
+{
+	if(umPmxModelPtr_.size()){
+		// イテレータを使って解放
+		auto it = vecUnLoadPmxModelList_.begin();
+		auto itEnd = vecUnLoadPmxModelList_.end();
+		auto itPmdEnd = umPmxModelPtr_.end();
+
+		for(; it != itEnd; ++it){
+			if(umPmxModelPtr_.find(*it) != itPmdEnd){
+				auto itPmd = umPmxModelPtr_.find(*it);
+				if(itPmd->second){
+					itPmd->second->UnLoad();
+					delete itPmd->second;
+					itPmd->second = nullptr;
+				}
+				umPmxModelPtr_.erase(itPmd);
+			}
+		}
+	}
+
+	vector<const char*>().swap(vecUnLoadPmxModelList_);
+}
+
 void eidosStorageManager::UnLoadAll()
 {
 	if(umObjModelPtr_.size()){
@@ -233,6 +329,22 @@ void eidosStorageManager::UnLoadAll()
 
 	vector<const char*>().swap(vecUnLoadPmdModelList_);
 
+	if(umPmxModelPtr_.size()){
+		// イテレータを使って解放
+		auto itPmx  = umPmxModelPtr_.begin();
+		auto itPmxEnd = umPmxModelPtr_.end();
+
+		for(; itPmx != itPmxEnd; ++itPmx){
+			if(itPmx->second){
+				itPmx->second->UnLoad();
+				delete itPmx->second;
+				itPmx->second = nullptr;
+			}
+		}
+	}
+	unordered_map<const char*, PmxModel*>().swap(umPmxModelPtr_);
+
+	vector<const char*>().swap(vecUnLoadPmxModelList_);
 
 	bUnLoadAll_ = false;
 }

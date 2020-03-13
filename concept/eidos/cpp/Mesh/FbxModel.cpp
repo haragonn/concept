@@ -929,7 +929,7 @@ void FbxModel::Draw(Camera * pCamera)
 	//																	   //インデックスバッファをセット
 	//gm.GetContextPtr()->IASetIndexBuffer(GetIndexBufferPtr(), DXGI_FORMAT_R16_UINT, 0);///
 
-																							   // 入力レイアウトのセット
+	// 入力レイアウトのセット
 	gm.GetContextPtr()->IASetInputLayout(om.GetInputLayoutPtr());
 
 	// プリミティブ形状のセット
@@ -966,10 +966,11 @@ void FbxModel::Draw(Camera * pCamera)
 		UINT offset = 0;
 		gm.GetContextPtr()->IASetVertexBuffers(0, 1, &pVBuf, &stride, &offset);///
 
-																			   //インデックスバッファをセット
+		//インデックスバッファをセット
 		gm.GetContextPtr()->IASetIndexBuffer(vecIndexBufferPtr_[meshCnt], DXGI_FORMAT_R16_UINT, 0);///
 
 		Texture* pTexture = vecMesh_[meshCnt].pTexture;
+
 		if(pTexture){
 			ID3D11ShaderResourceView* pTexView = pTexture->GetTextureViewPtr();
 			if(pTexView){
@@ -986,51 +987,4 @@ void FbxModel::Draw(Camera * pCamera)
 
 		gm.GetContextPtr()->DrawIndexed(vecMesh_[meshCnt].nNumIndex, 0, 0);///
 	}
-
-	//// サブセット毎に描画
-	//if(subsetSize_ <= 1){///
-	//	ID3D11ShaderResourceView* pTexView = nullptr;
-	//	if(texPtrSize_ > 0){///
-	//		pTexView = vecTexPtr_[0]->GetTextureViewPtr();///
-	//	}
-	//	if(pTexView){
-	//		gm.GetContextPtr()->PSSetShaderResources(0, 1, &pTexView);
-	//	}
-	//	if(pTexView){
-	//		gm.GetContextPtr()->PSSetShader(om.GetPixelShederTexturePtr(), NULL, 0);
-	//	} else{
-	//		gm.GetContextPtr()->PSSetShader(om.GetPixelShederDefaultPtr(), NULL, 0);
-	//	}
-	//	gm.GetContextPtr()->Draw(GetVertexSize(), 0);///
-	//} else{
-	//	for(unsigned int i = 1; i < subsetSize_; ++i){///
-
-	//		ID3D11ShaderResourceView* pTexView = nullptr;
-	//		if(texPtrSize_ > i){///
-	//			pTexView = vecTexPtr_[i - 1]->GetTextureViewPtr();///
-	//		}
-	//		if(pTexView){
-	//			gm.GetContextPtr()->PSSetShaderResources(0, 1, &pTexView);
-	//		}
-	//		if(pTexView){
-	//			gm.GetContextPtr()->PSSetShader(om.GetPixelShederTexturePtr(), NULL, 0);
-	//		} else{
-	//			gm.GetContextPtr()->PSSetShader(om.GetPixelShederDefaultPtr(), NULL, 0);
-	//		}
-	//		gm.GetContextPtr()->Draw(GetSubsetPtr()[i].faceStart - GetSubsetPtr()[i - 1].faceStart, GetSubsetPtr()[i - 1].faceStart);///
-	//	}
-	//	ID3D11ShaderResourceView* pTexView = nullptr;
-	//	if(texPtrSize_ == subsetSize_ - 1){///
-	//		pTexView = vecTexPtr_[subsetSize_ - 1]->GetTextureViewPtr();///
-	//	}
-	//	if(pTexView){
-	//		gm.GetContextPtr()->PSSetShaderResources(0, 1, &pTexView);
-	//	}
-	//	if(pTexView){
-	//		gm.GetContextPtr()->PSSetShader(om.GetPixelShederTexturePtr(), NULL, 0);
-	//	} else{
-	//		gm.GetContextPtr()->PSSetShader(om.GetPixelShederDefaultPtr(), NULL, 0);
-	//	}
-	//	gm.GetContextPtr()->Draw(GetVertexSize() - GetSubsetPtr()[subsetSize_ - 1].faceStart, GetSubsetPtr()[subsetSize_ - 1].faceStart);///
-	//}
 }

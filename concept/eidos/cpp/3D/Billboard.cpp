@@ -71,42 +71,7 @@ inline void Billboard::DrawBillboard(Camera * pCamera, int blend)
 	}
 
 	//定数バッファ
-	ConstBuffer3D cbuff;
-
-	XMFLOAT4X4 matWorld;
-	for(int i = 4 - 1; i >= 0; --i){
-		for(int j = 4 - 1; j >= 0; --j){
-			matWorld.m[i][j] = world_.r[i][j];
-		}
-	}
-	XMStoreFloat4x4(&cbuff.world, XMMatrixTranspose(XMLoadFloat4x4(&matWorld)));
-
-	XMFLOAT4X4 matView;
-	for(int i = 4 - 1; i >= 0; --i){
-		for(int j = 4 - 1; j >= 0; --j){
-			matView.m[i][j] = pCamera->GetViewMatrix().r[i][j];
-		}
-	}
-	XMStoreFloat4x4(&cbuff.view, XMMatrixTranspose(XMLoadFloat4x4(&matView)));
-
-	XMFLOAT4X4 matProj;
-	for(int i = 4 - 1; i >= 0; --i){
-		for(int j = 4 - 1; j >= 0; --j){
-			matProj.m[i][j] = pCamera->GetProjectionMatrix().r[i][j];
-		}
-	}
-	XMStoreFloat4x4(&cbuff.proj, XMMatrixTranspose(XMLoadFloat4x4(&matProj)));
-
-	XMStoreFloat4(&cbuff.color, XMVectorSet(color_.r, color_.g, color_.b, color_.a));
-	XMStoreFloat4(&cbuff.light, om.GetLight());
-
-	// 定数バッファ内容更新
-	gm.GetContextPtr()->UpdateSubresource(om.GetConstBufferPtr(), 0, NULL, &cbuff, 0, 0);
-
-	// 定数バッファ
-	UINT cb_slot = 1;
-	ID3D11Buffer* cb[1] = { om.GetConstBufferPtr() };
-	gm.GetContextPtr()->VSSetConstantBuffers(cb_slot, 1, cb);
+	SetConstBuffer(pCamera);
 
 	// バッファ書き込み
 	ID3D11Buffer* pVBuf = om.GetCubeVertexBufferPtr();
@@ -146,14 +111,7 @@ inline void Billboard::DrawBillboard(Camera * pCamera, int blend)
 	gm.GetContextPtr()->CSSetShader(NULL, NULL, 0);
 
 	// ビューポートの設定
-	D3D11_VIEWPORT viewPort;
-	viewPort.TopLeftX = pCamera->GetViewPort().topLeftX;
-	viewPort.TopLeftY = pCamera->GetViewPort().topLeftY;
-	viewPort.Width = pCamera->GetViewPort().width;
-	viewPort.Height = pCamera->GetViewPort().height;
-	viewPort.MinDepth = pCamera->GetViewPort().minDepth;
-	viewPort.MaxDepth = pCamera->GetViewPort().maxDepth;
-	gm.GetContextPtr()->RSSetViewports(1, &viewPort);
+	SetViewPort(pCamera);
 
 	//ポリゴン描画
 	gm.GetContextPtr()->Draw(4, 0);
@@ -173,37 +131,7 @@ inline void Billboard::DrawTextureBillboard(Camera * pCamera, const Texture & te
 	}
 
 	//定数バッファ
-	ConstBuffer3D cbuff;
-
-	XMFLOAT4X4 matWorld;
-	for(int i = 4 - 1; i >= 0; --i){
-		for(int j = 4 - 1; j >= 0; --j){
-			matWorld.m[i][j] = world_.r[i][j];
-		}
-	}
-	XMStoreFloat4x4(&cbuff.world, XMMatrixTranspose(XMLoadFloat4x4(&matWorld)));
-
-	XMFLOAT4X4 matView;
-	for(int i = 4 - 1; i >= 0; --i){
-		for(int j = 4 - 1; j >= 0; --j){
-			matView.m[i][j] = pCamera->GetViewMatrix().r[i][j];
-		}
-	}
-	XMStoreFloat4x4(&cbuff.view, XMMatrixTranspose(XMLoadFloat4x4(&matView)));
-
-	XMFLOAT4X4 matProj;
-	for(int i = 4 - 1; i >= 0; --i){
-		for(int j = 4 - 1; j >= 0; --j){
-			matProj.m[i][j] = pCamera->GetProjectionMatrix().r[i][j];
-		}
-	}
-	XMStoreFloat4x4(&cbuff.proj, XMMatrixTranspose(XMLoadFloat4x4(&matProj)));
-
-	XMStoreFloat4(&cbuff.color, XMVectorSet(color_.r, color_.g, color_.b, color_.a));
-	XMStoreFloat4(&cbuff.light, om.GetLight());
-
-	// 定数バッファ内容更新
-	gm.GetContextPtr()->UpdateSubresource(om.GetConstBufferPtr(), 0, NULL, &cbuff, 0, 0);
+	SetConstBuffer(pCamera);
 
 	// 定数バッファ
 	UINT cb_slot = 1;
@@ -256,6 +184,9 @@ inline void Billboard::DrawTextureBillboard(Camera * pCamera, const Texture & te
 		gm.SetBlendState(BLEND_SUBTRACT);
 	}
 
+	// ビューポートの設定
+	SetViewPort(pCamera);
+
 	// シェーダのセット
 	gm.GetContextPtr()->VSSetShader(om.GetVertexShederPtr(), NULL, 0);
 	gm.GetContextPtr()->HSSetShader(NULL, NULL, 0);
@@ -268,16 +199,6 @@ inline void Billboard::DrawTextureBillboard(Camera * pCamera, const Texture & te
 	}else{
 		gm.GetContextPtr()->PSSetShader(om.GetPixelShederDefaultPtr(), NULL, 0);
 	}
-
-	// ビューポートの設定
-	D3D11_VIEWPORT viewPort;
-	viewPort.TopLeftX = pCamera->GetViewPort().topLeftX;
-	viewPort.TopLeftY = pCamera->GetViewPort().topLeftY;
-	viewPort.Width = pCamera->GetViewPort().width;
-	viewPort.Height = pCamera->GetViewPort().height;
-	viewPort.MinDepth = pCamera->GetViewPort().minDepth;
-	viewPort.MaxDepth = pCamera->GetViewPort().maxDepth;
-	gm.GetContextPtr()->RSSetViewports(1, &viewPort);
 
 	//ポリゴン描画
 	gm.GetContextPtr()->Draw(4, 0);
@@ -297,42 +218,7 @@ inline void Billboard::DrawDividedTextureBillboard(Camera * pCamera, const Textu
 	}
 
 	//定数バッファ
-	ConstBuffer3D cbuff;
-
-	XMFLOAT4X4 matWorld;
-	for(int i = 4 - 1; i >= 0; --i){
-		for(int j = 4 - 1; j >= 0; --j){
-			matWorld.m[i][j] = world_.r[i][j];
-		}
-	}
-	XMStoreFloat4x4(&cbuff.world, XMMatrixTranspose(XMLoadFloat4x4(&matWorld)));
-
-	XMFLOAT4X4 matView;
-	for(int i = 4 - 1; i >= 0; --i){
-		for(int j = 4 - 1; j >= 0; --j){
-			matView.m[i][j] = pCamera->GetViewMatrix().r[i][j];
-		}
-	}
-	XMStoreFloat4x4(&cbuff.view, XMMatrixTranspose(XMLoadFloat4x4(&matView)));
-
-	XMFLOAT4X4 matProj;
-	for(int i = 4 - 1; i >= 0; --i){
-		for(int j = 4 - 1; j >= 0; --j){
-			matProj.m[i][j] = pCamera->GetProjectionMatrix().r[i][j];
-		}
-	}
-	XMStoreFloat4x4(&cbuff.proj, XMMatrixTranspose(XMLoadFloat4x4(&matProj)));
-
-	XMStoreFloat4(&cbuff.color, XMVectorSet(color_.r, color_.g, color_.b, color_.a));
-	XMStoreFloat4(&cbuff.light, om.GetLight());
-
-	// 定数バッファ内容更新
-	gm.GetContextPtr()->UpdateSubresource(om.GetConstBufferPtr(), 0, NULL, &cbuff, 0, 0);
-
-	// 定数バッファ
-	UINT cb_slot = 1;
-	ID3D11Buffer* cb[1] = { om.GetConstBufferPtr() };
-	gm.GetContextPtr()->VSSetConstantBuffers(cb_slot, 1, cb);
+	SetConstBuffer(pCamera);
 
 	float u1 = tex.GetDivU() * uNum;
 	float u2 = tex.GetDivU() * (uNum + 1);
@@ -399,6 +285,70 @@ inline void Billboard::DrawDividedTextureBillboard(Camera * pCamera, const Textu
 	}
 
 	// ビューポートの設定
+	SetViewPort(pCamera);
+
+	//ポリゴン描画
+	gm.GetContextPtr()->Draw(4, 0);
+}
+
+inline void Billboard::SetConstBuffer(Camera* pCamera)
+{
+	// 準備ができていなければ終了
+	GraphicManager& gm = GraphicManager::Instance();
+	ObjectManager& om = ObjectManager::Instance();
+
+	if(!gm.GetContextPtr()
+		|| !om.GetVertexShederPtr()
+		|| !pCamera){
+		return;
+	}
+
+	ConstBuffer3D cbuff;
+
+	XMFLOAT4X4 matWorld;
+	for(int i = 4 - 1; i >= 0; --i){
+		for(int j = 4 - 1; j >= 0; --j){
+			matWorld.m[i][j] = world_.r[i][j];
+		}
+	}
+	XMStoreFloat4x4(&cbuff.world, XMMatrixTranspose(XMLoadFloat4x4(&matWorld)));
+
+	XMFLOAT4X4 matView;
+	for(int i = 4 - 1; i >= 0; --i){
+		for(int j = 4 - 1; j >= 0; --j){
+			matView.m[i][j] = pCamera->GetViewMatrix().r[i][j];
+		}
+	}
+	XMStoreFloat4x4(&cbuff.view, XMMatrixTranspose(XMLoadFloat4x4(&matView)));
+
+	XMFLOAT4X4 matProj;
+	for(int i = 4 - 1; i >= 0; --i){
+		for(int j = 4 - 1; j >= 0; --j){
+			matProj.m[i][j] = pCamera->GetProjectionMatrix().r[i][j];
+		}
+	}
+	XMStoreFloat4x4(&cbuff.proj, XMMatrixTranspose(XMLoadFloat4x4(&matProj)));
+
+	XMStoreFloat4(&cbuff.color, XMVectorSet(color_.r, color_.g, color_.b, color_.a));
+	XMStoreFloat4(&cbuff.light, om.GetLight());
+
+	// 定数バッファ内容更新
+	gm.GetContextPtr()->UpdateSubresource(om.GetConstBufferPtr(), 0, NULL, &cbuff, 0, 0);
+
+	// 定数バッファ設定
+	UINT cb_slot = 1;
+	ID3D11Buffer* cb[1] = { om.GetConstBufferPtr() };
+	gm.GetContextPtr()->VSSetConstantBuffers(cb_slot, 1, cb);
+}
+
+inline void Billboard::SetViewPort(Camera* pCamera)
+{
+	// 準備ができていなければ終了
+	GraphicManager& gm = GraphicManager::Instance();
+
+	if(!gm.GetContextPtr()
+		|| !pCamera){ return; }
+
 	D3D11_VIEWPORT viewPort;
 	viewPort.TopLeftX = pCamera->GetViewPort().topLeftX;
 	viewPort.TopLeftY = pCamera->GetViewPort().topLeftY;
@@ -406,10 +356,8 @@ inline void Billboard::DrawDividedTextureBillboard(Camera * pCamera, const Textu
 	viewPort.Height = pCamera->GetViewPort().height;
 	viewPort.MinDepth = pCamera->GetViewPort().minDepth;
 	viewPort.MaxDepth = pCamera->GetViewPort().maxDepth;
-	gm.GetContextPtr()->RSSetViewports(1, &viewPort);
 
-	//ポリゴン描画
-	gm.GetContextPtr()->Draw(4, 0);
+	gm.GetContextPtr()->RSSetViewports(1, &viewPort);
 }
 
 inline void Billboard::UpdateMatrix(Camera* pCamera)

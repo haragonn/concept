@@ -27,7 +27,6 @@
 #define Assert(exp)
 #endif
 
-
 template <typename T>
 inline void SafeDelete(T*& p)
 {
@@ -64,6 +63,15 @@ inline void SafeDestroy(T*& p)
 	}
 }
 
+template <typename T>
+inline void SafeUnLoad(T*& p)
+{
+	if(p) {
+		p->UnLoad();
+		p = nullptr;
+	}
+}
+
 template <typename T, size_t SIZE>
 size_t ArraySize(const T(&)[SIZE])
 {
@@ -82,6 +90,7 @@ inline void AddDirectoryPath(std::string& fileName, std::string& src)
 		{
 			if(t[i] == '\\'){
 				fileName = src.substr(0, i - 1) + fileName;
+
 				break;
 			}
 		}
@@ -100,11 +109,11 @@ inline std::string WStringToString(std::wstring wstring)
 
 	WideCharToMultiByte(CP_OEMCP, 0, wstring.c_str(), -1, pMultiByte, bufferSize, NULL, NULL);
 
-	std::string res(pMultiByte, pMultiByte + bufferSize - 1);
+	std::string ret(pMultiByte, pMultiByte + bufferSize - 1);
 
 	SafeDeleteArray(pMultiByte);
 
-	return res;
+	return ret;
 }
 
 inline std::wstring StringToWString(std::string string)
@@ -117,12 +126,11 @@ inline std::wstring StringToWString(std::string string)
 
 	MultiByteToWideChar(CP_ACP, 0, string.c_str(), -1, pUCS2, bufferSize);
 
-	std::wstring res(pUCS2, pUCS2 + bufferSize - 1);
+	std::wstring ret(pUCS2, pUCS2 + bufferSize - 1);
 
 	SafeDeleteArray(pUCS2);
 
-	return res;
+	return ret;
 }
-
 
 #endif	// #ifndef INCLUDE_IDEA_IDEAUTILITY_H

@@ -15,6 +15,10 @@ public:
 	//static bool LoadPmdMeshFromArchiveFile(const char* pArchiveFileName, const char* pFileName);	// アーカイブファイルからPMDメッシュを読み込む
 	static void UnLoadPmdMesh(const char* pFileName);		// PMDメッシュの破棄
 
+	static bool LoadPmxMeshFromFile(const char* pFileName);	// PMXメッシュの読み込み
+	//static bool LoadPmxMeshFromArchiveFile(const char* pArchiveFileName, const char* pFileName);	// アーカイブファイルからPMXメッシュを読み込む
+	static void UnLoadPmxMesh(const char* pFileName);		// PMXメッシュの破棄
+
 	static bool LoadWaveFromFile(const char* pFileName, unsigned int soundSize = 1U);	// waveファイルの読み込み
 	static bool LoadWaveFromArchiveFile(const char* pArchiveFileName, const char* pFileName, unsigned int soundSize = 1U);	// アーカイブファイルからwaveファイルを読み込む
 	static void UnLoadWave(const char* pFileName);			// waveファイルの破棄

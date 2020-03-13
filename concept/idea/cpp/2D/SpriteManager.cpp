@@ -12,9 +12,6 @@ namespace{
 	static const char* PS_TEX_FILENAME = "PSTexture.cso";
 }
 
-using namespace DirectX;
-
-
 SpriteManager::SpriteManager() :
 	pVertexShader_(nullptr),
 	pVertexLayout_(nullptr),
@@ -76,14 +73,16 @@ bool SpriteManager::Init()
 
 		// 定数バッファ用意
 		ConstBuffer2D cbuff;
+
 		float w = (float)gm.GetWidth(), h = (float)gm.GetHeight();
-		XMMATRIX mtx(
-			2.0f / w, 0.0f, 0.0f, 0.0f,
-			0.0f, -2.0f / h, 0.0f, 0.0f,
+
+		Matrix4x4 mtx(
+			2.0f / w, 0.0f, 0.0f, -1.0f,
+			0.0f, -2.0f / h, 0.0f, 1.0f,
 			0.0f, 0.0f, 1.0f, 0.0f,
-			-1.0f, 1.0f, 0.0f, 1.0f
-		);
-		XMStoreFloat4x4(&cbuff.proj, XMMatrixTranspose(mtx));
+			0.0f, 0.0f, 0.0f, 1.0f);
+
+		cbuff.proj = mtx;
 		
 		// 定数バッファ内容更新
 		gm.GetContextPtr()->UpdateSubresource(pConstBuffer_, 0, NULL, &cbuff, 0, 0);

@@ -45,6 +45,9 @@ private:
 	inline void DrawTextureBillboard(Camera* pCamera, const Texture& tex, int blend = 0);	// ‹éŒ`‚Ì•`‰æ
 	inline void DrawDividedTextureBillboard(Camera* pCamera, const Texture& tex, int uNum, int vNum, int blend = 0);
 
+	inline void SetConstBuffer(Camera* pCamera);
+	inline void SetViewPort(Camera* pCamera);
+
 	inline void UpdateMatrix(Camera* pCamera);
 };
 

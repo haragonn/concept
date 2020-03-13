@@ -130,6 +130,8 @@ void PlaneMesh::Release()
 {
 	SafeRelease(pVertexBuffer_);
 	SafeRelease(pIndexBuffer_);
+
+	ExclusionTexture();
 }
 
 void PlaneMesh::SetTexture(Texture& tex)
@@ -172,47 +174,10 @@ inline void PlaneMesh::DrawPlain(Camera * pCamera, int blend)
 	if(!gm.GetContextPtr()
 		|| !pVertexBuffer_
 		|| !om.GetVertexShederPtr()
-		|| !pCamera){
-		return;
-	}
-
-	//定数バッファ
-	ConstBuffer3D cbuff;
-
-	XMFLOAT4X4 matWorld;
-	for(int i = 4 - 1; i >= 0; --i){
-		for(int j = 4 - 1; j >= 0; --j){
-			matWorld.m[i][j] = world_.r[i][j];
-		}
-	}
-	XMStoreFloat4x4(&cbuff.world, XMMatrixTranspose(XMLoadFloat4x4(&matWorld)));
-
-	XMFLOAT4X4 matView;
-	for(int i = 4 - 1; i >= 0; --i){
-		for(int j = 4 - 1; j >= 0; --j){
-			matView.m[i][j] = pCamera->GetViewMatrix().r[i][j];
-		}
-	}
-	XMStoreFloat4x4(&cbuff.view, XMMatrixTranspose(XMLoadFloat4x4(&matView)));
-
-	XMFLOAT4X4 matProj;
-	for(int i = 4 - 1; i >= 0; --i){
-		for(int j = 4 - 1; j >= 0; --j){
-			matProj.m[i][j] = pCamera->GetProjectionMatrix().r[i][j];
-		}
-	}
-	XMStoreFloat4x4(&cbuff.proj, XMMatrixTranspose(XMLoadFloat4x4(&matProj)));
-
-	XMStoreFloat4(&cbuff.color, XMVectorSet(color_.r, color_.g, color_.b, color_.a));
-	XMStoreFloat4(&cbuff.light, om.GetLight());
-
-	// 定数バッファ内容更新
-	gm.GetContextPtr()->UpdateSubresource(om.GetConstBufferPtr(), 0, NULL, &cbuff, 0, 0);
+		|| !pCamera){ return; }
 
 	// 定数バッファ
-	UINT cb_slot = 1;
-	ID3D11Buffer* cb[1] = { om.GetConstBufferPtr() };
-	gm.GetContextPtr()->VSSetConstantBuffers(cb_slot, 1, cb);
+	SetConstBuffer(pCamera);
 
 	// 頂点バッファのセット
 	UINT stride = sizeof(MeshVertexData);
@@ -243,6 +208,10 @@ inline void PlaneMesh::DrawPlain(Camera * pCamera, int blend)
 		gm.SetBlendState(BLEND_SUBTRACT);
 	}
 
+	ID3D11ShaderResourceView* const pSRV[1] = { NULL };
+	gm.GetContextPtr()->PSSetShaderResources(0, 1, pSRV);
+	gm.GetContextPtr()->PSSetShaderResources(1, 1, pSRV);
+
 	// シェーダのセット
 	gm.GetContextPtr()->VSSetShader(om.GetVertexShederPtr(), NULL, 0);
 	gm.GetContextPtr()->HSSetShader(NULL, NULL, 0);
@@ -252,14 +221,7 @@ inline void PlaneMesh::DrawPlain(Camera * pCamera, int blend)
 	gm.GetContextPtr()->CSSetShader(NULL, NULL, 0);
 
 	// ビューポートの設定
-	D3D11_VIEWPORT viewPort;
-	viewPort.TopLeftX = pCamera->GetViewPort().topLeftX;
-	viewPort.TopLeftY = pCamera->GetViewPort().topLeftY;
-	viewPort.Width = pCamera->GetViewPort().width;
-	viewPort.Height = pCamera->GetViewPort().height;
-	viewPort.MinDepth = pCamera->GetViewPort().minDepth;
-	viewPort.MaxDepth = pCamera->GetViewPort().maxDepth;
-	gm.GetContextPtr()->RSSetViewports(1, &viewPort);
+	SetViewPort(pCamera);
 
 	//ポリゴン描画
 	gm.GetContextPtr()->DrawIndexed(indexNum_, 0, 0);
@@ -273,63 +235,10 @@ inline void PlaneMesh::DrawPlainShadow(Camera* pCamera, int blend)
 	if(!gm.GetContextPtr()
 		|| !pVertexBuffer_
 		|| !om.GetVertexShederPtr()
-		|| !pCamera){
-		return;
-	}
-
-	//定数バッファ
-	ConstBuffer3DShadow cbuff;
-
-	XMFLOAT4X4 matWorld;
-	for(int i = 4 - 1; i >= 0; --i){
-		for(int j = 4 - 1; j >= 0; --j){
-			matWorld.m[i][j] = world_.r[i][j];
-		}
-	}
-	XMStoreFloat4x4(&cbuff.world, XMMatrixTranspose(XMLoadFloat4x4(&matWorld)));
-
-	XMFLOAT4X4 matView;
-	for(int i = 4 - 1; i >= 0; --i){
-		for(int j = 4 - 1; j >= 0; --j){
-			matView.m[i][j] = pCamera->GetViewMatrix().r[i][j];
-		}
-	}
-	XMStoreFloat4x4(&cbuff.view, XMMatrixTranspose(XMLoadFloat4x4(&matView)));
-
-	XMFLOAT4X4 matProj;
-	for(int i = 4 - 1; i >= 0; --i){
-		for(int j = 4 - 1; j >= 0; --j){
-			matProj.m[i][j] = pCamera->GetProjectionMatrix().r[i][j];
-		}
-	}
-	XMStoreFloat4x4(&cbuff.proj, XMMatrixTranspose(XMLoadFloat4x4(&matProj)));
-
-	XMStoreFloat4(&cbuff.color, XMVectorSet(color_.r, color_.g, color_.b, color_.a));
-	XMStoreFloat4(&cbuff.light, om.GetLight());
-
-	XMFLOAT4X4 matLightView;
-	for(int i = 4 - 1; i >= 0; --i){
-		for(int j = 4 - 1; j >= 0; --j){
-			matLightView.m[i][j] = pScmr_->GetViewMatrix().r[i][j];
-		}
-	}
-	XMStoreFloat4x4(&cbuff.lightView, XMMatrixTranspose(XMLoadFloat4x4(&matLightView)));
-
-	XMFLOAT4X4 matLightProj;
-	for(int i = 4 - 1; i >= 0; --i){
-		for(int j = 4 - 1; j >= 0; --j){
-			matLightProj.m[i][j] = pScmr_->GetProjectionMatrix().r[i][j];
-		}
-	}
-	XMStoreFloat4x4(&cbuff.lightProj, XMMatrixTranspose(XMLoadFloat4x4(&matLightProj)));
-
-	// 定数バッファ内容更新
-	gm.GetContextPtr()->UpdateSubresource(om.GetShadowConstBufferPtr(), 0, NULL, &cbuff, 0, 0);
+		|| !pCamera){ return; }
 
 	// 定数バッファ
-	UINT cb_slot = 3;
-	ID3D11Buffer* cb[1] = { om.GetShadowConstBufferPtr() };
-	gm.GetContextPtr()->VSSetConstantBuffers(cb_slot, 1, cb);
+	SetConstBufferShadow(pCamera);
 
 	// 頂点バッファのセット
 	UINT stride = sizeof(MeshVertexData);
@@ -378,14 +287,7 @@ inline void PlaneMesh::DrawPlainShadow(Camera* pCamera, int blend)
 	gm.GetContextPtr()->CSSetShader(NULL, NULL, 0);
 
 	// ビューポートの設定
-	D3D11_VIEWPORT viewPort;
-	viewPort.TopLeftX = pCamera->GetViewPort().topLeftX;
-	viewPort.TopLeftY = pCamera->GetViewPort().topLeftY;
-	viewPort.Width = pCamera->GetViewPort().width;
-	viewPort.Height = pCamera->GetViewPort().height;
-	viewPort.MinDepth = pCamera->GetViewPort().minDepth;
-	viewPort.MaxDepth = pCamera->GetViewPort().maxDepth;
-	gm.GetContextPtr()->RSSetViewports(1, &viewPort);
+	SetViewPort(pCamera);
 
 	//ポリゴン描画
 	gm.GetContextPtr()->DrawIndexed(indexNum_, 0, 0);
@@ -402,47 +304,10 @@ inline void PlaneMesh::DrawTexturePlain(Camera * pCamera, const Texture & tex, i
 	if(!gm.GetContextPtr()
 		|| !pVertexBuffer_
 		|| !om.GetVertexShederPtr()
-		|| !pCamera){
-		return;
-	}
-
-	//定数バッファ
-	ConstBuffer3D cbuff;
-
-	XMFLOAT4X4 matWorld;
-	for(int i = 4 - 1; i >= 0; --i){
-		for(int j = 4 - 1; j >= 0; --j){
-			matWorld.m[i][j] = world_.r[i][j];
-		}
-	}
-	XMStoreFloat4x4(&cbuff.world, XMMatrixTranspose(XMLoadFloat4x4(&matWorld)));
-
-	XMFLOAT4X4 matView;
-	for(int i = 4 - 1; i >= 0; --i){
-		for(int j = 4 - 1; j >= 0; --j){
-			matView.m[i][j] = pCamera->GetViewMatrix().r[i][j];
-		}
-	}
-	XMStoreFloat4x4(&cbuff.view, XMMatrixTranspose(XMLoadFloat4x4(&matView)));
-
-	XMFLOAT4X4 matProj;
-	for(int i = 4 - 1; i >= 0; --i){
-		for(int j = 4 - 1; j >= 0; --j){
-			matProj.m[i][j] = pCamera->GetProjectionMatrix().r[i][j];
-		}
-	}
-	XMStoreFloat4x4(&cbuff.proj, XMMatrixTranspose(XMLoadFloat4x4(&matProj)));
-
-	XMStoreFloat4(&cbuff.color, XMVectorSet(color_.r, color_.g, color_.b, color_.a));
-	XMStoreFloat4(&cbuff.light, om.GetLight());
-
-	// 定数バッファ内容更新
-	gm.GetContextPtr()->UpdateSubresource(om.GetConstBufferPtr(), 0, NULL, &cbuff, 0, 0);
+		|| !pCamera){ return; }
 
 	// 定数バッファ
-	UINT cb_slot = 1;
-	ID3D11Buffer* cb[1] = { om.GetConstBufferPtr() };
-	gm.GetContextPtr()->VSSetConstantBuffers(cb_slot, 1, cb);
+	SetConstBuffer(pCamera);
 
 	// 頂点バッファのセット
 	UINT stride = sizeof(MeshVertexData);
@@ -451,12 +316,6 @@ inline void PlaneMesh::DrawTexturePlain(Camera * pCamera, const Texture & tex, i
 
 	// インデックスバッファのセット
 	gm.GetContextPtr()->IASetIndexBuffer(pIndexBuffer_, DXGI_FORMAT_R16_UINT, 0);
-
-	// テクスチャ書き込み
-	ID3D11ShaderResourceView* pTexView = tex.GetTextureViewPtr();
-	if(pTexView){
-		gm.GetContextPtr()->PSSetShaderResources(0, 1, &pTexView);
-	}
 
 	// 入力レイアウトのセット
 	gm.GetContextPtr()->IASetInputLayout(om.GetInputLayoutPtr());
@@ -471,13 +330,23 @@ inline void PlaneMesh::DrawTexturePlain(Camera * pCamera, const Texture & tex, i
 	gm.GetContextPtr()->OMSetDepthStencilState(gm.GetDefaultDepthStatePtr(), 0);
 
 	// ブレンディングのセット
-	//if(!blend){
-	//	gm.SetBlendState(BLEND_ALIGNMENT);
-	//} else if(blend > 0){
-	//	gm.SetBlendState(BLEND_ADD);
-	//} else{
-	//	gm.SetBlendState(BLEND_SUBTRACT);
-	//}
+	if(!blend){
+		gm.SetBlendState(BLEND_ALIGNMENT);
+	} else if(blend > 0){
+		gm.SetBlendState(BLEND_ADD);
+	} else{
+		gm.SetBlendState(BLEND_SUBTRACT);
+	}
+
+	ID3D11ShaderResourceView* const pSRV[1] = { NULL };
+	gm.GetContextPtr()->PSSetShaderResources(0, 1, pSRV);
+	gm.GetContextPtr()->PSSetShaderResources(1, 1, pSRV);
+
+	// テクスチャ書き込み
+	ID3D11ShaderResourceView* pTexView = tex.GetTextureViewPtr();
+	if(pTexView){
+		gm.GetContextPtr()->PSSetShaderResources(0, 1, &pTexView);
+	}
 
 	// シェーダのセット
 	gm.GetContextPtr()->VSSetShader(om.GetVertexShederPtr(), NULL, 0);
@@ -492,14 +361,7 @@ inline void PlaneMesh::DrawTexturePlain(Camera * pCamera, const Texture & tex, i
 	gm.GetContextPtr()->CSSetShader(NULL, NULL, 0);
 
 	// ビューポートの設定
-	D3D11_VIEWPORT viewPort;
-	viewPort.TopLeftX = pCamera->GetViewPort().topLeftX;
-	viewPort.TopLeftY = pCamera->GetViewPort().topLeftY;
-	viewPort.Width = pCamera->GetViewPort().width;
-	viewPort.Height = pCamera->GetViewPort().height;
-	viewPort.MinDepth = pCamera->GetViewPort().minDepth;
-	viewPort.MaxDepth = pCamera->GetViewPort().maxDepth;
-	gm.GetContextPtr()->RSSetViewports(1, &viewPort);
+	SetViewPort(pCamera);
 
 	//ポリゴン描画
 	gm.GetContextPtr()->DrawIndexed(indexNum_, 0, 0);
@@ -513,63 +375,10 @@ inline void PlaneMesh::DrawTexturePlainShadow(Camera* pCamera, const Texture& te
 	if(!gm.GetContextPtr()
 		|| !pVertexBuffer_
 		|| !om.GetVertexShederPtr()
-		|| !pCamera){
-		return;
-	}
-
-	//定数バッファ
-	ConstBuffer3DShadow cbuff;
-
-	XMFLOAT4X4 matWorld;
-	for(int i = 4 - 1; i >= 0; --i){
-		for(int j = 4 - 1; j >= 0; --j){
-			matWorld.m[i][j] = world_.r[i][j];
-		}
-	}
-	XMStoreFloat4x4(&cbuff.world, XMMatrixTranspose(XMLoadFloat4x4(&matWorld)));
-
-	XMFLOAT4X4 matView;
-	for(int i = 4 - 1; i >= 0; --i){
-		for(int j = 4 - 1; j >= 0; --j){
-			matView.m[i][j] = pCamera->GetViewMatrix().r[i][j];
-		}
-	}
-	XMStoreFloat4x4(&cbuff.view, XMMatrixTranspose(XMLoadFloat4x4(&matView)));
-
-	XMFLOAT4X4 matProj;
-	for(int i = 4 - 1; i >= 0; --i){
-		for(int j = 4 - 1; j >= 0; --j){
-			matProj.m[i][j] = pCamera->GetProjectionMatrix().r[i][j];
-		}
-	}
-	XMStoreFloat4x4(&cbuff.proj, XMMatrixTranspose(XMLoadFloat4x4(&matProj)));
-
-	XMStoreFloat4(&cbuff.color, XMVectorSet(color_.r, color_.g, color_.b, color_.a));
-	XMStoreFloat4(&cbuff.light, om.GetLight());
-
-	XMFLOAT4X4 matLightView;
-	for(int i = 4 - 1; i >= 0; --i){
-		for(int j = 4 - 1; j >= 0; --j){
-			matLightView.m[i][j] = pScmr_->GetViewMatrix().r[i][j];
-		}
-	}
-	XMStoreFloat4x4(&cbuff.lightView, XMMatrixTranspose(XMLoadFloat4x4(&matLightView)));
-
-	XMFLOAT4X4 matLightProj;
-	for(int i = 4 - 1; i >= 0; --i){
-		for(int j = 4 - 1; j >= 0; --j){
-			matLightProj.m[i][j] = pScmr_->GetProjectionMatrix().r[i][j];
-		}
-	}
-	XMStoreFloat4x4(&cbuff.lightProj, XMMatrixTranspose(XMLoadFloat4x4(&matLightProj)));
-
-	// 定数バッファ内容更新
-	gm.GetContextPtr()->UpdateSubresource(om.GetShadowConstBufferPtr(), 0, NULL, &cbuff, 0, 0);
+		|| !pCamera){ return; }
 
 	// 定数バッファ
-	UINT cb_slot = 3;
-	ID3D11Buffer* cb[1] = { om.GetShadowConstBufferPtr() };
-	gm.GetContextPtr()->VSSetConstantBuffers(cb_slot, 1, cb);
+	SetConstBufferShadow(pCamera);
 
 	// 頂点バッファのセット
 	UINT stride = sizeof(MeshVertexData);
@@ -630,6 +439,134 @@ inline void PlaneMesh::DrawTexturePlainShadow(Camera* pCamera, const Texture& te
 	gm.GetContextPtr()->CSSetShader(NULL, NULL, 0);
 
 	// ビューポートの設定
+	SetViewPort(pCamera);
+
+	//ポリゴン描画
+	gm.GetContextPtr()->DrawIndexed(indexNum_, 0, 0);
+
+	gm.GetContextPtr()->PSSetShaderResources(0, 1, pSRV);
+	gm.GetContextPtr()->PSSetShaderResources(1, 1, pSRV);
+}
+
+inline void PlaneMesh::SetConstBuffer(Camera* pCamera)
+{
+	// 準備ができていなければ終了
+	GraphicManager& gm = GraphicManager::Instance();
+	ObjectManager& om = ObjectManager::Instance();
+	if(!gm.GetContextPtr()
+		|| !om.GetVertexShederPtr()
+		|| !pCamera){ return; }
+
+	ConstBuffer3D cbuff;
+	XMFLOAT4X4 matWorld;
+
+	for(int i = 4 - 1; i >= 0; --i){
+		for(int j = 4 - 1; j >= 0; --j){
+			matWorld.m[i][j] = world_.r[i][j];
+		}
+	}
+	XMStoreFloat4x4(&cbuff.world, XMMatrixTranspose(XMLoadFloat4x4(&matWorld)));
+
+	XMFLOAT4X4 matView;
+	for(int i = 4 - 1; i >= 0; --i){
+		for(int j = 4 - 1; j >= 0; --j){
+			matView.m[i][j] = pCamera->GetViewMatrix().r[i][j];
+		}
+	}
+	XMStoreFloat4x4(&cbuff.view, XMMatrixTranspose(XMLoadFloat4x4(&matView)));
+
+	XMFLOAT4X4 matProj;
+	for(int i = 4 - 1; i >= 0; --i){
+		for(int j = 4 - 1; j >= 0; --j){
+			matProj.m[i][j] = pCamera->GetProjectionMatrix().r[i][j];
+		}
+	}
+	XMStoreFloat4x4(&cbuff.proj, XMMatrixTranspose(XMLoadFloat4x4(&matProj)));
+
+	XMStoreFloat4(&cbuff.color, XMVectorSet(color_.r, color_.g, color_.b, color_.a));
+	XMStoreFloat4(&cbuff.light, om.GetLight());
+
+	// 定数バッファ内容更新
+	gm.GetContextPtr()->UpdateSubresource(om.GetConstBufferPtr(), 0, NULL, &cbuff, 0, 0);
+
+	// 定数バッファ
+	UINT cb_slot = 1;
+	ID3D11Buffer* cb[1] = { om.GetConstBufferPtr() };
+	gm.GetContextPtr()->VSSetConstantBuffers(cb_slot, 1, cb);
+}
+
+inline void PlaneMesh::SetConstBufferShadow(Camera* pCamera)
+{
+	// 準備ができていなければ終了
+	GraphicManager& gm = GraphicManager::Instance();
+	ObjectManager& om = ObjectManager::Instance();
+	if(!gm.GetContextPtr()
+		|| !om.GetVertexShederPtr()
+		|| !pCamera){ return; }
+
+	//定数バッファ
+	ConstBuffer3DShadow cbuff;
+	XMFLOAT4X4 matWorld;
+
+	for(int i = 4 - 1; i >= 0; --i){
+		for(int j = 4 - 1; j >= 0; --j){
+			matWorld.m[i][j] = world_.r[i][j];
+		}
+	}
+	XMStoreFloat4x4(&cbuff.world, XMMatrixTranspose(XMLoadFloat4x4(&matWorld)));
+
+	XMFLOAT4X4 matView;
+	for(int i = 4 - 1; i >= 0; --i){
+		for(int j = 4 - 1; j >= 0; --j){
+			matView.m[i][j] = pCamera->GetViewMatrix().r[i][j];
+		}
+	}
+	XMStoreFloat4x4(&cbuff.view, XMMatrixTranspose(XMLoadFloat4x4(&matView)));
+
+	XMFLOAT4X4 matProj;
+	for(int i = 4 - 1; i >= 0; --i){
+		for(int j = 4 - 1; j >= 0; --j){
+			matProj.m[i][j] = pCamera->GetProjectionMatrix().r[i][j];
+		}
+	}
+	XMStoreFloat4x4(&cbuff.proj, XMMatrixTranspose(XMLoadFloat4x4(&matProj)));
+
+	XMStoreFloat4(&cbuff.color, XMVectorSet(color_.r, color_.g, color_.b, color_.a));
+	XMStoreFloat4(&cbuff.light, om.GetLight());
+
+	XMFLOAT4X4 matLightView;
+	for(int i = 4 - 1; i >= 0; --i){
+		for(int j = 4 - 1; j >= 0; --j){
+			matLightView.m[i][j] = pScmr_->GetViewMatrix().r[i][j];
+		}
+	}
+	XMStoreFloat4x4(&cbuff.lightView, XMMatrixTranspose(XMLoadFloat4x4(&matLightView)));
+
+	XMFLOAT4X4 matLightProj;
+	for(int i = 4 - 1; i >= 0; --i){
+		for(int j = 4 - 1; j >= 0; --j){
+			matLightProj.m[i][j] = pScmr_->GetProjectionMatrix().r[i][j];
+		}
+	}
+	XMStoreFloat4x4(&cbuff.lightProj, XMMatrixTranspose(XMLoadFloat4x4(&matLightProj)));
+
+	// 定数バッファ内容更新
+	gm.GetContextPtr()->UpdateSubresource(om.GetShadowConstBufferPtr(), 0, NULL, &cbuff, 0, 0);
+
+	// 定数バッファ
+	UINT cb_slot = 3;
+	ID3D11Buffer* cb[1] = { om.GetShadowConstBufferPtr() };
+	gm.GetContextPtr()->VSSetConstantBuffers(cb_slot, 1, cb);
+}
+
+inline void PlaneMesh::SetViewPort(Camera* pCamera)
+{
+	// 準備ができていなければ終了
+	GraphicManager& gm = GraphicManager::Instance();
+
+	if(!gm.GetContextPtr()
+		|| !pCamera){ return; }
+
 	D3D11_VIEWPORT viewPort;
 	viewPort.TopLeftX = pCamera->GetViewPort().topLeftX;
 	viewPort.TopLeftY = pCamera->GetViewPort().topLeftY;
@@ -637,11 +574,6 @@ inline void PlaneMesh::DrawTexturePlainShadow(Camera* pCamera, const Texture& te
 	viewPort.Height = pCamera->GetViewPort().height;
 	viewPort.MinDepth = pCamera->GetViewPort().minDepth;
 	viewPort.MaxDepth = pCamera->GetViewPort().maxDepth;
+
 	gm.GetContextPtr()->RSSetViewports(1, &viewPort);
-
-	//ポリゴン描画
-	gm.GetContextPtr()->DrawIndexed(indexNum_, 0, 0);
-
-	gm.GetContextPtr()->PSSetShaderResources(0, 1, pSRV);
-	gm.GetContextPtr()->PSSetShaderResources(1, 1, pSRV);
 }

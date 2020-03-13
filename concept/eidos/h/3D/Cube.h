@@ -58,6 +58,10 @@ private:
 	inline void DrawDividedTextureShadowCube(Camera* pCamera, const Texture& tex, int uNum, int vNum, int blend = 0);
 	inline void DrawDelimitedTextureCube(Camera* pCamera, const Texture& tex, float u, float v, float width, float height, int blend = 0);
 	inline void DrawDelimitedTextureShadowCube(Camera* pCamera, const Texture& tex, float u, float v, float width, float height, int blend = 0);
+
+	inline void SetConstBuffer(Camera* pCamera);
+	inline void SetConstBufferShadow(Camera* pCamera);
+	inline void SetViewPort(Camera* pCamera);
 };
 
 #endif	// #ifndef INCLUDE_EIDOS_CUBE_H

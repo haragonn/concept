@@ -45,9 +45,9 @@ void BreadBoard3::Init()
 
 	im.texBG_.LoadImageFromFile("data/TEXTURE/grid04.bmp");
 
-	im.pxm_.LoadPmxMeshFromFile("model/sakuya/十六夜咲夜Ver2.10_Type-S(ダンス_上着A_膝丈スカート_パンプス).pmx");
+	im.pxm_.LoadPmxMeshFromStorage("model/sakuya/十六夜咲夜Ver2.10_Type-S(ダンス_南半球な水着_ハーフバック_ハイヒールサンダル).pmx");
 
-	im.pxm_.Init(0.0f, -15.0f, 0.0f);
+	im.pxm_.Init(0.0f, -13.0f, 0.0f);
 
 	im.wcmr_.AddObject(im.pxm_);
 

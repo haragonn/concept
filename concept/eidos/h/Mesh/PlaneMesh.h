@@ -43,6 +43,10 @@ private:
 	inline void DrawPlainShadow(Camera* pCamera, int blend = 0);	// ‹éŒ`‚Ì•`‰æ
 	inline void DrawTexturePlain(Camera* pCamera, const Texture& tex, int blend = 0);	// ‹éŒ`‚Ì•`‰æ
 	inline void DrawTexturePlainShadow(Camera* pCamera, const Texture& tex, int blend = 0);	// ‹éŒ`‚Ì•`‰æ
+
+	inline void SetConstBuffer(Camera* pCamera);
+	inline void SetConstBufferShadow(Camera* pCamera);
+	inline void SetViewPort(Camera* pCamera);
 };
 
 #endif	// #ifndef INCLUDE_EIDOS_PLAINMESH_H

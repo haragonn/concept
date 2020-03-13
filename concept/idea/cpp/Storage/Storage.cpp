@@ -33,15 +33,15 @@ bool Storage::LoadObjMeshFromArchiveFile(const char * pArchiveFileName, const ch
 	return eidosStorageManager::Instance().LoadObjMeshFromArchiveFile(pArchiveFileName, pFileName);
 }
 
-bool Storage::LoadPmdMeshFromFile(const char * pFileName)
+bool Storage::LoadPmdMeshFromFile(const char* pFileName)
 {
 	return eidosStorageManager::Instance().LoadPmdMeshFromFile(pFileName);
 }
 
-//bool eidosStorage::LoadObjPmdFromArchiveFile(const char * pArchiveFileName, const char * pFileName)
-//{
-//	return eidosStorageManager::Instance().LoadPmdMeshFromArchiveFile(pArchiveFileName, pFileName);
-//}
+bool Storage::LoadPmxMeshFromFile(const char* pFileName)
+{
+	return eidosStorageManager::Instance().LoadPmxMeshFromFile(pFileName);
+}
 
 //------------------------------------------------------------------------------
 // waveÉtÉ@ÉCÉãÇÃì«Ç›çûÇ›
@@ -79,9 +79,14 @@ void Storage::UnLoadObjMesh(const char * pFileName)
 	return eidosStorageManager::Instance().SetUnLoadObjModelRequest(pFileName);
 }
 
-void Storage::UnLoadPmdMesh(const char * pFileName)
+void Storage::UnLoadPmdMesh(const char* pFileName)
 {
 	return eidosStorageManager::Instance().SetUnLoadPmdModelRequest(pFileName);
+}
+
+void Storage::UnLoadPmxMesh(const char* pFileName)
+{
+	return eidosStorageManager::Instance().SetUnLoadPmxModelRequest(pFileName);
 }
 
 //------------------------------------------------------------------------------

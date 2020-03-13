@@ -284,6 +284,20 @@ struct PMXModelData{
 	std::vector<Bone> bones;
 };
 
+//マテリアル構造体
+struct PmxMaterial
+{
+	//Vector4D diffuse;
+	//Vector3D specular;
+	//float specularity;
+	//Vector3D ambient;
+
+	int colorMapTextureIndex;
+	//int toonTextureIndex;
+
+	int vertexNum;
+};
+
 // .vmd
 #pragma pack(push,1)
 

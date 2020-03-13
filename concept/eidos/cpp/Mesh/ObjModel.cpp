@@ -32,7 +32,6 @@ ObjModel::ObjModel() :
 	vector<ObjMaterial>().swap(vecMaterial_);
 	vector<WORD>().swap(vecIndex_);
 	vector<Texture*>().swap(vecTexPtr_);
-	//vector<ObjMeshHolder*>().swap(vecObjMeshHolderPtr_);
 }
 
 ObjModel::~ObjModel()
@@ -652,10 +651,9 @@ bool ObjModel::LoadMaterialFromFile(const char * pFileName)
 		file.ignore(1024, '\n');
 	}
 
-	//　ファイルを閉じる
 	file.close();
 
-	//　マテリアルデータをコピー
+	// マテリアルデータをコピー
 	materialSize_ = vecMaterial_.size();
 
 	return true;
@@ -836,6 +834,9 @@ void ObjModel::Draw(Camera * pCamera)
 	viewPort.MaxDepth = pCamera->GetViewPort().maxDepth;
 	gm.GetContextPtr()->RSSetViewports(1, &viewPort);
 
+	ID3D11ShaderResourceView* const pSRV[1] = { NULL };
+	gm.GetContextPtr()->PSSetShaderResources(0, 1, pSRV);
+
 	// サブセット毎に描画
 	if(subsetSize_ <= 1){
 		ID3D11ShaderResourceView* pTexView = nullptr;
@@ -856,6 +857,7 @@ void ObjModel::Draw(Camera * pCamera)
 			if(texPtrSize_ > i){
 				pTexView = vecTexPtr_[i - 1]->GetTextureViewPtr();
 			}
+
 			if(pTexView){
 				gm.GetContextPtr()->PSSetShaderResources(0, 1, &pTexView);
 				gm.GetContextPtr()->PSSetShader(om.GetPixelShederTexturePtr(), NULL, 0);
@@ -870,6 +872,7 @@ void ObjModel::Draw(Camera * pCamera)
 		if(texPtrSize_ == subsetSize_ - 1){
 			pTexView = vecTexPtr_[subsetSize_ - 1]->GetTextureViewPtr();
 		}
+
 		if(pTexView){
 			gm.GetContextPtr()->PSSetShaderResources(0, 1, &pTexView);
 			gm.GetContextPtr()->PSSetShader(om.GetPixelShederTexturePtr(), NULL, 0);

@@ -11,7 +11,6 @@
 
 struct ID3D11Buffer;
 
-
 class PmxModel : public Object{
 public:
 	PmxModel();
@@ -27,15 +26,22 @@ private:
 
 	ID3D11Buffer* pVertexBuffer_;//頂点バッファ
 	ID3D11Buffer* pIndexBuffer_;//インデックスバッファ
+
 	PMXModelData pmxData_;
+
 	std::vector<BlendVertexData> vecVertex_;
 	unsigned long vertexSize_;
+
 	std::vector<unsigned short> vecIndex_;
 	unsigned long indexSize_;
+
+	std::vector<PmxMaterial> vecMaterial_;
 	unsigned long materialSize_;
+
 	std::map<std::string, VmdBone> mapBone_;
 	std::vector<Matrix4x4> vecBoneMatrix_;
 	unsigned short boneSize_;
+
 	std::vector<Texture*> vecTexPtr_;
 	unsigned long texPtrSize_;
 

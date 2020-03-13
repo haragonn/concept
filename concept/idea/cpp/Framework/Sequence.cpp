@@ -164,6 +164,9 @@ int Sequence::Update(bool bRedy)
 			if(eidosStorageManager::Instance().GetUnLoadPmdModelRequestSize()){
 				eidosStorageManager::Instance().UnLoadPmdModel();
 			}
+			if(eidosStorageManager::Instance().GetUnLoadPmxModelRequestSize()){
+				eidosStorageManager::Instance().UnLoadPmxModel();
+			}
 		}
 
 		// ƒV[ƒ“‘JˆÚ

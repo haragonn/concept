@@ -9,7 +9,6 @@
 #include <locale.h>
 
 using namespace std;
-using namespace DirectX;
 
 TextureData Font::s_NullTextureData_;
 

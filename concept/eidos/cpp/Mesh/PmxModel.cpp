@@ -38,6 +38,7 @@ PmxModel::PmxModel() :
 {
 	vector<BlendVertexData>().swap(vecVertex_);
 	vector<unsigned short>().swap(vecIndex_);
+	vector<PmxMaterial>().swap(vecMaterial_);
 	vector<Texture*>().swap(vecTexPtr_);
 
 	vector<PMXModelData::Vertex>().swap(pmxData_.vertices);
@@ -58,10 +59,16 @@ bool PmxModel::LoadPmxMeshFromFile(const char* pFileName)
 	if(pVertexBuffer_){ return false; }	// 既に読み込み済みなら終了
 
 	GraphicManager& gm = GraphicManager::Instance();
+
 	if(!gm.GetContextPtr()){ return false; }
 
 	ifstream ifs(pFileName, ios::binary);
-	if(!ifs.is_open()){ return false; }
+
+	if(!ifs.is_open()){
+		SetDebugMessage("PmxMeshLoadError! [%s] をファイルから読み込みられませんでした。\n", pFileName);
+
+		return false;
+	}
 
 	string filePath = pFileName;
 
@@ -389,6 +396,7 @@ bool PmxModel::LoadPmxMeshFromFile(const char* pFileName)
 
 	ifs.close();
 
+	// 頂点情報格納
 	vecVertex_.resize(vertexSize_);
 
 	for(unsigned int i = 0; i < vertexSize_; ++i){
@@ -415,10 +423,19 @@ bool PmxModel::LoadPmxMeshFromFile(const char* pFileName)
 		vecVertex_[i].weight[2] = pmxData_.vertices[i].weight.weight3;
 	}
 
+	// インデックス情報格納
 	vecIndex_.resize(indexSize_);
 
 	for(unsigned int i = 0; i < indexSize_; ++i){
 		vecIndex_[i] = pmxData_.surfaces[i].vertexIndex;
+	}
+
+	// マテリアル情報格納
+	vecMaterial_.resize(materialSize_);
+
+	for(unsigned int i = 0; i < materialSize_; ++i){
+		vecMaterial_[i].colorMapTextureIndex = pmxData_.materials[i].colorMapTextureIndex;
+		vecMaterial_[i].vertexNum = pmxData_.materials[i].vertexNum;
 	}
 
 	// ボーン情報格納
@@ -480,6 +497,93 @@ bool PmxModel::LoadPmxMeshFromStorage(const char* pFileName)
 {
 	if(pVertexBuffer_ || pIndexBuffer_){ return false; }	// 既に読み込み済みなら終了
 
+	// ストレージから読み込む
+	PmxModel& pxm = eidosStorageManager::Instance().GetPmxModel(pFileName);
+
+	// 頂点
+	pVertexBuffer_ = pxm.pVertexBuffer_;
+
+	// インデックス
+	pIndexBuffer_ = pxm.pIndexBuffer_;
+
+	// pmxデータ
+	PMXModelData& pmxData = pxm.pmxData_;
+	vertexSize_ = pxm.vertexSize_;
+	indexSize_ = pxm.indexSize_;
+	materialSize_ = pxm.materialSize_;
+	boneSize_ = pxm.boneSize_;
+
+	// 頂点情報格納
+	vecVertex_.resize(vertexSize_);
+
+	for(unsigned int i = 0; i < vertexSize_; ++i){
+		vecVertex_[i].pos.x = pmxData.vertices[i].position.x;
+		vecVertex_[i].pos.y = pmxData.vertices[i].position.y;
+		vecVertex_[i].pos.z = pmxData.vertices[i].position.z;
+
+		vecVertex_[i].nor.x = pmxData.vertices[i].normal.x;
+		vecVertex_[i].nor.y = pmxData.vertices[i].normal.y;
+		vecVertex_[i].nor.z = pmxData.vertices[i].normal.z;
+
+		vecVertex_[i].tex.x = pmxData.vertices[i].uv.x;
+		vecVertex_[i].tex.y = pmxData.vertices[i].uv.y;
+
+		vecVertex_[i].col = ideaColor::WHITE;
+
+		vecVertex_[i].boneIndex[0] = pmxData.vertices[i].weight.born1;
+		vecVertex_[i].boneIndex[1] = pmxData.vertices[i].weight.born2;
+		vecVertex_[i].boneIndex[2] = pmxData.vertices[i].weight.born3;
+		vecVertex_[i].boneIndex[3] = pmxData.vertices[i].weight.born4;
+
+		vecVertex_[i].weight[0] = pmxData.vertices[i].weight.weight1;
+		vecVertex_[i].weight[1] = pmxData.vertices[i].weight.weight2;
+		vecVertex_[i].weight[2] = pmxData.vertices[i].weight.weight3;
+	}
+
+	// インデックス情報格納
+	vecIndex_.resize(indexSize_);
+
+	for(unsigned int i = 0; i < indexSize_; ++i){
+		vecIndex_[i] = pmxData.surfaces[i].vertexIndex;
+	}
+
+	// マテリアル情報格納
+	vecMaterial_.resize(materialSize_);
+
+	for(unsigned int i = 0; i < materialSize_; ++i){
+		vecMaterial_[i].colorMapTextureIndex = pmxData.materials[i].colorMapTextureIndex;
+		vecMaterial_[i].vertexNum = pmxData.materials[i].vertexNum;
+	}
+
+	// ボーン情報格納
+	vector<string> vecBoneName(boneSize_);
+
+	for(unsigned int i = 0; i < boneSize_; ++i){
+		auto& pd = pmxData.bones[i];
+		vecBoneName[i] = pd.name;
+		auto& node = mapBone_[pd.name];
+		node.index = i;
+		node.pos = pd.position;
+	}
+
+	for(auto& pd : pmxData.bones){
+		if(pd.parentIndex >= boneSize_ || pd.parentIndex == PMXModelData::NO_DATA_FLAG){
+			continue;
+		}
+		auto parentName = vecBoneName[pd.parentIndex];
+		mapBone_[parentName].vecChildrenPtr.emplace_back(&mapBone_[pd.name]);
+	}
+
+	vecBoneMatrix_.resize(boneSize_);
+
+	fill(vecBoneMatrix_.begin(), vecBoneMatrix_.end(), Matrix4x4::Identity());
+
+	// テクスチャ
+	texPtrSize_ = pxm.texPtrSize_;
+	copy(pxm.vecTexPtr_.begin(), pxm.vecTexPtr_.end(), back_inserter(vecTexPtr_));
+
+
+	if(pVertexBuffer_ && pIndexBuffer_){ bStorage_ = true; }	// ストレージ使用フラグをオンに
 
 	return true;
 }
@@ -662,8 +766,8 @@ void PmxModel::Draw(Camera* pCamera)
 	if(materialSize_ <= 1){
 		ID3D11ShaderResourceView* pTexView = nullptr;
 
-		if(texPtrSize_ > 0 && pmxData_.materials[0].colorMapTextureIndex != 255){
-			pTexView = vecTexPtr_[pmxData_.materials[0].colorMapTextureIndex]->GetTextureViewPtr();
+		if(texPtrSize_ > 0 && vecMaterial_[0].colorMapTextureIndex != 255){
+			pTexView = vecTexPtr_[vecMaterial_[0].colorMapTextureIndex]->GetTextureViewPtr();
 		}
 
 		if(pTexView){
@@ -680,8 +784,8 @@ void PmxModel::Draw(Camera* pCamera)
 		for(unsigned int i = 0; i < materialSize_; ++i){
 			ID3D11ShaderResourceView* pTexView = nullptr;
 
-			if(texPtrSize_ > 0 && pmxData_.materials[i].colorMapTextureIndex != 255){
-				pTexView = vecTexPtr_[pmxData_.materials[i].colorMapTextureIndex]->GetTextureViewPtr();
+			if(texPtrSize_ > 0 && vecMaterial_[i].colorMapTextureIndex != 255){
+				pTexView = vecTexPtr_[vecMaterial_[i].colorMapTextureIndex]->GetTextureViewPtr();
 			}
 
 			if(pTexView){
@@ -691,9 +795,9 @@ void PmxModel::Draw(Camera* pCamera)
 				gm.GetContextPtr()->PSSetShader(om.GetPixelShederDefaultPtr(), NULL, 0);
 			}
 
-			gm.GetContextPtr()->DrawIndexed(pmxData_.materials[i].vertexNum, strat, 0);
+			gm.GetContextPtr()->DrawIndexed(vecMaterial_[i].vertexNum, strat, 0);
 
-			strat += pmxData_.materials[i].vertexNum;
+			strat += vecMaterial_[i].vertexNum;
 		}
 	}
 }
