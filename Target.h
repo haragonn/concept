@@ -122,7 +122,7 @@ public:
 		bdTri_.Init(posX_, 9.0f, posZ_);
 		bdTri_.SetScale(3.0f, 3.0f, 0.0f);
 		bdTri_.SetDividedTexture(texTri_, 0, 0);
-		//cmr.AddObject(bdTri_);
+		cmr.AddObject(bdTri_);
 
 		hit_ = 0;
 		shildA_ = 0.0f;

@@ -45,18 +45,19 @@ public:
 		void Add(const char* pKey, Variant& val);	// 値の追加
 
 	private:
-		std::map<std::string, Variant*> value_;	// 値
-		std::vector<std::string> key_;	// キー
+		std::map<std::string, Variant*> mapValue_;	// 値
+		std::vector<std::string> vecKey_;	// キー
 	};
 
-	CsvReader():maxRow_(0), maxCol_(0){}	// コンストラクタ
+	CsvReader():rowSize_(0), colSize_(0){}	// コンストラクタ
 	CsvReader(const char* pFileName);		///
+
 	~CsvReader();	// デストラクタ
 
 	bool OpenFile(const char* pFileName);	// csvファイルの読み込み
 
-	int GetMaxrow()const{ return maxRow_; }	// csvファイルの行数の取得
-	int GetMaxcol()const{ return maxCol_; }	// csvファイルの列数の取得
+	int GetRowSize()const{ return rowSize_; }	// csvファイルの行数の取得
+	int GetColSize()const{ return colSize_; }	// csvファイルの列数の取得
 
 	Variant& GetField(const char* pID, const char* pKey);	// csvファイルのフィールドを取得
 	Variant& GetField(int row, const char* pKey);			///
@@ -66,14 +67,14 @@ public:
 	Record& operator[](int row);							///
 
 private:
-	int maxRow_;	// 最大行数
-	int maxCol_;	// 最大列数
+	int rowSize_;	// 行数
+	int colSize_;	// 列数
 
-	std::vector<std::string> id_;	// IDリスト
-	std::map<std::string, Record*> record_;	// Record
+	std::vector<std::string> vecId_;	// IDリスト
+	std::map<std::string, Record*> mapRecord_;	// Record
 
-	static Variant NullValue;	// 空の値
-	static Record NullRecord;	// 空のRecord
+	static Variant s_NullValue;	// 空の値
+	static Record s_NullRecord;	// 空のRecord
 };
 
 #endif	// #ifndef INCLUDE_IDEA_CSVREADER_H

@@ -39,7 +39,7 @@ void BreadBoard3::Init()
 
 	im.fnt_.Init(30);
 
-	im.wcmr_.Init(DegreeToRadian(65.5f), S_W / S_H, 0.1f, 1000.0f, 12.0f);
+	im.wcmr_.Init(DegreeToRadian(65.5f), S_W / S_H, 0.1f, 1000.0f, 13.0f);
 
 	im.sprBG_.Init(C_W, C_H, S_W, S_W);
 

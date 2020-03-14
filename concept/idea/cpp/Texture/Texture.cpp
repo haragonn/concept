@@ -13,9 +13,9 @@
 #include "../../h/Utility//ideaUtility.h"
 
 #define WIN32_LEAN_AND_MEAN
+#include "DirectXTex.h"
 #include <d3d11.h>
 #include <locale.h>
-#include "DirectXTex.h"
 
 #ifdef _DEBUG
 #pragma comment(lib, "DirectXTex_d.lib")
@@ -241,6 +241,7 @@ void Texture::UnLoad()
 {
 	if(!pTextureView_){ return; }
 
+	// テクスチャホルダーに解放を伝える
 	if(vecTexHolderPtr_.size() > 0){
 		for(auto it = vecTexHolderPtr_.begin(), itEnd = vecTexHolderPtr_.end(); it != itEnd; ++it){
 			if(*it){
@@ -253,11 +254,10 @@ void Texture::UnLoad()
 	if(!bStorage_){
 		SafeRelease(pTextureView_);
 	}
+	bStorage_ = false;
 
 	ZeroMemory(fileName_, ArraySize(fileName_));
 
 	divU_ = 1.0f;
 	divV_ = 1.0f;
-
-	bStorage_ = false;
 }
